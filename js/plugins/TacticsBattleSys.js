@@ -2384,76 +2384,45 @@ Imported.TacticsBattleSys = true;
     
     //味方の配置
     if (allyId) {
-      //this.setSelfSwitch('A', false);
-      //_(アンダーバー)は他クラスで流用できるため使用する
-      this.setActor($gameParty.allMembers()[allyId]);
-      
-      //actor設定できるなら設定できなければ消去
-      if (this.isActor()) {
-        this.initTacticsUnitSetting();
-        this._allyId = allyId;
-        this._move = $dataClasses[this._actor._classId].meta.move; //移動力
-        this.setImage(this._actor.characterName(), this._actor.characterIndex()); //characterIndexは0に統一する予定
-        this.isActor().setCharacter(this); //イベントと紐づける用
-        //向きの設定
-        var d = this.event().meta.Direction;
-        if(d) this.setDirection(d);
-        //this._actor.gainTp(100);//テスト用
-        
-      } else {
-        this.erase();
+      this.initTacticsUnitSetting();
+      if($gameSystem.allyMembers()[parseInt(allyId)] <= 0){
+        var n = 0;
+        do{
+          n = Math.floor( Math.random() * (81 + 1 - 1) ) + 1;
+        }while(!$gameSystem.allyMembers().indexOf(n));
+        $gameSystem.allyMembers()[parseInt(allyId)] = n;
       }
+      this._allyId = $gameSystem.allyMembers()[parseInt(allyId)];
+      this.setActor(new Game_Actor(this._allyId));
+        
+      this.isActor().setCharacter(this); //イベントと紐づける用
+      this._move = $dataClasses[this._actor._classId].meta.move; //移動力
+      this.setImage(this._actor.characterName(), this._actor.characterIndex());
+      //向きの設定
+      var d = this.event().meta.Direction;
+      if(d) this.setDirection(d);
+      //this._actor.gainTp(100);//テスト用
     }
     //敵の配置
     else if (enemyId) {
-        this.initTacticsUnitSetting();
-        //this._enemyId = enemyId;
-        switch(parseInt(enemyId)){
-        case 0:
-          if($gameVariables.value(7) > 0){
-            this._enemyId = $gameVariables.value(7);
-          }else{
-            this._enemyId = Math.floor( Math.random() * (81 + 1 - 1) ) + 1 ;
-          }
-          break;
-        case 1:
-          if($gameVariables.value(8) > 0){
-            this._enemyId = $gameVariables.value(8);
-          }else{
-            this._enemyId = Math.floor( Math.random() * (81 + 1 - 1) ) + 1 ;
-          }
-          break;
-        case 2:
-          if($gameVariables.value(9) > 0){
-            this._enemyId = $gameVariables.value(9);
-          }else{
-            this._enemyId = Math.floor( Math.random() * (81 + 1 - 1) ) + 1 ;
-          }
-          break;
-        case 3:
-          if($gameVariables.value(10) > 0){
-            this._enemyId = $gameVariables.value(10);
-          }else{
-            this._enemyId = Math.floor( Math.random() * (81 + 1 - 1) ) + 1 ;
-          }
-          break;
-        }
-        this.setActor(new Game_Actor(this._enemyId));
+      this.initTacticsUnitSetting();
+      if($gameSystem.enemyMembers()[parseInt(enemyId)] <= 0){
+        var n = 0;
+        do{
+          n = Math.floor( Math.random() * (81 + 1 - 1) ) + 1;
+        }while(!$gameSystem.enemyMembers().indexOf(n));
+        $gameSystem.enemyMembers()[parseInt(enemyId)] = n;
+      }
+      this._enemyId = $gameSystem.enemyMembers()[parseInt(enemyId)];
+      this.setActor(new Game_Actor(this._enemyId));
         
-        //レベル設定があった場合
-        var level = this.event().meta.Level; //配置
-        if(level){
-          this._actor.changeLevel(parseInt(level), false);
-          this._actor.recoverAll();
-          this._actor.clearActions();
-        }
-        this.isActor().setCharacter(this); //イベントと紐づける用
-        this._move = $dataClasses[this._actor._classId].meta.move; //移動力
-        this.setImage(this._actor.characterName(), this._actor.characterIndex());
-        //向きの設定
-        var d = this.event().meta.Direction;
-        if(d) this.setDirection(d);
-        //this._actor.gainTp(100);//テスト用
+      this.isActor().setCharacter(this); //イベントと紐づける用
+      this._move = $dataClasses[this._actor._classId].meta.move; //移動力
+      this.setImage(this._actor.characterName(), this._actor.characterIndex());
+      //向きの設定
+      var d = this.event().meta.Direction;
+      if(d) this.setDirection(d);
+      //this._actor.gainTp(100);//テスト用
     }
     else {
     }

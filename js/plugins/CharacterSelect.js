@@ -109,35 +109,7 @@
  * @text 空欄表示テキスト
  * @desc 空欄に表示するテキスト
  * @type string
- * @default - 空き -
- *
- * @param enemyVariables1
- * @parent layoutPW
- * @text 1人目戦闘メンバーの変数ID
- * @desc 1人目戦闘メンバーの変数ID
- * @type number
- * @default 7
- *
- * @param enemyVariables2
- * @parent layoutPW
- * @text 2人目戦闘メンバーの変数ID
- * @desc 2人目戦闘メンバーの変数ID
- * @type number
- * @default 8
- *
- * @param enemyVariables3
- * @parent layoutPW
- * @text 3人目戦闘メンバーの変数ID
- * @desc 3人目戦闘メンバーの変数ID
- * @type number
- * @default 9
- *
- * @param enemyVariables4
- * @parent layoutPW
- * @text 4人目戦闘メンバーの変数ID
- * @desc 4人目戦闘メンバーの変数ID
- * @type number
- * @default 10
+ * @default - ランダム -
  *
  * @param layoutWW
  * @text 待機メンバーウィンドウ
@@ -231,10 +203,6 @@
     param.removeOnReserveTerm    = String(param['removeOnReserveTerm']),
     param.actorListColMax        = Number(param['actorListColMax']  || 4),
     param.maxBattleMembers       = Number(param['maxBattleMembers'] || 0),
-    param.enemyVariables1       = Number(param['enemyVariables1'] || 0),
-    param.enemyVariables2       = Number(param['enemyVariables2'] || 0),
-    param.enemyVariables3       = Number(param['enemyVariables3'] || 0),
-    param.enemyVariables4       = Number(param['enemyVariables4'] || 0),
     param.addThisIntoMenuCommand = eval(param['addThisIntoMenuCommand'] || false),
     param.allyTerm  = String(param['allyTerm']),
     param.enemyTerm  = String(param['enemyTerm']),
@@ -309,6 +277,24 @@
     Game_System.prototype.selectMembers = function () {
         if (!this._selectMembers) this._selectMembers = []
         return this._selectMembers;
+    }
+    Game_System.prototype.allyMembers = function () {
+        if (!this._allyMembers){
+          this._allyMembers = [];
+          for(var i = 0; i < 8; i++){
+            this._allyMembers[i] = 0;
+          }
+        }
+        return this._allyMembers;
+    }
+    Game_System.prototype.enemyMembers = function () {
+        if (!this._enemyMembers){
+          this._enemyMembers = [];
+          for(var i = 0; i < 8; i++){
+            this._enemyMembers[i] = 0;
+          }
+        }
+        return this._enemyMembers;
     }
 
 
@@ -392,7 +378,8 @@
     };
 
     Window_AllyBattlerList.prototype.drawItem = function (index) {
-        var actor = $gameActors.actor($gameParty._actors[index]), rect = this.itemRect(index);
+        var id = $gameSystem.allyMembers()[index];
+        var actor = $gameActors.actor(id), rect = this.itemRect(index);
         if (actor) {
             this.drawActorCharacter(actor, rect.x + rect.width / 2,
             rect.y + rect.height - 30);
@@ -438,21 +425,7 @@
     };
 
     Window_EnemyBattlerList.prototype.drawItem = function (index) {
-        var id;
-        switch (index) {
-        case 0:
-          id = $gameVariables.value(param.enemyVariables1);
-          break;
-        case 1:
-          id = $gameVariables.value(param.enemyVariables2);
-          break;
-        case 2:
-          id = $gameVariables.value(param.enemyVariables3);
-          break;
-        case 3:
-          id = $gameVariables.value(param.enemyVariables4);
-          break;
-        }
+        var id = $gameSystem.enemyMembers()[index];
         var actor = $gameActors.actor(id), rect = this.itemRect(index);
         if (actor) {
             this.drawActorCharacter(actor, rect.x + rect.width / 2,
@@ -684,62 +657,24 @@
     Scene_CharacterSelect.prototype.commandOkReserve = function () {
         var id = $gameParty._actors[this.allyBattlerListWindow._index],
         data = $gameSystem.selectMembers();
-        var enemyList = [$gameVariables.value(param.enemyVariables1), $gameVariables.value(param.enemyVariables2), $gameVariables.value(param.enemyVariables3), $gameVariables.value(param.enemyVariables4)];
         if (param.removeOnReserveTerm && this.reserveMemberWindow._index == 0) {
           if(this.commandWindow._index == 0 && id){
-            // 控えメンバーウィンドウからパーティを外した場合
-            if ($gameParty._actors.length > 1) {
-                $gameParty._actors = $gameParty._actors.filter(actorId => id !== actorId);
-            }else{
-                SoundManager.playBuzzer();
-            }
+            $gameSystem.allyMembers()[this.allyBattlerListWindow._index] = 0;
           }else if(this.commandWindow._index == 1){
-            switch(this.enemyBattlerListWindow._index){
-            case 0:
-              $gameVariables.setValue(param.enemyVariables1, 0);
-              break;
-            case 1:
-              $gameVariables.setValue(param.enemyVariables2, 0);
-              break;
-            case 2:
-              $gameVariables.setValue(param.enemyVariables3, 0);
-              break;
-            case 3:
-              $gameVariables.setValue(param.enemyVariables4, 0);
-              break;
-            }
+            $gameSystem.enemyMembers()[this.enemyBattlerListWindow._index] = 0;
           }
         }else{
         // 控えメンバーウィンドウのアクターを選んだ場合
           var index = this.reserveMemberWindow._index - (param.removeOnReserveTerm ? 1 : 0);
           if(this.commandWindow._index == 0){
-            if (!$gameParty._actors.includes(data[index])){
-              if (id) {
-                // パーティにアクターがいる。
-                $gameParty._actors[this.allyBattlerListWindow._index] = data[index];
-              }else{
-                // パーティウィンドウで選んだところにアクターがいない
-                $gameParty._actors.push(data[index]);
-              }
+            if (!$gameSystem.allyMembers().includes(data[index])){
+              $gameSystem.allyMembers()[this.allyBattlerListWindow._index] = data[index];
             }else{
                 SoundManager.playBuzzer();
             }
           }else if(this.commandWindow._index == 1){
-            if (!enemyList.includes(data[index])){
-              switch(this.enemyBattlerListWindow._index){
-              case 0:
-                $gameVariables.setValue(param.enemyVariables1, data[index]);
-                break;
-              case 1:
-                $gameVariables.setValue(param.enemyVariables2, data[index]);
-                break;
-              case 2:
-                $gameVariables.setValue(param.enemyVariables3, data[index]);
-                break;
-              case 3:
-                $gameVariables.setValue(param.enemyVariables4, data[index]);
-                break;
-              }
+            if (!$gameSystem.enemyMembers().includes(data[index])){
+              $gameSystem.enemyMembers()[this.enemyBattlerListWindow._index] = data[index];
             }else{
                 SoundManager.playBuzzer();
             }
