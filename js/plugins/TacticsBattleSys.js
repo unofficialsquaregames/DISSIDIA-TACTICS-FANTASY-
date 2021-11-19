@@ -346,6 +346,7 @@ Imported.TacticsBattleSys = true;
     this._countWtTime = false; //行動順計算中か
     this._attacktime = false; //攻撃中か
     this._deadUnitIds = []; //ユニット退場予約用
+    this._resurrectionUnit = []; //蘇生ユニット予約用
     this._selfState = []; //自身がそのターンに付与したバフリスト
     this._arrangePattern = 0; //配置パターン
     this._quickTurnUnit = null;//[]; //WT0でも誰を優先的に配置させるか決める
@@ -354,6 +355,8 @@ Imported.TacticsBattleSys = true;
     this._moveTargetPointFlag = false; //攻撃時移動のフラグ
     this._moveTargetPointX = 0; //攻撃時移動の場合の移動座標X
     this._moveTargetPointY = 0; //攻撃時移動の場合の移動座標X
+    
+    this._resurrectionFlag = false; //攻撃時移動のフラグ
     this._multiHitCount = 0; //多段ヒット時のカウント用
     this._selectUnit = []; //ユニットリストからのステータス画面で使用する
   };
@@ -397,6 +400,20 @@ Imported.TacticsBattleSys = true;
     }else{
       return false;
     }
+  };
+  
+  // 蘇生ユニットの予約
+  Game_Temp.prototype.setResurrectionUnit = function(unit) {
+    this._resurrectionUnit = unit;
+  };
+  
+  // 蘇生ユニット
+  Game_Temp.prototype.isResurrectionUnit = function() {
+    return this._resurrectionUnit;
+  };
+  // 蘇生ユニットのリセット
+  Game_Temp.prototype.resetResurrectionUnit = function(unit) {
+    this._resurrectionUnit = null;
   };
   
 
@@ -492,7 +509,9 @@ Imported.TacticsBattleSys = true;
         //バフ解除
         if(turnUnit.useSkill().meta.clear){
           if (turnUnit.useSkill().meta.clear == "buff"){
-            target.removeBuffState();
+            target.removeBuffState(false);
+          }else if(turnUnit.useSkill().meta.clear == "burst"){
+            target.removeBuffState(true);
           }
         }
         //TPドロー
@@ -1090,13 +1109,13 @@ Imported.TacticsBattleSys = true;
     }, this);
   };
   //すべてのバフを除去
-  Game_Battler.prototype.removeBuffState = function() {
+  Game_Battler.prototype.removeBuffState = function(burst) {
     for(var stateId = 1; stateId < $dataStates.length; stateId++){
       if (this.isStateAffected(stateId)) {
         if($dataStates[stateId].meta.type == "buff"){
         
           //バフ消去不能なバフかどうか
-          if($dataStates[stateId].meta.buffFixed) continue; //バフ消去不能なら以降の処理は行わず、次のステートへ
+          if($dataStates[stateId].meta.buffFixed && !burst) continue; //バフ消去不能なら以降の処理は行わず、次のステートへ
           
           this.eraseState(stateId);
           this.refresh();
@@ -1243,6 +1262,8 @@ Imported.TacticsBattleSys = true;
     this._toY = 0; //移動先Y座標
     this._isAllyTurn = false;
     this._isEnemyTurn = false;
+    this._allyDeadUnitList = []; //味方の戦闘不能者リスト
+    this._enemyDeadUnitList = []; //敵の戦闘不能者リスト
     this._unitList = []; //ただのユニットリスト
     this._wtTurnList = []; //行動順リスト
     this._turnUnit = []; //ターンが回ったユニット
@@ -1371,8 +1392,10 @@ Imported.TacticsBattleSys = true;
     //マップ上にいるユニットのすり抜け設定
     for(var i = 0; i < this.unitList().length; i++){
       var target = this.unitList()[i];
-      target.setThrough(false);
-      target.setThrough(false);
+      if(!target.isActor().isDead()){
+        target.setThrough(false);
+        target.setThrough(false);
+      }
     }
   };
   // 残っているアクターユニットの数を更新
@@ -1418,6 +1441,25 @@ Imported.TacticsBattleSys = true;
         //event.setDeadBattler;
       }
     }
+  };
+  
+  //戦闘不能者リスト
+  Game_Map.prototype.setDeadUnitList = function(unit) {
+    if(unit.isAlly()){
+      this._allyDeadUnitList.push(unit);
+    }else{
+      this._enemyDeadUnitList.push(unit);
+    }
+  };
+  
+  //戦闘不能者リスト
+  Game_Map.prototype.allyDeadUnitList = function() {
+    return this._allyDeadUnitList;
+  };
+  
+  //戦闘不能者リスト
+  Game_Map.prototype.enemyDeadUnitList = function() {
+    return this._enemyDeadUnitList;
   };
   
   //ユニットリスト作成
@@ -1745,18 +1787,16 @@ Imported.TacticsBattleSys = true;
       a= (skill.meta.range || 'diamond 0').split(' ');
     }
     //移動しながらの攻撃の場合
-    //if($gameTemp._moveTargetPointFlag){
     if (skill.meta.move){
       x = $gameTemp._moveTargetPointX;
       y = $gameTemp._moveTargetPointY;
-      /*
-      var targets = $gameMap.unitsArea($gameMap._targetArea, true); //対象とその周囲を設定
-      if(targets){
-        turnUnit.setTarget(targets[0]);
-      }
-      */
     }
     
+    //蘇生の場合
+    if (skill.meta.resurrection){
+      x = $gameTemp.isResurrectionUnit()._x;
+      y = $gameTemp.isResurrectionUnit()._y;
+    }
     //このあたりに効果延長ステートを反映させる
     for(var id = 1; id < $dataStates.length; id++){
       if (turnUnit.isActor().isStateAffected(id)) {
@@ -2428,7 +2468,16 @@ Imported.TacticsBattleSys = true;
     }
     
   };
- 
+  // ユニット蘇生
+  Game_Event.prototype.resurrectionUnit = function(x, y) {
+    this._x = x;
+    this._y = y;
+    this.setTransparent(false);
+    this.setThrough(false);
+    this.isActor().clearStates();
+    this.isActor()._hp = this.mhp;
+    $gameMap.setUnitList();
+  };
   // ターゲットを返す
   Game_Event.prototype.target = function() {
     return this._target;
@@ -2465,7 +2514,9 @@ Imported.TacticsBattleSys = true;
   
   //戦闘不能時の処理
   Game_Event.prototype.setDeadBattler = function() {
-    this.erase(); //敵の場合だけにしたい
+    this.setTransparent(true); //透明化
+    this.setThrough(true); //すり抜け
+    //this.erase(); //敵の場合だけにしたい
   };
   
   // イベントが水上移動可能状態かどうかを返す
@@ -5078,7 +5129,7 @@ Imported.TacticsBattleSys = true;
   };
 
 
- //-----------------------------------------------------------------------------
+  //-----------------------------------------------------------------------------
   // Window_BattleCommand
   //
   
@@ -5197,7 +5248,87 @@ Imported.TacticsBattleSys = true;
     this.createContents();
     Window_Selectable.prototype.refresh.call(this);
   };
+    //-----------------------------------------------------------------------------
+  // Window_DeadUnitList(戦闘不能者を表示するウインドウ)
+  //
+
+  function Window_DeadUnitList() {
+    this.initialize.apply(this, arguments);
+  }
+
+  Window_DeadUnitList.prototype = Object.create(Window_Selectable.prototype);
+  Window_DeadUnitList.prototype.constructor = Window_DeadUnitList;
+
+  Window_DeadUnitList.prototype.initialize = function() {
+    
+    var width = unitListWidth;
+    var height = this.fittingHeight(unitListRows);
+    Window_Selectable.prototype.initialize.call(this, Graphics.boxWidth-256, 0, width, height);
+    this.select(0);
+    this.hide();
+    this.deactivate();
+    
+    this.openness = 0;
+    this._data = [];
+    this._lastindex = this.index();
+  };
+  Window_DeadUnitList.prototype.update = function() {
+    Window_Selectable.prototype.update.call(this);
+  };
+
+  Window_DeadUnitList.prototype.lineHeight = function() {
+    return commandLineHeight;
+  };
+
+  Window_DeadUnitList.prototype.setStatusWindow = function(statusWindow) {
+    this._statusWindow = statusWindow;
+  };
+
+  Window_DeadUnitList.prototype.maxItems = function() {
+    return this._data ? this._data.length : 1;
+  };
+
+  //ユニットリストの作成
+  Window_DeadUnitList.prototype.item = function() {
+    var index = this.index();
+    return this._data && index >= 0 ? this._data[index] : null;
+  };
+
+  //表示されるユニットリストの作成
+  Window_DeadUnitList.prototype.makeItemList = function() {
+    this._data = $gameMap.allyDeadUnitList();
+  };
+
+  //
+  Window_DeadUnitList.prototype.selectLast = function() {
+    var lastUnit = $gameMap._unitList[unitListRows];
+    var lastIndex = this._data.indexOf(lastUnit);
+    this.select(lastIndex >= 0 ? lastIndex : 0);
+  };
   
+  //▽選択時の挙動
+  Window_DeadUnitList.prototype.onTouch = function(triggered) {
+    //var lastIndex = this.index();
+    this._lastindex = this.index();
+    Window_Selectable.prototype.onTouch.call(this, triggered);
+  };
+
+  Window_DeadUnitList.prototype.drawItem = function(index) {
+    var item = this._data[index];
+    if (!item) return;
+    var rect = this.itemRect(index);
+    rect.width -= this.textPadding();
+    var alphabet ="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    var id = alphabet[item.unitId-1];
+    this.drawText(item.isActor().name() + id, rect.x, rect.y, rect.width);
+  };
+
+  Window_DeadUnitList.prototype.refresh = function() {
+    this.makeItemList();
+    this.createContents();
+    this.drawAllItems();
+  };
+
   //-----------------------------------------------------------------------------
   // Window_UnitList(ユニットリストを表示するウインドウ)
   //
@@ -6242,6 +6373,7 @@ Imported.TacticsBattleSys = true;
     this.createYesNoWindow();
     this.createCommandWindow();
     this.createUnitListWindow();
+    this.createDeadUnitListWindow();
     
   };
   
@@ -6381,6 +6513,35 @@ Imported.TacticsBattleSys = true;
     this._battleStatusWindow.setUnit(null);
     this._unitListWindow.hide();
     this._unitListWindow.deactivate();
+  };
+  
+  //戦闘不能者リストウインドウ
+  Scene_Map.prototype.createDeadUnitListWindow = function() {
+    this._deadUnitListWindow = new Window_DeadUnitList();
+    this._deadUnitListWindow.setHandler('ok', this.okDeadUnitList.bind(this));
+    this._deadUnitListWindow.setHandler('cancel', this.cancelDeadUnitList.bind(this));
+    this._deadUnitListWindow.setStatusWindow(this._battleStatusWindow);
+    this.addWindow(this._deadUnitListWindow);
+  };
+  
+  // 戦闘不能者リストウインドウを開く
+  Scene_Map.prototype.openDeadUnitListWindow = function() {
+    this._deadUnitListWindow.refresh();
+    this._deadUnitListWindow.selectLast();
+    this._deadUnitListWindow.activeOpen();
+    this._deadUnitListWindow.show();
+  };
+  
+  // 戦闘不能者リストウインドウを更新する
+  Scene_Map.prototype.updateDeadUnitListWindow = function() {
+    this._deadUnitListWindow.refresh();
+  };
+  
+  // 戦闘不能者リストウインドウを閉じる
+  Scene_Map.prototype.closeDeadUnitListWindow = function() {
+    this._battleStatusWindow.setUnit(null);
+    this._deadUnitListWindow.hide();
+    this._deadUnitListWindow.deactivate();
   };
   
   //コマンド発動前確認ウインドウ作成
@@ -6569,7 +6730,10 @@ Imported.TacticsBattleSys = true;
         var yPlus = $gameTemp._moveTargetPointY - turnUnit.y;
         turnUnit.jump(xPlus, yPlus); //移動しながらの攻撃はジャンプで行う
       }
-      
+      //蘇生の場合
+      if($gameTemp._resurrectionFlag){
+        $gameTemp.isResurrectionUnit().resurrectionUnit();
+      }
       this.showActionMotion(turnUnit);
       $gameMap._phaseState = 8;
       break;
@@ -6607,6 +6771,9 @@ Imported.TacticsBattleSys = true;
       break;
     case 13: //ユニットリスト選択フェーズ
       this.updateUnitListWindow();
+      break;
+    case 14: //蘇生ユニット選択フェーズ
+      this.updateDeadUnitListWindow();
       break;
     }
   };
@@ -6860,20 +7027,34 @@ Imported.TacticsBattleSys = true;
   Scene_Map.prototype.firstAbility = function() {
     var turnUnit = $gameMap._turnUnit;
     turnUnit.setUseSkill(turnUnit._myAbility[0]);
-    $gameMap._phaseState = 5;//対象選択
     //コマンドウインドウを閉じる
     this.closeCommandWindow();
-    $gameMap.showRangeArea(turnUnit,null);
+    //蘇生アビであった場合、蘇生ウインドウを開く
+    if(turnUnit.useSkill().meta.resurrection){
+      //戦闘不能者リストを開く
+      $gameMap._phaseState = 14;//対象選択
+      this.openDeadUnitListWindow();
+    }else{
+      $gameMap._phaseState = 5;//対象選択
+      $gameMap.showRangeArea(turnUnit,null);
+    }
   };
   
   // 2,SRPGコマンド【第二アビリティ】
   Scene_Map.prototype.secondAbility = function() {
     var turnUnit = $gameMap._turnUnit;
     turnUnit.setUseSkill(turnUnit._myAbility[1]);
-    $gameMap._phaseState = 5;//対象選択
     //コマンドウインドウを閉じる
     this.closeCommandWindow();
-    $gameMap.showRangeArea(turnUnit,null);
+    //蘇生アビであった場合、蘇生ウインドウを開く
+    if(turnUnit.useSkill().meta.resurrection){
+      //戦闘不能者リストを開く
+      $gameMap._phaseState = 14;//対象選択
+      this.openDeadUnitListWindow();
+    }else{
+      $gameMap._phaseState = 5;//対象選択
+      $gameMap.showRangeArea(turnUnit,null);
+    }
   };
   
   // 2,SRPGコマンド【第三アビリティ】
@@ -6883,20 +7064,34 @@ Imported.TacticsBattleSys = true;
     if(useSkill) turnUnit.setUseSkill($dataSkills[useSkill]);
     
     //var weapon = turnUnit.isActor().weapons()[0];
-    $gameMap._phaseState = 5;//対象選択
     //コマンドウインドウを閉じる
     this.closeCommandWindow();
-    $gameMap.showRangeArea(turnUnit,null);
+    //蘇生アビであった場合、蘇生ウインドウを開く
+    if(turnUnit.useSkill().meta.resurrection){
+      //戦闘不能者リストを開く
+      $gameMap._phaseState = 14;//対象選択
+      this.openDeadUnitListWindow();
+    }else{
+      $gameMap._phaseState = 5;//対象選択
+      $gameMap.showRangeArea(turnUnit,null);
+    }
   };
   
   // 2,SRPGコマンド【バーストアビリティ】
   Scene_Map.prototype.burstAbility = function() {
     var turnUnit = $gameMap._turnUnit;
     turnUnit.setUseSkill(turnUnit._myAbility[2]);
-    $gameMap._phaseState = 5;//対象選択
     //コマンドウインドウを閉じる
     this.closeCommandWindow();
-    $gameMap.showRangeArea(turnUnit,null);
+    //蘇生アビであった場合、蘇生ウインドウを開く
+    if(turnUnit.useSkill().meta.resurrection){
+      //戦闘不能者リストを開く
+      $gameMap._phaseState = 14;//対象選択
+      this.openDeadUnitListWindow();
+    }else{
+      $gameMap._phaseState = 5;//対象選択
+      $gameMap.showRangeArea(turnUnit,null);
+    }
   };
   
   // 2,SRPGコマンド【待機】
@@ -7003,6 +7198,7 @@ Imported.TacticsBattleSys = true;
           }
         }
         
+        
         //「警戒」付与者が対象ならnull
         if(turnUnit.target()){
           if(turnUnit.target().nonTargetBuffCheck()) turnUnit.setTarget(null);
@@ -7022,6 +7218,17 @@ Imported.TacticsBattleSys = true;
         }
         if(!turnUnit.target() && $gameMap.isInsideArea(x,y+1)){
           turnUnit.setTarget($gameMap.unitAllyXy(x,y+1));
+        }
+        //蘇生の場合
+        if(turnUnit.useSkill().meta.resurrection){
+          if($gameMap.unitEnemyXy(x,y)==null && $gameMap.unitAllyXy(x,y)==null){
+              turnUnit.setTarget($gameTemp.isResurrectionUnit());//あえて自身をターゲットに設定する(自身へのダメージは入らない)
+              $gameTemp._resurrectionFlag = true;
+              $gameTemp.isResurrectionUnit()._x = x;
+              $gameTemp.isResurrectionUnit()._y = y;
+          }else{
+            turnUnit.setTarget(null);
+          }
         }
       }
       
@@ -7103,6 +7310,10 @@ Imported.TacticsBattleSys = true;
     $gameTemp._moveTargetPointFlag = false
     $gameTemp._moveTargetPointX = 0;
     $gameTemp._moveTargetPointY = 0;
+    $gameTemp._resurrectionFlag = false
+    $gameTemp._resurrectionX = 0;
+    $gameTemp._resurrectionY = 0;
+    $gameTemp.resetResurrectionUnit();
     $gameMap.endTurn();
     $gameTemp._countWtTime = true;
     $gameMap.setWtTurnList();//行動順調整
@@ -7124,7 +7335,28 @@ Imported.TacticsBattleSys = true;
   Scene_Map.prototype.cancelUnitList = function() {
     this.closeUnitListWindow();
     this._battleStatusWindow.setUnit(null);
-    this.closeUnitListWindow();
+    this.openCommandWindow();
+    $gamePlayer.setCameraEvent($gameMap.turnUnit);
+    $gameMap.showInvisibleArea($gameMap._turnUnit);
+    $gameMap._phaseState = 2;//コマンド選択に戻る
+    
+  };
+  
+  // 14,戦闘不能者リストウインドウ【決定】
+  Scene_Map.prototype.okDeadUnitList = function() {
+    var turnUnit = $gameMap._turnUnit;
+    $gameTemp.setResurrectionUnit(this._deadUnitListWindow.item());//ステータス画面に遷移するため、どのユニットを選択したか記憶したい
+    this.closeDeadUnitListWindow();
+    this._battleStatusWindow.setUnit(null);
+    $gameMap._phaseState = 5;//対象選択画面へ移行する
+    $gameMap.showRangeArea(turnUnit,null);
+  };
+  
+  // 14,戦闘不能者リストウインドウ【キャンセル】
+  Scene_Map.prototype.cancelDeadUnitList = function() {
+    var turnUnit = $gameMap._turnUnit;
+    this.closeDeadUnitListWindow();
+    this._battleStatusWindow.setUnit(null);
     this.openCommandWindow();
     $gamePlayer.setCameraEvent($gameMap.turnUnit);
     $gameMap.showInvisibleArea($gameMap._turnUnit);
@@ -7232,6 +7464,7 @@ Imported.TacticsBattleSys = true;
     var eventId = $gameTemp.deadUnitId();
     if (eventId > 0) {
       var event = $gameMap.event(eventId);
+      $gameMap.setDeadUnitList(event);
       event.setDeadBattler();
       $gameMap.setUnitList();
     }
