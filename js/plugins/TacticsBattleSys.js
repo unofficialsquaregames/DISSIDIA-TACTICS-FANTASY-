@@ -356,7 +356,7 @@ Imported.TacticsBattleSys = true;
     this._moveTargetPointX = 0; //攻撃時移動の場合の移動座標X
     this._moveTargetPointY = 0; //攻撃時移動の場合の移動座標X
     
-    this._resurrectionFlag = false; //攻撃時移動のフラグ
+    this._resurrectionFlag = false; //蘇生フラグ
     this._multiHitCount = 0; //多段ヒット時のカウント用
     this._selectUnit = []; //ユニットリストからのステータス画面で使用する
   };
@@ -1262,9 +1262,9 @@ Imported.TacticsBattleSys = true;
     this._toY = 0; //移動先Y座標
     this._isAllyTurn = false;
     this._isEnemyTurn = false;
-    this._allyDeadUnitList = []; //味方の戦闘不能者リスト
-    this._enemyDeadUnitList = []; //敵の戦闘不能者リスト
-    this._unitList = []; //ただのユニットリスト
+    this._unitList = []; //味方ユニットリスト
+    this._allyList = []; //敵ユニットリスト
+    this._enemyList = []; //ただのユニットリスト
     this._wtTurnList = []; //行動順リスト
     this._turnUnit = []; //ターンが回ったユニット
     this._area = {}; //エリアトーン表示
@@ -1332,6 +1332,16 @@ Imported.TacticsBattleSys = true;
   //ユニットリストを返す
   Game_Map.prototype.unitList = function() {
     return this._unitList;
+  };
+  
+  //味方ユニットリストを返す
+  Game_Map.prototype.allyList = function() {
+    return this._allyList;
+  };
+  
+  //敵ユニットリストを返す
+  Game_Map.prototype.enemyList = function() {
+    return this._enemyList;
   };
   
   // SRPGユニットを返す
@@ -1443,28 +1453,12 @@ Imported.TacticsBattleSys = true;
     }
   };
   
-  //戦闘不能者リスト
-  Game_Map.prototype.setDeadUnitList = function(unit) {
-    if(unit.isAlly()){
-      this._allyDeadUnitList.push(unit);
-    }else{
-      this._enemyDeadUnitList.push(unit);
-    }
-  };
-  
-  //戦闘不能者リスト
-  Game_Map.prototype.allyDeadUnitList = function() {
-    return this._allyDeadUnitList;
-  };
-  
-  //戦闘不能者リスト
-  Game_Map.prototype.enemyDeadUnitList = function() {
-    return this._enemyDeadUnitList;
-  };
   
   //ユニットリスト作成
   Game_Map.prototype.setUnitList = function() {
     this._unitList = [];
+    this._allyList = [];
+    this._enemyList = [];
     
     //戦闘外のイベントを除外する(ユニット追加ケースを考えてfor文の中を別の関数に移行する必要あり)
     for(var i = 1; i < this._events.length; i++){
@@ -1475,6 +1469,11 @@ Imported.TacticsBattleSys = true;
         if(!actor.isDead()) {
           this._unitList.push(event); //アクターかエネミーである場合イベントを配列にプッシュ
           event.unitId = this._unitList.length;
+        }
+        if(event.isAlly()){
+          this._allyList.push(event);
+        }else{
+          this._enemyList.push(event);
         }
       }
     }
@@ -1716,7 +1715,7 @@ Imported.TacticsBattleSys = true;
     //この辺りに自身の座標を基に対象エリアを削除していく(実装が難しいためコメントアウト)
     //this.deleteCantRangeArea(turnUnit);
     //タイルカラーの表示
-    if (skill.meta.move){
+    if (skill.meta.move || skill.meta.resurrection){
       this.deleteCantMoveArea(turnUnit, "attack");
       this.setColorArea(colorAreaMove); //移動しながら攻撃の場合はカラーが移動時の色
     }else{
@@ -2259,8 +2258,12 @@ Imported.TacticsBattleSys = true;
   
   // 予約されたアクションがあるか
   Game_Map.prototype.isReservationAction = function() {
-    if(this._reservationActionList.length) {
-      return true;
+    if(this._reservationActionList){
+      if(this._reservationActionList.length) {
+        return true;
+      }else{
+        return false;
+      }
     }else{
       return false;
     }
@@ -2469,13 +2472,11 @@ Imported.TacticsBattleSys = true;
     
   };
   // ユニット蘇生
-  Game_Event.prototype.resurrectionUnit = function(x, y) {
-    this._x = x;
-    this._y = y;
+  Game_Event.prototype.resurrectionUnit = function() {
+    this.isActor().recoverAll();
+    this.isActor().clearTp();
     this.setTransparent(false);
     this.setThrough(false);
-    this.isActor().clearStates();
-    this.isActor()._hp = this.mhp;
     $gameMap.setUnitList();
   };
   // ターゲットを返す
@@ -4316,7 +4317,7 @@ Imported.TacticsBattleSys = true;
   //移動状態をアップデート(カーソルが消えて移動不可になる　原因は？)
   var _Game_Player_updateMove = Game_Player.prototype.updateMove;
   Game_Player.prototype.updateMove = function() {
-    if ($gameMap.isBattleActivate()) {
+    if ($gameMap.isBattleActivate() && ($gameMap.isAllyTurn() ||  $gameMap.isEnemyTurn() || $gameMap.isReservationAction())) {
       if (this._x < this._realX) {
         this._realX = Math.max(this._realX - this._vx, this._x);
       } else if (this._x > this._realX) {
@@ -4336,7 +4337,7 @@ Imported.TacticsBattleSys = true;
   //移動状態をアップデート
   var _Game_Player_updateNonmiving = Game_Player.prototype.updateNonmoving;
   Game_Player.prototype.updateNonmoving = function(wasMoving) {
-    if (!$gameMap.isBattleActivate()) {
+    if (!$gameMap.isBattleActivate() && ($gameMap.isAllyTurn() ||  $gameMap.isEnemyTurn() || $gameMap.isReservationAction())) {
       _Game_Player_updateNonmiving.call(this, wasMoving);
     }
   };
@@ -5291,12 +5292,17 @@ Imported.TacticsBattleSys = true;
   //ユニットリストの作成
   Window_DeadUnitList.prototype.item = function() {
     var index = this.index();
-    return this._data && index >= 0 ? this._data[index] : null;
+    if(this._data && index >= 0 ){
+      return this._data[index].isActor().isDead() ? this._data[index] : null;
+    }else{
+      return null;
+    }
   };
 
   //表示されるユニットリストの作成
   Window_DeadUnitList.prototype.makeItemList = function() {
-    this._data = $gameMap.allyDeadUnitList();
+    //this._data = $gameMap.allyDeadUnitList();
+    this._data = $gameMap.allyList();
   };
 
   //
@@ -5320,6 +5326,11 @@ Imported.TacticsBattleSys = true;
     rect.width -= this.textPadding();
     var alphabet ="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     var id = alphabet[item.unitId-1];
+    if(item.isActor().isDead()){
+      this.changePaintOpacity(true);
+    }else{
+      this.changePaintOpacity(false);
+    }
     this.drawText(item.isActor().name() + id, rect.x, rect.y, rect.width);
   };
 
@@ -7272,6 +7283,7 @@ Imported.TacticsBattleSys = true;
     $gameTemp._moveTargetPointFlag = false;
     $gameTemp._moveTargetPointX = 0;
     $gameTemp._moveTargetPointY = 0;
+    $gameTemp_resurrectionFlag = false;
     //YesNoウインドウを閉じる
     this.closeYesNoWindow();
     this.openCommandWindow();
@@ -7345,11 +7357,17 @@ Imported.TacticsBattleSys = true;
   // 14,戦闘不能者リストウインドウ【決定】
   Scene_Map.prototype.okDeadUnitList = function() {
     var turnUnit = $gameMap._turnUnit;
-    $gameTemp.setResurrectionUnit(this._deadUnitListWindow.item());//ステータス画面に遷移するため、どのユニットを選択したか記憶したい
-    this.closeDeadUnitListWindow();
-    this._battleStatusWindow.setUnit(null);
-    $gameMap._phaseState = 5;//対象選択画面へ移行する
-    $gameMap.showRangeArea(turnUnit,null);
+    var resurrectionUnit = this._deadUnitListWindow.item();
+    if(resurrectionUnit){
+      $gameTemp.setResurrectionUnit(resurrectionUnit);//ステータス画面に遷移するため、どのユニットを選択したか記憶したい
+      this.closeDeadUnitListWindow();
+      this._battleStatusWindow.setUnit(null);
+      $gameMap._phaseState = 5;//対象選択画面へ移行する
+      $gameMap.showRangeArea(turnUnit,null);
+    }else{
+      SoundManager.playBuzzer();//ブザー
+      this.cancelDeadUnitList();
+    }
   };
   
   // 14,戦闘不能者リストウインドウ【キャンセル】
@@ -7361,7 +7379,6 @@ Imported.TacticsBattleSys = true;
     $gamePlayer.setCameraEvent($gameMap.turnUnit);
     $gameMap.showInvisibleArea($gameMap._turnUnit);
     $gameMap._phaseState = 2;//コマンド選択に戻る
-    
   };
   
   
@@ -7464,7 +7481,6 @@ Imported.TacticsBattleSys = true;
     var eventId = $gameTemp.deadUnitId();
     if (eventId > 0) {
       var event = $gameMap.event(eventId);
-      $gameMap.setDeadUnitList(event);
       event.setDeadBattler();
       $gameMap.setUnitList();
     }
