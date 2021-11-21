@@ -468,16 +468,6 @@ Imported.TacticsBattleSys = true;
       }
       //敵対ユニットが対象
       if(turnUnit.isAttackTarget(targetUnit)){
-        //ヒットによって行動負荷がなくなるデバフ
-        for(var id = 1; id < $dataStates.length; id++){
-          if (target.isStateAffected(id)) {
-            if($dataStates[id].meta.shift){
-              if($dataStates[id].meta.shift == "mark"){
-                $gameTemp._quickTurnUnit = turnUnit;
-              }
-            }
-          }
-        }
         //スキルによる行動順遅延
         var invalidDelay = false;
         //遅延無効チェック
@@ -575,6 +565,20 @@ Imported.TacticsBattleSys = true;
       this.item().effects.forEach(function(effect) {
         this.applyItemEffect(target, effect); //指定対象にエフェクトを適用。
         }, this);
+      //敵対ユニットが対象
+      if(turnUnit.isAttackTarget(targetUnit)){
+        //ヒットによって行動負荷がなくなるデバフ
+        for(var id = 1; id < $dataStates.length; id++){
+          if (target.isStateAffected(id)) {
+            if($dataStates[id].meta.shift){
+              if($dataStates[id].meta.shift == "mark"){
+                //turnUnit.isActor().wtTurnAdvance();
+                $gameTemp._quickTurnUnit = turnUnit;
+              }
+            }
+          }
+        }
+      }
       //ヒットによって持続ACTが消費するバフ
       if(!($gameMap.isReservationActionType("trapChase") && $gameMap.isReservationActionTurn()) && value >= 0){ //トラップ追撃で減少しない
         for(var id = 1; id < $dataStates.length; id++){
@@ -1522,47 +1526,11 @@ Imported.TacticsBattleSys = true;
       }
     });
     
-    //行動負荷なし＆行動順操作などで先頭に来たユニットは頭に置きたい
-    if($gameTemp._quickTurnUnit){
-      this._wtTurnList.sort(function(a,b){
-        if( a[1] == b[1] ){
-          if( a[0] == $gameTemp._quickTurnUnit.event().id ){
-            return -1;
-          }else{
-            return 1;
-          }
-          if( b[0] == $gameTemp._quickTurnUnit.event().id ){
-            return -1;
-          }else{
-            return 1;
-          }
-          return 0;
-        }
-      });
-    }
     
   };
  
   //WTカウント
   Game_Map.prototype.countWt = function() {
-    //行動負荷なしのキャラがいた場合、そちらを優先させる
-    if($gameTemp._quickTurnUnit){
-      for (var i = 0; i < this.unitList().length; i++){
-        if($gameTemp._quickTurnUnit == this.unitList()[i]){
-          var target = this._turnUnit;
-          if (target.isAlly()) {
-            this._isAllyTurn = true;
-          } else {
-            this._isEnemyTurn = true;
-          }
-          $gamePlayer.setCameraEvent(target); //カメラをターンが回ったキャラへ回す
-          $gameTemp._cameraWait=true;
-          $gameTemp._countWtTime = false;
-          return;
-        }
-      }
-    }
-    
     //以下が平常時の動作
     for (var i = 0; i < this.unitList().length; i++){
       var character = this.unitList()[i];
@@ -1570,7 +1538,7 @@ Imported.TacticsBattleSys = true;
       
       if (battler.matchWt()) {
         //同一WTのユニットがいて先にターンが回られてしまった場合、以降の処理は行わない
-        if (!$gameTemp._countWtTime) break;//continue;
+        //if (!$gameTemp._countWtTime) break;//continue;
         //敵のターンか味方のターンか
         if (character.isAlly()) {
           this._isAllyTurn = true;
@@ -1583,9 +1551,18 @@ Imported.TacticsBattleSys = true;
         $gamePlayer.setCameraEvent(target); //カメラをターンが回ったキャラへ回す
         $gameTemp._cameraWait=true;
         $gameTemp._countWtTime = false;
-      }else{
-        battler.countWt(); //WT数を加算する
+        return;
+      //}else{
+      //  battler.countWt(); //WT数を加算する
       }
+    }
+    
+    //以下が平常時の動作
+    for (var i = 0; i < this.unitList().length; i++){
+      var character = this.unitList()[i];
+      var battler = character.isActor();
+      
+      if (!battler.matchWt()) battler.countWt(); //WT数を加算する
     }
   };
   
@@ -2699,14 +2676,6 @@ Imported.TacticsBattleSys = true;
             this.isActor().setMp(0);
           }
         }
-        //行動順繰り上げ
-        if(this.useSkill().meta.shift){
-          if(targets[i] == this) continue; //自身も対象に含んでる場合無視する
-          if(this.useSkill().meta.shift == "chase") {
-            actor.wtTurnAdvance();
-            //$gameTemp._quickTurnUnit = targets[i];//本来、パラダイムシフトで行動順操作をできるようにしたかったがバグが発生しやすいためターンをすぐに回せるのが限界っぽい
-          }
-        }
         targets[i].reserveDamagePopup(0);//回復時被ダメージ時のポップアップ表示
       }
     }
@@ -2802,7 +2771,7 @@ Imported.TacticsBattleSys = true;
              }else{
                $gameMap.addReservationActionList(target,$dataSkills[parseInt(skill)],this,"counter");
              }
-             return;
+             //return;
            }
          }
        }
@@ -2875,7 +2844,7 @@ Imported.TacticsBattleSys = true;
                   }else{
                     $gameMap.addReservationActionList(allyCounterUnit,$dataSkills[parseInt($dataStates[id].meta.skill)],this,"allyCounter");
                   }
-                  return;
+                  //return;
                 }
               }
             }                
@@ -2904,7 +2873,6 @@ Imported.TacticsBattleSys = true;
   Game_Event.prototype.beforeTurnStart = function() {
     var actor = this.isActor();
     actor.clearResult();
-    $gameTemp._quickTurnUnit = null;//初期化(ターン終了後だとパラダイムシフトのが反映されない)
     //actor.onTurnEnd(); //この処理だとバフターンの仕様がおかしくなる
     
     //可視バフデバフ処理
@@ -2935,18 +2903,21 @@ Imported.TacticsBattleSys = true;
     var actor = this.isActor();
     actor.regenerateAll();//この処理でリジェネや毒を発生させる
     this.reserveDamagePopup(0);//リジェネ効果のポップアップ表示
+    if($gameTemp._quickTurnUnit == this){
+      $gameTemp._quickTurnUnit = null;
+    }else{
+      actor.resetWt(this.checkBehavioralLoad());
+    }
+    
     //自身のステートチェック
     for(var id = 1; id < $dataStates.length; id++){
       if (actor.isStateAffected(id)) {
-      
         //行動負荷なしのバフを持っているか
         if($dataStates[id].meta.shift){
           if($dataStates[id].meta.shift == "self") {
-            $gameTemp._quickTurnUnit = this;
-            //break;
+            this.isActor().wtTurnAdvance();
           }
         }
-        
         //行動終了後発動するスキルのあるバフデバフを持っているか
         if($dataStates[id].meta.activate){
           if($dataStates[id].meta.activate == "trap") {
@@ -3005,11 +2976,9 @@ Imported.TacticsBattleSys = true;
         }
       }
     }
-    //行動負荷なしかどうか
-    if(!$gameTemp._quickTurnUnit){
-      actor.resetWt(this.checkBehavioralLoad());
-    }
+   
     
+        
     this.resetMove();
     this.resetAction();
     
@@ -3326,6 +3295,13 @@ Imported.TacticsBattleSys = true;
     return null;
   };
   
+  // HPが○○%以下のユニット
+  Game_Event.prototype.targetDeadSearch = function(target,rate) {
+    if(target.isActor().isDead()){
+      return target;
+    }
+    return null;
+  };
   // HPが○○%以下のユニット
   Game_Event.prototype.targetLessHpSearch = function(target,rate) {
     if(target.isActor().hp < target.isActor().mhp * rate / 100 && this.targetIsInvalid(target)){
