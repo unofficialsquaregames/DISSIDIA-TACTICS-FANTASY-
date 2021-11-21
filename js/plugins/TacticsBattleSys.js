@@ -818,21 +818,19 @@ Imported.TacticsBattleSys = true;
   //バフ期間更新
   var _Game_BattlerBase_updateStateTurns = Game_BattlerBase.prototype.updateStateTurns;
   Game_BattlerBase.prototype.updateStateTurns = function() {
-    this._states.forEach(function(stateId) {
-        var selfBuff = $gameTemp._selfState.contains(parseInt(stateId));
-        if ((this._stateTurns[stateId] > 0) && !selfBuff) {
-            this._stateTurns[stateId]--;
-        }
-        if (this._stateTurns[stateId] <= 0) this.removeState(stateId); //バフ期間が0になったらバフ除去
-    }, this);
-    
+    for(i = this._states.length - 1; i >= 0; i--){
+      var stateId = this._states[i];
+      var selfBuff = $gameTemp._selfState.contains(parseInt(stateId));
+      if ((this._stateTurns[stateId] > 0) && !selfBuff) this._stateTurns[stateId]--;
+      if (this._stateTurns[stateId] <= 0) this.removeState(stateId); //バフ期間が0になったらバフ除去(ステート配列除外によって処理にバグが発生)
+    }
   };
 
   //バフ枠ソート
   var _Game_BattlerBase_sortStates = Game_BattlerBase.prototype.sortStates;
   Game_BattlerBase.prototype.sortStates = function() {
     //付与順に並べるだけにしたい
-    for(i=1; i<this._states.length; i++){
+    for(i = 1; i < this._states.length; i++){
       if(this._states[i] > 0 && this._states[i-1] <= 0){
         this._states[i-1] = this._states[i];
         this._states[i] = 0;
@@ -2976,9 +2974,6 @@ Imported.TacticsBattleSys = true;
         }
       }
     }
-   
-    
-        
     this.resetMove();
     this.resetAction();
     
@@ -3295,10 +3290,12 @@ Imported.TacticsBattleSys = true;
     return null;
   };
   
-  // HPが○○%以下のユニット
-  Game_Event.prototype.targetDeadSearch = function(target,rate) {
-    if(target.isActor().isDead()){
-      return target;
+  // 戦闘不能ユニット
+  Game_Event.prototype.targetDeadSearch = function() {
+    for (var i = 0; i < $gameMap.allyList().length; i++){
+      if($gameMap.enemyList()[i].isActor().isDead()){
+        return $gameMap.enemyList()[i];
+      }
     }
     return null;
   };
@@ -3465,6 +3462,11 @@ Imported.TacticsBattleSys = true;
                 if(!this.isActor().meetsSkillConditions(skill)) continue;
                 target = this.targetNearSearch(unit);
                 break;
+              case "resurrection": //蘇生
+                var skill = $dataSkills[parseInt(command[3])];
+                if(!this.isActor().meetsSkillConditions(skill)) continue;
+                target = this.targetDeadSearch();
+                break;
               case "lessHp":
                 target = this.targetLessHpSearch(unit,parseInt(command[3]));
                 var skill = $dataSkills[parseInt(command[4])];
@@ -3608,6 +3610,19 @@ Imported.TacticsBattleSys = true;
             this.setTarget(this);
             $gameTemp._moveTargetPointX = targetpos.x;
             $gameTemp._moveTargetPointY = targetpos.y;
+          }else if(command[2] == "resurrection" && target){
+            var effect = (skill.meta.effect || 'diamond 1').split(' ');
+            if(parseInt(effect[1]) == "self") continue;
+            $gameTemp.setResurrectionUnit(target);
+            this.setTarget($gameTemp.isResurrectionUnit());
+            this.setUseSkill(skill);
+            $gameTemp._resurrectionFlag = true;
+            $gameMap.showRangeArea(this, null);
+            targetpos = this.setMovePoint(parseInt(effect[1]));
+            
+            $gameTemp._resurrectionFlag = true;
+            $gameTemp.isResurrectionUnit()._x = targetpos.x;
+            $gameTemp.isResurrectionUnit()._y = targetpos.y;
           }
         }
       }else if(command[0] == "round"){
@@ -4311,10 +4326,10 @@ Imported.TacticsBattleSys = true;
 
 
   //移動状態をアップデート
-  var _Game_Player_updateNonmiving = Game_Player.prototype.updateNonmoving;
+  var _Game_Player_updateNonmoving = Game_Player.prototype.updateNonmoving;
   Game_Player.prototype.updateNonmoving = function(wasMoving) {
     if (!$gameMap.isBattleActivate() && ($gameMap.isAllyTurn() ||  $gameMap.isEnemyTurn() || $gameMap.isReservationAction())) {
-      _Game_Player_updateNonmiving.call(this, wasMoving);
+      _Game_Player_updateNonmoving.call(this, wasMoving);
     }
   };
 
@@ -6868,6 +6883,10 @@ Imported.TacticsBattleSys = true;
         var yPlus = $gameTemp._moveTargetPointY - turnUnit.y;
         turnUnit.jump(xPlus, yPlus); //移動しながらの攻撃はジャンプで行う
       }
+      //蘇生の場合
+      if($gameTemp._resurrectionFlag){
+        $gameTemp.isResurrectionUnit().resurrectionUnit();
+      }
       //自身に攻撃アニメーション
       this.showActionMotion(turnUnit);
       //this.showActionAnimation(turnUnit);
@@ -7137,6 +7156,14 @@ Imported.TacticsBattleSys = true;
         SoundManager.playBuzzer();//ブザー
       }
     }
+    //キャンセルボタン
+    if (TouchInput.isCancelled()){
+      SoundManager.playCancel();//キャンセル
+      $gameMap.initColorArea();
+      this.openCommandWindow();
+      $gameMap.showInvisibleArea(turnUnit);
+      $gameMap._phaseState = 2;//コマンド選択画面へ移行
+    }
   };
 
   // 4,移動処理
@@ -7229,16 +7256,21 @@ Imported.TacticsBattleSys = true;
         $gameMap._phaseState = 6;//範囲表示およびYesNo選択
       }else{
         SoundManager.playBuzzer();//ブザー
-        //タッチした地点へカメラを移動
-        //$gamePlayer.setCameraXy(x, y);
-        
-        //エラーが起きた場合コマンド選択画面へ戻る(スクロールと被ってどうしようか検討中)
-        //$gameMap.initColorArea();
-        this.openCommandWindow();
-        $gamePlayer.setCameraEvent(turnUnit);
-        $gameMap.showInvisibleArea(turnUnit);
-        $gameMap._phaseState = 2;//コマンド選択に戻る
+        if(x == turnUnit.x && y == turnUnit.y){
+          this.openCommandWindow();
+          $gamePlayer.setCameraEvent(turnUnit);
+          $gameMap.showInvisibleArea(turnUnit);
+          $gameMap._phaseState = 2;//コマンド選択に戻る
+        }
       }
+    }
+    //キャンセルボタン
+    if (TouchInput.isCancelled()){
+      SoundManager.playCancel();//キャンセル
+      this.openCommandWindow();
+      $gamePlayer.setCameraEvent(turnUnit);
+      $gameMap.showInvisibleArea(turnUnit);
+      $gameMap._phaseState = 2;//コマンド選択に戻る
     }
   };
    
