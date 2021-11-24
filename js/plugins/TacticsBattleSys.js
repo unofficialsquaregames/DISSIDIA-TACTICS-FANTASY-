@@ -479,6 +479,7 @@ Imported.TacticsBattleSys = true;
               }
             }
           }
+          if(targetUnit.checkInInvisibleArea()) invalidDelay = true;
         }
         if(turnUnit.useSkill().meta.delay && !invalidDelay){
           target.wtTurnDelay(parseInt(turnUnit.useSkill().meta.delay));
@@ -3070,6 +3071,30 @@ Imported.TacticsBattleSys = true;
       }
     }
     return true;
+  };
+  
+  // 進行不可の不可視領域に入っているか
+  Game_Event.prototype.checkInInvisibleArea = function() {
+    var unitList = $gameMap.unitList();
+    for(var i = 0; i < unitList.length; i++){
+      var target = unitList[i];
+      if (target.isAttackTarget(this)) continue; //敵対関係だったら関係ないのでスルー
+      var targetActor = target.isActor();
+      for(var id = 1; id < $dataStates.length; id++){
+        if (targetActor.isStateAffected(id)) {
+          var field = $dataStates[id].meta.field;
+          var move = $dataStates[id].meta.move;
+          if(field && move){
+            if(move == "cantProceed"){
+              if(target.targetRange(this) <= parseInt(field)){
+                return true;
+              }
+            }
+          }
+        }
+      }
+    }
+    return false;
   };
   // 既に進行不可の不可視領域に入っているか
   Game_Event.prototype.cantMoveInvisibleArea = function() {
