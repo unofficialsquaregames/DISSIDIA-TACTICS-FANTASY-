@@ -468,25 +468,6 @@ Imported.TacticsBattleSys = true;
       }
       //敵対ユニットが対象
       if(turnUnit.isAttackTarget(targetUnit)){
-        //スキルによる行動順遅延
-        var invalidDelay = false;
-        //遅延無効チェック
-        for(var id = 1; id < $dataStates.length; id++){
-          if (target.isStateAffected(id)) {
-            if($dataStates[id].meta.invalid){
-              if($dataStates[id].meta.invalid == "delay"){
-                invalidDelay = true;
-              }
-            }
-          }
-          if(targetUnit.checkInInvisibleArea()) invalidDelay = true;
-        }
-        if(turnUnit.useSkill().meta.delay && !invalidDelay){
-          target.wtTurnDelay(parseInt(turnUnit.useSkill().meta.delay));
-        }else if(targetUnit.checkDelay() && !invalidDelay){
-          target.wtTurnDelay(parseInt(targetUnit.checkDelay()));//デバフによる行動順遅延
-        }
-          
         //座標入れ替え
         if(turnUnit.useSkill().meta.swap){
           if (turnUnit.useSkill().meta.swap == "area"){
@@ -505,6 +486,25 @@ Imported.TacticsBattleSys = true;
             target.removeBuffState(true);
           }
         }
+        //スキルによる行動順遅延
+        var invalidDelay = false;
+        //遅延無効チェック
+        for(var id = 1; id < $dataStates.length; id++){
+          if (target.isStateAffected(id)) {
+            if($dataStates[id].meta.invalid){
+              if($dataStates[id].meta.invalid == "delay"){
+                invalidDelay = true;
+              }
+            }
+          }
+          if(targetUnit.checkInInvisibleArea()) invalidDelay = true;
+        }
+        if(turnUnit.useSkill().meta.delay && !invalidDelay){
+          target.wtTurnDelay(parseInt(turnUnit.useSkill().meta.delay));
+        }else if(targetUnit.checkDelay() && !invalidDelay){
+          target.wtTurnDelay(parseInt(targetUnit.checkDelay()));//デバフによる行動順遅延
+        }
+        
         //TPドロー
         if(turnUnit.useSkill().meta.steal == "tp"){
           this.subject().gainTp(target.tp);
@@ -2724,7 +2724,7 @@ Imported.TacticsBattleSys = true;
               var trapGrantorActor = trapGrantorUnit.isActor();
               if ((trapGrantorActor._classId == parseInt(trapGrantor)) && trapGrantorUnit.isAttackTarget(this)){
                 $gameMap.addReservationActionList(trapGrantorUnit,$dataSkills[parseInt(skill)],this,"trapChase");
-                return;
+                //return;
               }
             }
           }
@@ -2746,7 +2746,7 @@ Imported.TacticsBattleSys = true;
             }else{
               $gameMap.addReservationActionList(this,$dataSkills[parseInt(skill)],target,"chase");
             }
-            return;         
+            //return;         
           }
         }
       }
@@ -2811,7 +2811,7 @@ Imported.TacticsBattleSys = true;
               if($dataStates[id].meta.activate && allyChaseUnit.isAttackTarget(target) && this.isAttackTarget(target)){
                 if($dataStates[id].meta.activate == "allyChase") {
                   $gameMap.addReservationActionList(allyChaseUnit,$dataSkills[parseInt($dataStates[id].meta.skill)],target,"allyChase");
-                  return;
+                  //return;
                 }
               }
             }                
