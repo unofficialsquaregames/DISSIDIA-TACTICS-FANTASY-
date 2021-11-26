@@ -119,7 +119,14 @@
  * @text 項目の高さ
  * @desc 選択項目の行の高さを指定します。
  * @type number
- * @default 64
+ * @default 32
+ * 
+ * @param wwRowTop
+ * @parent layoutWW
+ * @text 頂点の始まり
+ * @desc 選択項目のtopを指定します。
+ * @type number
+ * @default 16
  *
  * @param removeOnReserveTerm
  * @parent layoutWW
@@ -211,6 +218,7 @@
     param.nameShow    = eval(param['nameShow']),
     param.horzLineYPos= param['horzLineYPos']           || "[148]",
     param.wwRowHeight = Number(param['wwRowHeight']     || 48),
+    param.wwRowTop = Number(param['wwRowTop']     || 16),
     param.maxAllParty = Number(param['maxAllParty']     || 8);
 
     var $originalParty, $originalMembers, ssBitmap;
@@ -492,7 +500,7 @@
         var ph = bitmap.height / (big ? 4 : 8);
         var n = characterIndex;
         var sx = (n % 4 * 3 + 1) * pw;
-        var sy = (Math.floor(n / 4) * 4) * ph;
+        var sy = (Math.floor(n / 4) * 4) * ph + param.wwRowTop;
         this.contents.blt(bitmap, sx, sy, pw, this.itemHeight(), x - pw / 2, y);
     };
 
