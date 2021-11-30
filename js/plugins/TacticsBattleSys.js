@@ -7,7 +7,7 @@
 /*:
  * @plugindesc DISSIDIA TACTICS FANTASY専用のゲームシステム
  *
- * @author シド・ファブール ()
+ * @author サボテンマン (ベースは「tomoaky」様)
  *
  * @param damagePopupInterval
  * @desc 連続ダメージポップアップの間隔（フレーム）

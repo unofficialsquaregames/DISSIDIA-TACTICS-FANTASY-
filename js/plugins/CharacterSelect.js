@@ -2,18 +2,13 @@
  * ===========================================================================
  * CharacterSelect.js
  * (KanjiPartyChange.jsより流用)
- * ---------------------------------------------------------------------------
- * version 1.04
- * Copyright (c) 2020 Kanji the Grass
- * This work is provided under the MTCM Blue License
- * - https://ja.materialcommons.org/mtcm-b-summary/
- * Credits display: Kanji the Grass ordered by Munokura fungamemake.com
  * ===========================================================================
 */
 
 /*:
- * @plugindesc 待機メンバーと入れ替えるシーンを追加します
- * @author 莞爾の草
+ * @plugindesc DISSIDIA TACTICS FANTASY専用のキャラクターセレクト
+ *
+ * @author サボテンマン (ベースは「莞爾の草 (仕様作成:ムノクラ fungamemake.com )」様)
  *
  * @param system
  * @text システム部
@@ -193,12 +188,6 @@
  *   kanjiPC changeMaxParty 9
  *     パーティメンバーの最大数を9に変更します。
  * 
- * ■利用規約
- * この作品は マテリアル・コモンズ・ブルー・ライセンスの下に提供されています。
- * - https://ja.materialcommons.org/mtcm-b-summary/
- * クレジット表示：莞爾の草 (仕様作成:ムノクラ fungamemake.com )
- *
- * ライセンス内容を確認の上、ご利用ください。
  */
 
 (function () {
