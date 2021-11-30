@@ -2280,6 +2280,7 @@ Imported.TacticsBattleSys = true;
       var target = this.unitList()[i];
       var actor = target.isActor();
       target._alreadyCover = false; //かばうフラグoff
+      target._allyCounterFlag = false; //カウンターフラグoff
       for(var id = 1; id < $dataStates.length; id++){
         if (actor.isStateAffected(id)) {
           //瀕死時HP回復
@@ -2375,6 +2376,8 @@ Imported.TacticsBattleSys = true;
     this._myAbility[2] = null; //バーストアビリティ(TP消費)
     
     this._alreadyCover = false; //かばう時にすでに庇ったかどうか
+    this._allyCounterFlag = false; //連動式カウンターフラグ
+    
     this._moved = false; //移動したかどうか
     this._acted = false; //行動したかどうか
     var unitId;
@@ -2420,7 +2423,7 @@ Imported.TacticsBattleSys = true;
       //向きの設定
       var d = this.event().meta.Direction;
       if(d) this.setDirection(d);
-      //this._actor.gainTp(100);//テスト用
+      if(Utils.isOptionValid('test')) this._actor.gainTp(100);//テスト用
     }
     //敵の配置
     else if (enemyId) {
@@ -2827,14 +2830,13 @@ Imported.TacticsBattleSys = true;
     for(var i = 0; i < $gameMap.unitList().length; i++){
       var allyCounterUnit = $gameMap.unitList()[i];
       var allyCounterUnitActor = allyCounterUnit.isActor();
-      
+      if(allyCounterUnit._allyCounterFlag) continue; //既にカウンター成立している場合、以降の処理は行わない
       for(var id = 1; id < $dataStates.length; id++){
         if (allyCounterUnitActor.isStateAffected(id)) {
           var field = $dataStates[id].meta.field;
           if(field){
             //if((this.targetRange(allyCounterUnit) <= parseInt(field)) && (target.targetRange(allyCounterUnit) <= parseInt(field))){
             if(target.targetRange(allyCounterUnit) <= parseInt(field)){ //味方が領域内に入っていれば、敵が領域外でもカウンターが発動する
-              
               //不可視領域内侵入していた場合反撃発生する
               if($dataStates[id].meta.activate && allyCounterUnit.isCoverTarget(target) && allyCounterUnit.isAttackTarget(this)){
                 if($dataStates[id].meta.activate == "allyCounter") {
@@ -2842,6 +2844,7 @@ Imported.TacticsBattleSys = true;
                     allyCounterUnitActor.wtTurnAdvance();
                   }else{
                     $gameMap.addReservationActionList(allyCounterUnit,$dataSkills[parseInt($dataStates[id].meta.skill)],this,"allyCounter");
+                    allyCounterUnit._allyCounterFlag = true;
                   }
                   //return;
                 }
@@ -6949,17 +6952,7 @@ Imported.TacticsBattleSys = true;
   // 予約ターンの更新
   Scene_Map.prototype.updateReservationTurn = function() {
     var turnUnit = $gameMap.loadReservationAttackUnit();//予約ターンでは攻撃者のこと
-    /*
-    //想定できないエラー
-    if(!turnUnit.isActor()){
-      alert("Scene_Map.updateReservationTurn()にてエラー発生")
-      $gameMap.removeReservationActionList();
-      $gameTemp.allyCounterFrag = false;
-      return;
-    }
-    */
-    if(turnUnit.target().isActor().isDead() && $gameMap._phaseState == 0) $gameMap._phaseState = 11; //追撃前に死亡していた場合、予約ターンを終わらせる(複数ヒットの影響で不具合発生)
-    
+    if($gameMap.loadReservationTargetUnit().isActor().isDead() && $gameMap._phaseState == 0) $gameMap._phaseState = 11; //追撃前に死亡していた場合、予約ターンを終わらせる(複数ヒットの影響で不具合発生)
     switch ($gameMap._phaseState) {
     case 0: //カメラ移動完了後コマンド表示
       $gameMap.initColorArea();
