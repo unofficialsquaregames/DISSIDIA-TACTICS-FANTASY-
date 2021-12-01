@@ -3223,6 +3223,7 @@ Imported.TacticsBattleSys = true;
   };
   // 誘惑付与者が範囲内にいるかチェック
   Game_Event.prototype.effectCharmCheck = function(targets) {
+    if(this.useSkill().scope == 7 || this.useSkill().scope == 8) return false;
     var actor = this.isActor();
     for(var id = 1; id < $dataStates.length; id++){
       if (actor.isStateAffected(id)) {
