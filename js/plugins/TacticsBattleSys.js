@@ -521,6 +521,7 @@ Imported.TacticsBattleSys = true;
             for(var id = 0; id < states.length; id++) {
               if($dataStates[states[id]].meta.type == "debuff") target.addState(states[id]);
             }
+            //this.subject().removeDebuffState(); //自身のデバフを消去
           }
         }
         //攻撃ヒット時に行動負荷がなくなるバフを所持していた場合
@@ -1129,13 +1130,13 @@ Imported.TacticsBattleSys = true;
     }
   };
   //すべてのデバフを除去
-  Game_Battler.prototype.removeDebuffState = function() {
+  Game_Battler.prototype.removeDebuffState = function(burst) {
     for(var stateId = 1; stateId < $dataStates.length; stateId++){
       if (this.isStateAffected(stateId)) {
         if($dataStates[stateId].meta.type == "debuff"){
         
           //デバフ消去不能なバフかどうか
-          if($dataStates[stateId].meta.debuffFixed) continue;//バフ消去不能なら以降の処理は行わず、次のステートへ
+          if($dataStates[stateId].meta.debuffFixed && !burst) continue;//バフ消去不能なら以降の処理は行わず、次のステートへ
           
           this.eraseState(stateId);
           this.refresh();
@@ -2613,6 +2614,12 @@ Imported.TacticsBattleSys = true;
       }
       targets[i].checkDead();//戦闘不能チェック
     }
+    //デバフ消去処理
+    if(this.useSkill().meta.throw){
+      if (this.useSkill().meta.throw == "debuff"){
+        this.isActor().removeDebuffState(true);
+      }
+    }
     
     //以下メモ欄に記載されたタグ処理(敵に攻撃したあと味方にバフや回復を行いたいとき、味方全体に回復を行った後に自身にバフをつけたい場合の処理)
     var target = this.useSkill().meta.target;
@@ -2622,12 +2629,7 @@ Imported.TacticsBattleSys = true;
       //ステート追加処理
       var state = this.useSkill().meta.state;
       if(state) actor.addState (state);
-      //デバフ消去処理
-      if(this.useSkill().meta.clear){
-        if (this.useSkill().meta.clear == "allyDebuff"){
-          actor.removeDebuffState();
-        }
-      }
+      
       //HP回復処理
       var gainHp = this.useSkill().meta.gainHp;
       if(gainHp) actor.gainHp(Math.round(actor.mhp * gainHp / 100));
