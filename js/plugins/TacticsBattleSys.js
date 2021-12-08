@@ -7147,6 +7147,7 @@ Imported.TacticsBattleSys = true;
   // 3,移動先選択
   Scene_Map.prototype.updateMoveInput = function() {
     var turnUnit = $gameMap._turnUnit;
+    
     //タッチした瞬間の処理
     if (TouchInput.isTriggered() || Input.isPressed('ok')){
       //選択ポイントがエリア内かという処理もいれたい
