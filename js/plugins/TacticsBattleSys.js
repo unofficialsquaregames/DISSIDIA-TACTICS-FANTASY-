@@ -486,6 +486,10 @@ Imported.TacticsBattleSys = true;
             target.removeBuffState(true);
           }
         }
+        //デバフ延長
+        if(turnUnit.useSkill().meta.extend){
+          if(turnUnit.useSkill().meta.extend == "debuffTurn") target.extendDebuffStateTurns();
+        }
         //スキルによる行動順遅延
         var invalidDelay = false;
         //遅延無効チェック
@@ -777,6 +781,7 @@ Imported.TacticsBattleSys = true;
   // WTを加算する
   Game_BattlerBase.prototype.countWt = function() {
     this._wt++;
+    //this._wt+= Math.floor(Math.random() * 2) + 1;
   };
   
   // WTをリセットする
@@ -2411,7 +2416,7 @@ Imported.TacticsBattleSys = true;
       if($gameSystem.allyMembers()[parseInt(allyId)] <= 0){
         var n = 0;
         do{
-          n = Math.floor( Math.random() * (84 + 1 - 1) ) + 1;
+          n = Math.floor( Math.random() * (85 + 1 - 1) ) + 1;
         }while(!$gameSystem.allyMembers().indexOf(n));
         $gameSystem.allyMembers()[parseInt(allyId)] = n;
       }
@@ -2432,7 +2437,7 @@ Imported.TacticsBattleSys = true;
       if($gameSystem.enemyMembers()[parseInt(enemyId)] <= 0){
         var n = 0;
         do{
-          n = Math.floor( Math.random() * (84 + 1 - 1) ) + 1;
+          n = Math.floor( Math.random() * (85 + 1 - 1) ) + 1;
         }while(!$gameSystem.enemyMembers().indexOf(n));
         $gameSystem.enemyMembers()[parseInt(enemyId)] = n;
       }
