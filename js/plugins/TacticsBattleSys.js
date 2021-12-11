@@ -654,6 +654,10 @@ Imported.TacticsBattleSys = true;
             value *= -1;
           }
         }
+        var stoneskin = $dataStates[id].meta.stoneskin;
+        if(stoneskin){
+          value = Math.max(value - target.hp * 10 / 100, 0);
+        }
       }
     }
     
@@ -2433,7 +2437,7 @@ Imported.TacticsBattleSys = true;
       if($gameSystem.allyMembers()[parseInt(allyId)] <= 0){
         var n = 0;
         do{
-          n = Math.floor( Math.random() * (86 + 1 - 1) ) + 1;
+          n = Math.floor( Math.random() * (87 + 1 - 1) ) + 1;
         }while(!$gameSystem.allyMembers().indexOf(n));
         $gameSystem.allyMembers()[parseInt(allyId)] = n;
       }
@@ -2454,7 +2458,7 @@ Imported.TacticsBattleSys = true;
       if($gameSystem.enemyMembers()[parseInt(enemyId)] <= 0){
         var n = 0;
         do{
-          n = Math.floor( Math.random() * (86 + 1 - 1) ) + 1;
+          n = Math.floor( Math.random() * (87 + 1 - 1) ) + 1;
         }while(!$gameSystem.enemyMembers().indexOf(n));
         $gameSystem.enemyMembers()[parseInt(enemyId)] = n;
       }
@@ -2658,7 +2662,10 @@ Imported.TacticsBattleSys = true;
       //MP回復処理
       var gainMp = this.useSkill().meta.gainMp;
       if(gainMp) actor.gainMp(Math.round(actor.mmp * gainMp / 100));
-      
+      //TP回復処理
+      var gainTp = this.useSkill().meta.gainTp;
+      if(gainTp) actor.gainTp(Math.round(actor.maxTp() * gainTp / 100));
+        
       this.reserveDamagePopup(0);//回復時被ダメージ時のポップアップ表示
       
       //HP変更
