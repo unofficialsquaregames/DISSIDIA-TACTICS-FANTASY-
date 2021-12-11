@@ -461,10 +461,6 @@ Imported.TacticsBattleSys = true;
             target.wtTurnAdvance();
           }
         }
-        //バフ延長
-        if(turnUnit.useSkill().meta.extend){
-          if(turnUnit.useSkill().meta.extend == "buffTurn") target.extendBuffStateTurns();
-        }
       }
       //敵対ユニットが対象
       if(turnUnit.isAttackTarget(targetUnit)){
@@ -486,10 +482,7 @@ Imported.TacticsBattleSys = true;
             target.removeBuffState(true);
           }
         }
-        //デバフ延長
-        if(turnUnit.useSkill().meta.extend){
-          if(turnUnit.useSkill().meta.extend == "debuffTurn") target.extendDebuffStateTurns();
-        }
+        
         //スキルによる行動順遅延
         var invalidDelay = false;
         //遅延無効チェック
@@ -571,6 +564,14 @@ Imported.TacticsBattleSys = true;
       this.item().effects.forEach(function(effect) {
         this.applyItemEffect(target, effect); //指定対象にエフェクトを適用。
         }, this);
+      //バフ延長
+      if(turnUnit.useSkill().meta.extend){
+        if(turnUnit.useSkill().meta.extend == "buffTurn") target.extendBuffStateTurns();
+      }
+      //デバフ延長
+      if(turnUnit.useSkill().meta.extend){
+        if(turnUnit.useSkill().meta.extend == "debuffTurn") target.extendDebuffStateTurns();
+      }
       //敵対ユニットが対象
       if(turnUnit.isAttackTarget(targetUnit)){
         //ヒットによって行動負荷がなくなるデバフ
