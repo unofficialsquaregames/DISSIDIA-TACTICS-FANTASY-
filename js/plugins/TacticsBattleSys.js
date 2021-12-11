@@ -2364,6 +2364,22 @@ Imported.TacticsBattleSys = true;
             //付与者がいない場合スリップデバフは剥がれる
             if(!coverIsArea) actor.removeState(id);
           }
+          //アクティベートバフの扱い
+          var changeGrantor = $dataStates[id].meta.changeGrantor;
+          if(changeGrantor){
+            //マップ上にいるユニットのステートをチェックする
+            for(var j = 0; j < this.unitList().length; j++){
+              var changeUnit = this.unitList()[j];
+              var changeActor = changeUnit.isActor();
+              var changeIsArea = false;
+              if ((changeActor._classId == parseInt(changeGrantor)) && !changeUnit.isHostileUnit(target)){
+                changeIsArea = true;
+                break;
+              }
+            }
+            //付与者がいない場合スリップデバフは剥がれる
+            if(!changeIsArea) actor.removeState(id);
+          }
         }
       }
     }
@@ -2416,7 +2432,7 @@ Imported.TacticsBattleSys = true;
       if($gameSystem.allyMembers()[parseInt(allyId)] <= 0){
         var n = 0;
         do{
-          n = Math.floor( Math.random() * (85 + 1 - 1) ) + 1;
+          n = Math.floor( Math.random() * (86 + 1 - 1) ) + 1;
         }while(!$gameSystem.allyMembers().indexOf(n));
         $gameSystem.allyMembers()[parseInt(allyId)] = n;
       }
@@ -2437,7 +2453,7 @@ Imported.TacticsBattleSys = true;
       if($gameSystem.enemyMembers()[parseInt(enemyId)] <= 0){
         var n = 0;
         do{
-          n = Math.floor( Math.random() * (85 + 1 - 1) ) + 1;
+          n = Math.floor( Math.random() * (86 + 1 - 1) ) + 1;
         }while(!$gameSystem.enemyMembers().indexOf(n));
         $gameSystem.enemyMembers()[parseInt(enemyId)] = n;
       }
@@ -3190,6 +3206,21 @@ Imported.TacticsBattleSys = true;
                 return coverGrantor;
                 break;
               }
+            }
+          }
+          //アフマウのアクティベート
+          if($dataStates[id].meta.changeGrantor){
+            if((this.isActor()._classId == parseInt($dataStates[id].meta.changeGrantor)) && coverUnitActor.canMove() && coverUnitActor.meetsSkillConditions($dataSkills[2]) && coverGrantor.checkProceedInvisibleArea(this.x, this.y) && (coverGrantor.isCoverTarget(this)) && (!coverGrantor._alreadyCover) && (!targets.includes(coverGrantor))){
+              //座標入れ替え
+              var x = this.x;
+              var y = this.y;
+              this.setPosition (coverGrantor.x, coverGrantor.y);
+              coverGrantor.setPosition (x, y);
+              coverGrantor.turnTowardCharacter(attacker);// 向き
+              coverGrantor._alreadyCover = true; // かばうフラグon
+              this.isActor().wtTurnAdvance();
+              return coverGrantor;
+              break;
             }
           }
         }else if(this.isActor().isStateAffected(id)){
