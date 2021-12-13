@@ -652,6 +652,8 @@ Imported.TacticsBattleSys = true;
             value *= -1;
           }else if(absorption == "all"){
             value *= -1;
+          }else if(absorption == "heal" && value < 0){
+            value *= -1;
           }
         }
         var stoneskin = $dataStates[id].meta.stoneskin;
