@@ -2504,9 +2504,10 @@ Imported.TacticsBattleSys = true;
   
   // 攻撃時のアニメ設定
   Game_Event.prototype.setBattlerAttack = function() {
+    /*
     this.resetPattern();
     this.setImage(this._actor.characterName(), 2);
-    //this.setImage(this._actor.characterName(), 1);
+    */
     $gameTemp._attacktime = true;
   };
   // 攻撃時のアニメ設定
