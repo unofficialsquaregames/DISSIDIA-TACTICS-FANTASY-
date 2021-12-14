@@ -546,11 +546,11 @@ Imported.TacticsBattleSys = true;
         if($gameTemp.lastMultiHit() && !$gameMap.isReservationActionTurn()) turnUnit.checkReflector(targetUnit, turnUnit.useSkill(), this);
         //バフ奪取(クリティカル発生時のみ)
         if(turnUnit.useSkill().meta.steal){
-          if(turnUnit.useSkill().meta.steal == "buff" || turnUnit.useSkill().meta.steal == "burst"){
+          if((turnUnit.useSkill().meta.steal == "buff" && result.critical) || turnUnit.useSkill().meta.steal == "burst"){
             var states = target._states; //ステータスIDの配列
             for(var id = 0; id < states.length; id++) {
               if($dataStates[states[id]].meta.type == "buff"){
-                if($dataStates[states[id]].meta.buffFixed && turnUnit.useSkill().meta.steal == "burst" && !result.critical) continue; //フレーム付きの場合、クリティカルヒット時にダッシュ可能
+                if($dataStates[states[id]].meta.buffFixed && !result.critical) continue; //フレーム付きの場合、クリティカルヒット時にダッシュ可能
                 this.subject().addState(states[id]);
                 target.removeState(states[id]);
                 break;
