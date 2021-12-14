@@ -2299,13 +2299,13 @@ Imported.TacticsBattleSys = true;
           var dying = $dataStates[id].meta.dying;
           var compensation = $dataStates[id].meta.compensation;
           if(dying && compensation){
-            if(dying == "gainHp" && actor.isDying()){
+            if(actor.isDying()){
               if (compensation == "buffTurn"){
                 //バフターン短縮
                 actor.reduceStateTurns(id);
                 //ダメージ受けた後瀕死状態であった場合
-                //actor.gainHp(Math.round((actor.mhp * isDyingHp / 100) - actor.hp));
-                actor.gainHp(Math.round(actor.mhp * isDyingHp / 100));
+                actor.gainHp(Math.round((actor.mhp * parseInt(dying) / 100) - actor.hp));
+                //actor.gainHp(Math.round(actor.mhp * isDyingHp / 100));
                 target.reserveDamagePopup(0);
               }else if(compensation == "mpCost" && actor.mp >= 1){
                 //actor.gainMp(Math.round(-actor.mmp * 20 / 100));
@@ -2472,7 +2472,7 @@ Imported.TacticsBattleSys = true;
       //向きの設定
       var d = this.event().meta.Direction;
       if(d) this.setDirection(d);
-      //this._actor.gainTp(100);//テスト用
+      if(Utils.isOptionValid('test')) this._actor.gainTp(100);//テスト用
     }
     else {
     }
