@@ -1221,34 +1221,39 @@ Imported.TacticsBattleSys = true;
             break;
           }
         }
-        //盗賊の証
-        var stealUnit = $dataStates[id].meta.stealUnit;
-        if(stealUnit){
-          //マップ上にいるユニットのステートをチェックする
-          for(var j = 0; j < $gameMap.unitList().length; j++){
-            var robbedUnit = $gameMap.unitList()[j];
-            var robbedActor = robbedUnit.isActor();
-            if (robbedActor.isStateAffected(parseInt(stealUnit))){
-              var atk = $dataStates[id].meta.stealAtk;
-              var def = $dataStates[id].meta.stealDef;
-              var mat = $dataStates[id].meta.stealMat;
-              var mdf = $dataStates[id].meta.stealMdf;
-              var agi = $dataStates[id].meta.stealAgi
-              if(paramId == 2 && atk){
-                var rate = parseInt(atk);
-                value += Math.round(value * rate / 100);
-              }else if(paramId == 3 && def){
-                var rate = parseInt(def);
-                value += Math.round(value * rate / 100);
-              }else if(paramId == 4 && mat){
-                var rate = parseInt(mat);
-                value += Math.round(value * rate / 100);
-              }else if(paramId == 5 && mdf){
-                var rate = parseInt(mdf);
-                value += Math.round(value * rate / 100);
-              }else if(paramId == 6 && agi){
-                var rate = parseInt(agi);
-                value += Math.round(value * rate / 100);
+      }
+    }
+    if($gameMap.unitList()){
+      //マップ上にいるユニットのステートをチェックする
+      for(var i = 0; i < $gameMap.unitList().length; i++){
+        var robbedUnit = $gameMap.unitList()[i];
+        var robbedActor = robbedUnit.isActor();
+        for(var id = 1; id < $dataStates.length; id++){
+          if (robbedActor.isStateAffected(id)) {
+            var stealGrantor = $dataStates[id].meta.stealGrantor;
+            if(stealGrantor){
+              if (this._classId == parseInt(stealGrantor)){
+                var atk = $dataStates[id].meta.stealAtk;
+                var def = $dataStates[id].meta.stealDef;
+                var mat = $dataStates[id].meta.stealMat;
+                var mdf = $dataStates[id].meta.stealMdf;
+                var agi = $dataStates[id].meta.stealAgi;
+                if(paramId == 2 && atk){
+                  var rate = parseInt(atk);
+                  value += Math.round((value + this.paramBase(paramId)) * rate / 100);
+                }else if(paramId == 3 && def){
+                  var rate = parseInt(def);
+                  value += Math.round((value + this.paramBase(paramId)) * rate / 100);
+                }else if(paramId == 4 && mat){
+                  var rate = parseInt(mat);
+                  value += Math.round((value + this.paramBase(paramId)) * rate / 100);
+                }else if(paramId == 5 && mdf){
+                  var rate = parseInt(mdf);
+                  value += Math.round((value + this.paramBase(paramId)) * rate / 100);
+                }else if(paramId == 6 && agi){
+                  var rate = parseInt(agi);
+                  value += Math.round((value + this.paramBase(paramId)) * rate / 100);
+                }
               }
             }
           }
@@ -2386,6 +2391,24 @@ Imported.TacticsBattleSys = true;
             //付与者がいない場合スリップデバフは剥がれる
             if(!changeIsArea) actor.removeState(id);
           }
+          /*
+          //盗まれたバフの扱い
+          var stealGrantor = $dataStates[id].meta.stealGrantor;
+          if(stealGrantor){
+            //マップ上にいるユニットのステートをチェックする
+            for(var j = 0; j < this.unitList().length; j++){
+              var stealUnit = this.unitList()[j];
+              var stealActor = stealUnit.isActor();
+              var stealIsArea = false;
+              if ((stealActor._classId == parseInt(stealGrantor)) && !stealUnit.isHostileUnit(target)){
+                stealIsArea = true;
+                break;
+              }
+            }
+            //付与者がいない場合スリップデバフは剥がれる
+            if(!stealIsArea) actor.removeState(id);
+          }
+          */
         }
       }
     }
