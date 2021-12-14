@@ -2462,7 +2462,7 @@ Imported.TacticsBattleSys = true;
         var n = 0;
         do{
           n = Math.floor( Math.random() * (88 + 1 - 1) ) + 1;
-        }while(!$gameSystem.allyMembers().indexOf(n));
+        }while(!$gameSystem.allyMembers().indexOf(parseInt(n)));
         $gameSystem.allyMembers()[parseInt(allyId)] = n;
       }
       this._allyId = $gameSystem.allyMembers()[parseInt(allyId)];
@@ -2483,7 +2483,7 @@ Imported.TacticsBattleSys = true;
         var n = 0;
         do{
           n = Math.floor( Math.random() * (88 + 1 - 1) ) + 1;
-        }while(!$gameSystem.enemyMembers().indexOf(n));
+        }while(!$gameSystem.enemyMembers().indexOf(parseInt(n)));
         $gameSystem.enemyMembers()[parseInt(enemyId)] = n;
       }
       this._enemyId = $gameSystem.enemyMembers()[parseInt(enemyId)];
