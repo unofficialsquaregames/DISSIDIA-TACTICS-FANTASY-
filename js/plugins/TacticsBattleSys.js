@@ -792,7 +792,10 @@ Imported.TacticsBattleSys = true;
   
   // WTをリセットする
   Game_BattlerBase.prototype.resetWt = function(rate) {
-    this._wt = Math.round(this.wtTurn() * rate / 100);//0;
+    var max = rate + 10;
+    var min = rate - 10;
+    var distributed = Math.floor(Math.random() * (max - min) + min);
+    this._wt = Math.round(this.wtTurn() * distributed / 100);//0;
   };
   
   // 自身のターンが回るWT数を返す
