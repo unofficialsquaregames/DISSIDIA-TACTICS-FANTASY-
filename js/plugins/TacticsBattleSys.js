@@ -717,7 +717,7 @@ Imported.TacticsBattleSys = true;
   var _Game_BattlerBase_initialize = Game_BattlerBase.prototype.initialize;
   Game_BattlerBase.prototype.initialize = function() {
     _Game_BattlerBase_initialize.call(this);
-    this._wt = 0; //自身のウェイトターン到達でターンが回り、行動終了後リセットされるような
+    this._wt = Math.floor(Math.random() * 50); //自身のウェイトターン到達でターンが回り、行動終了後リセットされるような
     this._character = null; //バトラーと紐づいてるイベントをセットする
   }
   //紐づいてるイベントを返す
@@ -2461,8 +2461,8 @@ Imported.TacticsBattleSys = true;
       if($gameSystem.allyMembers()[parseInt(allyId)] <= 0){
         var n = 0;
         do{
-          n = Math.floor( Math.random() * (88 + 1 - 1) ) + 1;
-        }while(!$gameSystem.allyMembers().indexOf(parseInt(n)));
+          n = parseInt(Math.floor( Math.random() * (88 + 1 - 1) ) + 1);
+        }while(!$gameSystem.allyMembers().indexOf(n));
         $gameSystem.allyMembers()[parseInt(allyId)] = n;
       }
       this._allyId = $gameSystem.allyMembers()[parseInt(allyId)];
@@ -2482,8 +2482,8 @@ Imported.TacticsBattleSys = true;
       if($gameSystem.enemyMembers()[parseInt(enemyId)] <= 0){
         var n = 0;
         do{
-          n = Math.floor( Math.random() * (88 + 1 - 1) ) + 1;
-        }while(!$gameSystem.enemyMembers().indexOf(parseInt(n)));
+          n = parseInt(Math.floor( Math.random() * (88 + 1 - 1) ) + 1);
+        }while(!$gameSystem.enemyMembers().indexOf(n));
         $gameSystem.enemyMembers()[parseInt(enemyId)] = n;
       }
       this._enemyId = $gameSystem.enemyMembers()[parseInt(enemyId)];
