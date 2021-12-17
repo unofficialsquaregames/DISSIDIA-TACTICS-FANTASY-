@@ -657,7 +657,7 @@ Imported.TacticsBattleSys = true;
         }
         var stoneskin = $dataStates[id].meta.stoneskin;
         if(stoneskin){
-          value = Math.max(value - target.hp * parseInt(stoneskin) / 100, 0);
+          value = parseInt(Math.max(value - target.hp * parseInt(stoneskin) / 100, 0));
         }
       }
     }
