@@ -656,7 +656,7 @@ Imported.TacticsBattleSys = true;
           }
         }
         var stoneskin = $dataStates[id].meta.stoneskin;
-        if(stoneskin){
+        if(stoneskin && value > 0){
           value = parseInt(Math.max(value - target.hp * parseInt(stoneskin) / 100, 0));
         }
       }
@@ -2464,7 +2464,7 @@ Imported.TacticsBattleSys = true;
       if($gameSystem.allyMembers()[parseInt(allyId)] <= 0){
         var n = 0;
         do{
-          n = parseInt(Math.floor( Math.random() * (88 + 1 - 1) ) + 1);
+          n = parseInt(Math.floor( Math.random() * (89 + 1 - 1) ) + 1);
         }while(!$gameSystem.allyMembers().indexOf(n));
         $gameSystem.allyMembers()[parseInt(allyId)] = n;
       }
@@ -2485,7 +2485,7 @@ Imported.TacticsBattleSys = true;
       if($gameSystem.enemyMembers()[parseInt(enemyId)] <= 0){
         var n = 0;
         do{
-          n = parseInt(Math.floor( Math.random() * (88 + 1 - 1) ) + 1);
+          n = parseInt(Math.floor( Math.random() * (89 + 1 - 1) ) + 1);
         }while(!$gameSystem.enemyMembers().indexOf(n));
         $gameSystem.enemyMembers()[parseInt(enemyId)] = n;
       }
@@ -2616,6 +2616,10 @@ Imported.TacticsBattleSys = true;
   Game_Event.prototype.executeAction = function() {
     var subject = this.isActor();
     var action = subject.currentAction();
+    if(!action){
+      SoundManager.playBuzzer();//ブザー
+      return;
+    }
     var checkFlag = action.isSkill() || action.isItem();// && action.item().id === checkSkillId; //isSkillでエラー発生(Enemyだとundefind)
     //var targets = $gameMap.unitsArea(null, true); //対象とその周囲を設定
     var targets = $gameMap.unitsArea($gameMap._targetArea, true); //対象とその周囲を設定
