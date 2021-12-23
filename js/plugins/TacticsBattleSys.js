@@ -578,8 +578,11 @@ Imported.TacticsBattleSys = true;
           if (target.isStateAffected(id)) {
             if($dataStates[id].meta.shift){
               if($dataStates[id].meta.shift == "mark"){
-                //turnUnit.isActor().wtTurnAdvance();
-                $gameTemp._quickTurnUnit = turnUnit;
+                if($gameMap.isReservationActionTurn()){
+                  turnUnit.isActor().wtTurnAdvance();
+                }else{
+                  $gameTemp._quickTurnUnit = turnUnit;
+                }
               }
             }
           }
@@ -3488,12 +3491,14 @@ Imported.TacticsBattleSys = true;
     if($dataClasses[this.isActor()._classId].meta.hateSkill) hateSkill = ($dataClasses[this.isActor()._classId].meta.hateSkill).split(',');
     //ターゲット固定されてた場合
     if(this.isActor().checkHateState() && hateSkill){
-      for(var i = 0; i < hateSkill.length; i++){
-        var skill = $dataSkills[parseInt(hateSkill[i])];
-        var range = (skill.meta.range || 'diamond 1').split(' ');
-        if(this.isActor().meetsSkillConditions(skill) && (this.targetRange(this.target()) <= parseInt(range[1]))){
-          this.setUseSkill(skill);
-          return;
+      if(this.target()){
+        for(var i = 0; i < hateSkill.length; i++){
+          var skill = $dataSkills[parseInt(hateSkill[i])];
+          var range = (skill.meta.range || 'diamond 1').split(' ');
+          if(this.isActor().meetsSkillConditions(skill) && (this.targetRange(this.target()) <= parseInt(range[1]))){
+            this.setUseSkill(skill);
+            return;
+          }
         }
       }
     }
