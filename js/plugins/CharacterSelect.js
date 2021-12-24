@@ -566,8 +566,10 @@
         this.commandWindow = new Window_CharacterSelectMainCommand();
         this.commandWindow.setHandler('ally', this.commandAllyChange.bind(this));
         this.commandWindow.setHandler('enemy', this.commandEnemyChange.bind(this));
-        this.commandWindow.setHandler('save', this.commandSave.bind(this));
-        this.commandWindow.setHandler('load', this.commandLoad.bind(this));
+        if(Utils.isOptionValid('test')){
+          this.commandWindow.setHandler('save', this.commandSave.bind(this));
+          this.commandWindow.setHandler('load', this.commandLoad.bind(this));
+        }
         this.commandWindow.setHandler('cancel', this.commandFinish.bind(this));
         this.commandWindow.activate();
         this.addWindow(this.commandWindow);
