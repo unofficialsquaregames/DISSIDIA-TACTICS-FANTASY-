@@ -332,8 +332,10 @@
     Window_CharacterSelectMainCommand.prototype.makeCommandList = function (x, y) {
         if (param.allyTerm) this.addCommand(param.allyTerm, "ally");
         if (param.enemyTerm) this.addCommand(param.enemyTerm, "enemy");
-        if (param.saveTerm) this.addCommand(param.saveTerm, "save");
-        if (param.loadTerm) this.addCommand(param.loadTerm, "load");
+        if(Utils.isOptionValid('test')){
+          if (param.saveTerm) this.addCommand(param.saveTerm, "save");
+          if (param.loadTerm) this.addCommand(param.loadTerm, "load");
+        }
         if (param.finishTerm) this.addCommand(param.finishTerm, "cancel");
     }
 
