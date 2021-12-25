@@ -2467,7 +2467,7 @@ Imported.TacticsBattleSys = true;
       if($gameSystem.allyMembers()[parseInt(allyId)] <= 0){
         var n = 0;
         do{
-          n = parseInt(Math.floor( Math.random() * (93 + 1 - 1) ) + 1);
+          n = parseInt(Math.floor( Math.random() * (94 + 1 - 1) ) + 1);
         }while(!$gameSystem.allyMembers().indexOf(n));
         $gameSystem.allyMembers()[parseInt(allyId)] = n;
       }
@@ -2488,7 +2488,7 @@ Imported.TacticsBattleSys = true;
       if($gameSystem.enemyMembers()[parseInt(enemyId)] <= 0){
         var n = 0;
         do{
-          n = parseInt(Math.floor( Math.random() * (93 + 1 - 1) ) + 1);
+          n = parseInt(Math.floor( Math.random() * (94 + 1 - 1) ) + 1);
         }while(!$gameSystem.enemyMembers().indexOf(n));
         $gameSystem.enemyMembers()[parseInt(enemyId)] = n;
       }
@@ -2704,8 +2704,10 @@ Imported.TacticsBattleSys = true;
       this.reserveDamagePopup(0);//回復時被ダメージ時のポップアップ表示
       
       //HP変更
-      var Hp = this.useSkill().meta.Hp;
-      if(Hp) actor.setHp(1);
+      if(this.useSkill().meta.Hp){
+        var Hp = Math.max(actor.hp - actor.mhp * parseInt(this.useSkill().meta.Hp) / 100,1);
+        actor.setHp(Hp);
+      }
       
       //その他、ダメージなどの処理も入れる予定
       //action.actionApply(this, target);
