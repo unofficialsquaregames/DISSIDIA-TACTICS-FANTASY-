@@ -1466,20 +1466,6 @@ Imported.TacticsBattleSys = true;
     return count;
   };
   
-  // 戦闘終了後戦闘ユニットを消去する
-  Game_Map.prototype.eraseUnit = function() {
-    for(var i = 1; i < this._events.length; i++){
-      if(!this._events[i]) continue;
-      var event = this._events[i];
-      var actor = event.isActor();
-      if(actor){
-        $gameTemp.setDeadUnitId(i);
-        //event.setDeadBattler;
-      }
-    }
-  };
-  
-  
   //ユニットリスト作成
   Game_Map.prototype.setUnitList = function() {
     this._unitList = [];
@@ -2437,6 +2423,7 @@ Imported.TacticsBattleSys = true;
     
     this._moved = false; //移動したかどうか
     this._acted = false; //行動したかどうか
+    this._deadFlag = false;
     var unitId;
     var allyId = this.event().meta.Ally;
     var enemyId = this.event().meta.Enemy;
@@ -2513,6 +2500,7 @@ Imported.TacticsBattleSys = true;
     this.isActor().clearTp();
     this.setTransparent(false);
     this.setThrough(false);
+    this._deadFlag = false;
     $gameMap.setUnitList();
   };
   // ターゲットを返す
@@ -2689,8 +2677,10 @@ Imported.TacticsBattleSys = true;
       var actor = this.isActor();
       //ステート追加処理
       var state = this.useSkill().meta.state;
-      if(state) actor.addState (state);
-      
+      if(state){
+        if(parseInt(state) == 1) this._deadFlag = true;
+        actor.addState (state);
+      }      
       //HP回復処理
       var gainHp = this.useSkill().meta.gainHp;
       if(gainHp) actor.gainHp(Math.round(actor.mhp * gainHp / 100));
@@ -3048,7 +3038,10 @@ Imported.TacticsBattleSys = true;
     }
     this.resetMove();
     this.resetAction();
-    
+    if(this._deadFlag){
+      actor.addState(1);
+      this.checkDead();
+    }
     actor.updateStateTurns(); //バフ期間1act減少
   };
   
