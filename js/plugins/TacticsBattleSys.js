@@ -2946,6 +2946,9 @@ Imported.TacticsBattleSys = true;
             var targetActor = target.isActor();
             if((targetActor._classId == parseInt(slipGrantor)) && this.isHostileUnit(target)) {
               var gainHp = targetActor.mhp - targetActor.hp;//最大HP-HP(被ダメージ分のHP)
+              if(gainHp > actor.hp){
+                gainHp = actor.hp - 1;
+              }
               actor.gainHp(-gainHp);
               targetActor.gainHp(gainHp);
               target.reserveDamagePopup(0);//ポップアップ表示
