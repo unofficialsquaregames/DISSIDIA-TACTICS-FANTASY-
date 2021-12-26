@@ -2454,7 +2454,7 @@ Imported.TacticsBattleSys = true;
       if($gameSystem.allyMembers()[parseInt(allyId)] <= 0){
         var n = 0;
         do{
-          n = parseInt(Math.floor( Math.random() * (95 + 1 - 1) ) + 1);
+          n = parseInt(Math.floor( Math.random() * (96 + 1 - 1) ) + 1);
         }while(!$gameSystem.allyMembers().indexOf(n));
         $gameSystem.allyMembers()[parseInt(allyId)] = n;
       }
@@ -2475,7 +2475,7 @@ Imported.TacticsBattleSys = true;
       if($gameSystem.enemyMembers()[parseInt(enemyId)] <= 0){
         var n = 0;
         do{
-          n = parseInt(Math.floor( Math.random() * (95 + 1 - 1) ) + 1);
+          n = parseInt(Math.floor( Math.random() * (96 + 1 - 1) ) + 1);
         }while(!$gameSystem.enemyMembers().indexOf(n));
         $gameSystem.enemyMembers()[parseInt(enemyId)] = n;
       }
@@ -3265,7 +3265,7 @@ Imported.TacticsBattleSys = true;
             }
           }
         }else if(this.isActor().isStateAffected(id)){
-        //レオンハルトのチェンジ用
+          //レオンハルトのチェンジ用
           if($dataStates[id].meta.coverGrantor){
             if((coverUnitActor._classId == parseInt($dataStates[id].meta.coverGrantor)) && coverUnitActor.canMove() && coverUnitActor.meetsSkillConditions($dataSkills[2]) && coverGrantor.checkProceedInvisibleArea(this.x, this.y) && (coverGrantor.isCoverTarget(this)) && (!coverGrantor._alreadyCover) && (!targets.includes(coverGrantor))){
               //座標入れ替え(入れ替えできない、リフレッシュ必要？)
