@@ -452,6 +452,8 @@ Imported.TacticsBattleSys = true;
         if(turnUnit.useSkill().meta.clear){
           if (turnUnit.useSkill().meta.clear == "debuff"){
             target.removeDebuffState();
+          }else if(turnUnit.useSkill().meta.clear == "refresh"){
+            target.removeDebuffState(true);
           }
         }
         //行動順繰り上げ
@@ -2454,7 +2456,7 @@ Imported.TacticsBattleSys = true;
       if($gameSystem.allyMembers()[parseInt(allyId)] <= 0){
         var n = 0;
         do{
-          n = parseInt(Math.floor( Math.random() * (96 + 1 - 1) ) + 1);
+          n = parseInt(Math.floor( Math.random() * (97 + 1 - 1) ) + 1);
         }while(!$gameSystem.allyMembers().indexOf(n));
         $gameSystem.allyMembers()[parseInt(allyId)] = n;
       }
@@ -2475,7 +2477,7 @@ Imported.TacticsBattleSys = true;
       if($gameSystem.enemyMembers()[parseInt(enemyId)] <= 0){
         var n = 0;
         do{
-          n = parseInt(Math.floor( Math.random() * (96 + 1 - 1) ) + 1);
+          n = parseInt(Math.floor( Math.random() * (97 + 1 - 1) ) + 1);
         }while(!$gameSystem.enemyMembers().indexOf(n));
         $gameSystem.enemyMembers()[parseInt(enemyId)] = n;
       }
