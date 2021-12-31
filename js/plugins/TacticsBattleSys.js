@@ -2849,7 +2849,7 @@ Imported.TacticsBattleSys = true;
          if($dataStates[id].meta.activate){
            if($dataStates[id].meta.activate == "reflector"){
              if(($dataStates[id].meta.reflectType == "physical" && action.isPhysical()) || ($dataStates[id].meta.reflectType == "magical" && action.isMagical())){
-               $gameMap.addReservationActionList(this,skill,this,"reflector");
+               $gameMap.addReservationActionList(target,skill,this,"reflector");
                return;
              }
            }
@@ -4157,9 +4157,11 @@ Imported.TacticsBattleSys = true;
   
   // 攻撃対象か
   Game_CharacterBase.prototype.isAttackTarget = function(target) {
+    /*
     if($gameMap.isReservationActionType("reflector") && $gameMap.isReservationActionTurn() && !this.isHostileUnit(target)){
       return true;
     }
+    */
     if(this.isActor().restriction() == 2){
       return true;
     }else{
