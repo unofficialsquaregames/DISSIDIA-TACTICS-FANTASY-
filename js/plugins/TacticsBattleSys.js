@@ -1229,6 +1229,46 @@ Imported.TacticsBattleSys = true;
             break;
           }
         }
+        //イカサマバフ
+        var ikasama = $dataStates[id].meta.ikasama;
+        if(ikasama){
+          if(paramId == 0){
+            var max = 100;
+            var min = 0;
+            var rate = parseInt(Math.floor(Math.random() * (max - min) + min));
+            value += Math.round((value + this.paramBase(paramId)) * rate / 100);
+          }else if(paramId == 1){
+            var max = 100;
+            var min = 0;
+            var rate = parseInt(Math.floor(Math.random() * (max - min) + min));
+            value += Math.round((value + this.paramBase(paramId)) * rate / 100);
+          }else if(paramId == 2){
+            var max = 40;
+            var min = 0;
+            var rate = parseInt(Math.floor(Math.random() * (max - min) + min));
+            value += Math.round((value + this.paramBase(paramId)) * rate / 100);
+          }else if(paramId == 3){
+            var max = 40;
+            var min = 0;
+            var rate = parseInt(Math.floor(Math.random() * (max - min) + min));
+            value += Math.round((value + this.paramBase(paramId)) * rate / 100);
+          }else if(paramId == 4){
+            var max = 20;
+            var min = 0;
+            var rate = parseInt(Math.floor(Math.random() * (max - min) + min));
+            value += Math.round((value + this.paramBase(paramId)) * rate / 100);
+          }else if(paramId == 5){
+            var max = 20;
+            var min = 0;
+            var rate = parseInt(Math.floor(Math.random() * (max - min) + min));
+            value += Math.round((value + this.paramBase(paramId)) * rate / 100);
+          }else if(paramId == 6){
+            var max = 80;
+            var min = 0;
+            var rate = parseInt(Math.floor(Math.random() * (max - min) + min));
+            value += Math.round((value + this.paramBase(paramId)) * rate / 100);
+          }
+        }
       }
     }
     if($gameMap.unitList()){
@@ -2456,7 +2496,7 @@ Imported.TacticsBattleSys = true;
       if($gameSystem.allyMembers()[parseInt(allyId)] <= 0){
         var n = 0;
         do{
-          n = parseInt(Math.floor( Math.random() * (97 + 1 - 1) ) + 1);
+          n = parseInt(Math.floor( Math.random() * (98 - 1) + 1));
         }while(!$gameSystem.allyMembers().indexOf(n));
         $gameSystem.allyMembers()[parseInt(allyId)] = n;
       }
@@ -2477,7 +2517,7 @@ Imported.TacticsBattleSys = true;
       if($gameSystem.enemyMembers()[parseInt(enemyId)] <= 0){
         var n = 0;
         do{
-          n = parseInt(Math.floor( Math.random() * (97 + 1 - 1) ) + 1);
+          n = parseInt(Math.floor( Math.random() * (98 - 1) + 1));
         }while(!$gameSystem.enemyMembers().indexOf(n));
         $gameSystem.enemyMembers()[parseInt(enemyId)] = n;
       }
