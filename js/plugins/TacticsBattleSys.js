@@ -2496,7 +2496,7 @@ Imported.TacticsBattleSys = true;
       if($gameSystem.allyMembers()[parseInt(allyId)] <= 0){
         var n = 0;
         do{
-          n = parseInt(Math.floor( Math.random() * (98 - 1) + 1));
+          n = parseInt(Math.floor( Math.random() * (99 - 1) + 1));
         }while(!$gameSystem.allyMembers().indexOf(n));
         $gameSystem.allyMembers()[parseInt(allyId)] = n;
       }
@@ -2517,7 +2517,7 @@ Imported.TacticsBattleSys = true;
       if($gameSystem.enemyMembers()[parseInt(enemyId)] <= 0){
         var n = 0;
         do{
-          n = parseInt(Math.floor( Math.random() * (98 - 1) + 1));
+          n = parseInt(Math.floor( Math.random() * (99 - 1) + 1));
         }while(!$gameSystem.enemyMembers().indexOf(n));
         $gameSystem.enemyMembers()[parseInt(enemyId)] = n;
       }
@@ -2675,7 +2675,10 @@ Imported.TacticsBattleSys = true;
           var coverUnit =  targets[i].inCoverArea(this, targets);
           if(coverUnit) targets[i] = coverUnit;
           //ダメージ無効エリアチェック(CPU用?)
-          if(this.checkInvalidArea(targets[i])) continue;
+          if(this.checkInvalidArea(targets[i])){
+            SoundManager.playBuzzer();//ブザー
+            continue;
+          }
           //以降は普通
           target = targets[i].isActor();
         }
@@ -3377,6 +3380,7 @@ Imported.TacticsBattleSys = true;
     for(var i = 0; i < unitList.length; i++){
       var invalidUnit = unitList[i];
       var invalidActor = invalidUnit.isActor();
+      if(!invalidUnit.isCoverTarget(target) || invalidUnit == target) continue;
       for(var id = 1; id < $dataStates.length; id++){
         if (invalidActor.isStateAffected(id)) {
           var field = $dataStates[id].meta.field;
@@ -3391,7 +3395,7 @@ Imported.TacticsBattleSys = true;
         }
       }
     }
-    return;// this.isActor();
+    return false;// this.isActor();
   };
   
   // 戦闘不能チェック
