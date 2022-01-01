@@ -1172,15 +1172,23 @@ Imported.TacticsBattleSys = true;
     //this.chargeTpByDamage(value / this.mhp);
   };
   //ヘイトステートが付与されているか
-  Game_Battler.prototype.checkHateState = function() {
+  Game_Battler.prototype.checkHateGrantor = function() {
     for(var stateId = 1; stateId < $dataStates.length; stateId++){
       if (this.isStateAffected(stateId)) {
-        if($dataStates[stateId].meta.hate) return $dataStates[stateId].meta.hate;
+        if($dataStates[stateId].meta.hateGrantor) return $dataStates[stateId].meta.hateGrantor;
       }
     }
     return false;
   };
-  
+  //ヘイトステートが付与されているか
+  Game_Battler.prototype.checkHateState = function() {
+    for(var stateId = 1; stateId < $dataStates.length; stateId++){
+      if (this.isStateAffected(stateId)) {
+        if($dataStates[stateId].meta.hateState) return $dataStates[stateId].meta.hateState;
+      }
+    }
+    return false;
+  };
   //-----------------------------------------------------------------------------
   // Game_Actor
   //
@@ -2425,24 +2433,31 @@ Imported.TacticsBattleSys = true;
             //付与者がいない場合スリップデバフは剥がれる
             if(!changeIsArea) actor.removeState(id);
           }
-          /*
-          //盗まれたバフの扱い
-          var stealGrantor = $dataStates[id].meta.stealGrantor;
-          if(stealGrantor){
+          //ヘイト系バフの扱い
+          if($dataStates[id].meta.hateClass || $dataStates[id].meta.hateState){
             //マップ上にいるユニットのステートをチェックする
             for(var j = 0; j < this.unitList().length; j++){
-              var stealUnit = this.unitList()[j];
-              var stealActor = stealUnit.isActor();
-              var stealIsArea = false;
-              if ((stealActor._classId == parseInt(stealGrantor)) && !stealUnit.isHostileUnit(target)){
-                stealIsArea = true;
-                break;
+              var hateUnit = this.unitList()[j];
+              var hateActor = hateUnit.isActor();
+              var hateIsArea = false;
+              if(!hateUnit.isHostileUnit(target)) continue;
+              if($dataStates[id].meta.hateClass){
+                var hateGrantor = $dataStates[id].meta.hateGrantor;
+                if (hateActor._classId == parseInt(hateGrantor)){
+                  hateIsArea = true;
+                  break;
+                }
+              }else if($dataStates[id].meta.hateState){
+                var hateState = $dataStates[id].meta.hateState;
+                if (hateActor.isStateAffected(parseInt(hateState))){
+                  hateIsArea = true;
+                  break;
+                }
               }
             }
             //付与者がいない場合スリップデバフは剥がれる
-            if(!stealIsArea) actor.removeState(id);
+            if(!hateIsArea) actor.removeState(id);
           }
-          */
         }
       }
     }
@@ -2496,7 +2511,7 @@ Imported.TacticsBattleSys = true;
       if($gameSystem.allyMembers()[parseInt(allyId)] <= 0){
         var n = 0;
         do{
-          n = parseInt(Math.floor( Math.random() * (99 - 1) + 1));
+          n = parseInt(Math.floor( Math.random() * (100 - 1) + 1));
         }while(!$gameSystem.allyMembers().indexOf(n));
         $gameSystem.allyMembers()[parseInt(allyId)] = n;
       }
@@ -2517,7 +2532,7 @@ Imported.TacticsBattleSys = true;
       if($gameSystem.enemyMembers()[parseInt(enemyId)] <= 0){
         var n = 0;
         do{
-          n = parseInt(Math.floor( Math.random() * (99 - 1) + 1));
+          n = parseInt(Math.floor( Math.random() * (100 - 1) + 1));
         }while(!$gameSystem.enemyMembers().indexOf(n));
         $gameSystem.enemyMembers()[parseInt(enemyId)] = n;
       }
@@ -2915,7 +2930,7 @@ Imported.TacticsBattleSys = true;
             if((this.targetRange(allyChaseUnit) <= parseInt(field)) && (target.targetRange(allyChaseUnit) <= parseInt(field))){
               //不可視領域内侵入していた場合追撃発生する
               if($dataStates[id].meta.activate && allyChaseUnit.isAttackTarget(target) && this.isAttackTarget(target)){
-                if($dataStates[id].meta.activate == "allyChase") {
+                if($dataStates[id].meta.activate == "allyChase" || $dataStates[id].meta.activate == "freeFight") {
                   $gameMap.addReservationActionList(allyChaseUnit,$dataSkills[parseInt($dataStates[id].meta.skill)],target,"allyChase");
                   //return;
                 }
@@ -2942,7 +2957,7 @@ Imported.TacticsBattleSys = true;
             if(target.targetRange(allyCounterUnit) <= parseInt(field)){ //味方が領域内に入っていれば、敵が領域外でもカウンターが発動する
               //不可視領域内侵入していた場合反撃発生する
               if($dataStates[id].meta.activate && allyCounterUnit.isCoverTarget(target) && allyCounterUnit.isAttackTarget(this)){
-                if($dataStates[id].meta.activate == "allyCounter") {
+                if($dataStates[id].meta.activate == "allyCounter" || $dataStates[id].meta.activate == "freeFight") {
                   if($dataStates[id].meta.skill == "shift"){
                     allyCounterUnitActor.wtTurnAdvance();
                   }else{
@@ -3087,7 +3102,7 @@ Imported.TacticsBattleSys = true;
               }
               //不可視領域内侵入でアビリティが発動するタイプ
               if($dataStates[id].meta.activate && invisibleAreaGrantorUnit.isAttackTarget(this)){//this.isEnemy()){
-                if($dataStates[id].meta.activate == "invasion") {
+                if($dataStates[id].meta.activate == "invasion" || $dataStates[id].meta.activate == "freeFight") {
                   $gameMap.addReservationActionList(invisibleAreaGrantorUnit,$dataSkills[parseInt($dataStates[id].meta.skill)],this,$dataStates[id].meta.activate);
                 }
               }
@@ -3546,7 +3561,7 @@ Imported.TacticsBattleSys = true;
     var hateSkill;
     if($dataClasses[this.isActor()._classId].meta.hateSkill) hateSkill = ($dataClasses[this.isActor()._classId].meta.hateSkill).split(',');
     //ターゲット固定されてた場合
-    if(this.isActor().checkHateState() && hateSkill){
+    if((this.isActor().checkHateGrantor() || this.isActor().checkHateState()) && hateSkill){
       if(this.target()){
         for(var i = 0; i < hateSkill.length; i++){
           var skill = $dataSkills[parseInt(hateSkill[i])];
@@ -3877,14 +3892,23 @@ Imported.TacticsBattleSys = true;
     this.setTarget(null);
     //var searchRange = $dataClasses[this.isActor()._classId].meta.searchRange;
     //ターゲット固定されてた場合
-    var hate = this.isActor().checkHateState();
-    if(hate){
+    var hateGrantor = this.isActor().checkHateGrantor();
+    var hateState = this.isActor().checkHateState();
+    if(hateGrantor || hateState){
       for (var j = 0; j < $gameMap.unitList().length; j++){
         var unit = $gameMap.unitList()[j];
-        if(hate == parseInt(unit.isActor()._classId)){
-          this.setTarget(unit);
-          targetpos = this.setMovePoint(1);
-          return targetpos;
+        if(hateGrantor){
+          if(hateGrantor == parseInt(unit.isActor()._classId)){
+            this.setTarget(unit);
+            targetpos = this.setMovePoint(1);
+            return targetpos;
+          }
+        }else if(hateState){
+          if(unit.isActor().isStateAffected(parseInt(hateState))){
+            this.setTarget(unit);
+            targetpos = this.setMovePoint(1);
+            return targetpos;
+          }
         }
       }
     }
@@ -6144,6 +6168,11 @@ Imported.TacticsBattleSys = true;
       case 10:
         this.changeTextColor(this.systemColor());
         this.drawText("反撃(連携)", x + iconBoxWidth + this.spacing()*2, y2, this.spacing()*2, "left");
+        this.resetTextColor();
+        break;
+      case 11:
+        this.changeTextColor(this.systemColor());
+        this.drawText("フリーファイト", x + iconBoxWidth + this.spacing()*2, y2, this.spacing()*2, "left");
         this.resetTextColor();
         break;
       }
