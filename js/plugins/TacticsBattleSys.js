@@ -3061,14 +3061,26 @@ Imported.TacticsBattleSys = true;
               //領域内の味方を回復するタイプ
               var state = $dataStates[id];
               var gainHp = state.meta.gainHp;
-              if(gainHp && invisibleAreaGrantorUnit.isCoverTarget(this)) {
-                actor.gainHp(Math.round(actor.mhp * gainHp / 100));
-                this.reserveDamagePopup(0);//リジェネ効果のポップアップ表示
+              if(gainHp){
+                if(parseInt(gainHp) > 0 && invisibleAreaGrantorUnit.isCoverTarget(this)) {
+                  actor.gainHp(Math.round(actor.mhp * parseInt(gainHp) / 100));
+                  this.reserveDamagePopup(0);//リジェネ効果のポップアップ表示
+                }
+                if(parseInt(gainHp) < 0 && invisibleAreaGrantorUnit.isAttackTarget(this)) {
+                  actor.gainHp(Math.round(actor.mhp * parseInt(gainHp) / 100));
+                  this.reserveDamagePopup(0);//リジェネ効果のポップアップ表示
+                }
               }
               var gainMp = state.meta.gainMp;
-              if(gainMp && invisibleAreaGrantorUnit.isCoverTarget(this)) {
-                actor.gainMp(Math.round(actor.mmp * gainMp / 100));
-                this.reserveDamagePopup(0);//リジェネ効果のポップアップ表示
+              if(gainMp){
+                if(parseInt(gainMp) > 0 && invisibleAreaGrantorUnit.isCoverTarget(this)) {
+                  actor.gainMp(Math.round(actor.mmp * parseInt(gainMp) / 100));
+                  this.reserveDamagePopup(0);//リジェネ効果のポップアップ表示
+                }
+                if(parseInt(gainMp) < 0 && invisibleAreaGrantorUnit.isAttackTarget(this)) {
+                  actor.gainMp(Math.round(actor.mmp * parseInt(gainMp) / 100));
+                  this.reserveDamagePopup(0);//リジェネ効果のポップアップ表示
+                }
               }
               //不可視領域内侵入でアビリティが発動するタイプ
               if($dataStates[id].meta.activate && invisibleAreaGrantorUnit.isAttackTarget(this)){//this.isEnemy()){
