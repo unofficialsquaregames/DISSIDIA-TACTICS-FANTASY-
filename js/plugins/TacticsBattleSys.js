@@ -839,10 +839,13 @@ Imported.TacticsBattleSys = true;
   //バフ期間更新
   var _Game_BattlerBase_updateStateTurns = Game_BattlerBase.prototype.updateStateTurns;
   Game_BattlerBase.prototype.updateStateTurns = function() {
-    for(i = this._states.length - 1; i >= 0; i--){
+    for(i = 0; i < this._states.length; i++){
       var stateId = this._states[i];
       var selfBuff = $gameTemp._selfState.contains(parseInt(stateId));
       if ((this._stateTurns[stateId] > 0) && !selfBuff) this._stateTurns[stateId]--;
+    }
+    for(i = 0; i < this._states.length; i++){
+      var stateId = this._states[i];
       if (this._stateTurns[stateId] <= 0) this.removeState(stateId); //バフ期間が0になったらバフ除去(ステート配列除外によって処理にバグが発生)
     }
   };
@@ -3795,8 +3798,13 @@ Imported.TacticsBattleSys = true;
             $gameMap.showRangeArea(this, null);
             targetpos = this.setMovePoint(parseInt(effect[1]));
             this.setTarget(this);
-            $gameTemp._moveTargetPointX = targetpos.x;
-            $gameTemp._moveTargetPointY = targetpos.y;
+            if(targetpos){
+              $gameTemp._moveTargetPointX = targetpos.x;
+              $gameTemp._moveTargetPointY = targetpos.y;
+            }else{
+              $gameTemp._moveTargetPointX = this.x;
+              $gameTemp._moveTargetPointY = this.y;
+            }
           }else if(command[2] == "resurrection" && target){
             var effect = (skill.meta.effect || 'diamond 1').split(' ');
             if(parseInt(effect[1]) == "self") continue;
