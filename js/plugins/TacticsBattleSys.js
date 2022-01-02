@@ -1089,13 +1089,14 @@ Imported.TacticsBattleSys = true;
         }
         //ステートが最大数を超えてしまった場合既存の最初のバフを消去
         if (this._states.length >= stateMax){ 
-          for(var i = 0; id < this._states; i++){
-            var removeId = this._states[i];
+          for(var i = 0; i < this._states.length; i++){
+            var removeId = parseInt(this._states[i]);
             //バフ解除無効バフが存在するか
             if($dataStates[removeId].meta.buffFixed) continue;//バフ消去不能なら以降の処理は行わず、次のステートへ
             //デバフ解除無効バフが存在するか
             if($dataStates[removeId].meta.debuffFixed) continue;//デバフ消去不能なら以降の処理は行わず、次のステートへ
             this.removeState(removeId);
+            break;
           }
         }
         //ステート削除に失敗した場合は通らない
