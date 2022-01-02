@@ -6909,7 +6909,7 @@ Imported.TacticsBattleSys = true;
     }
     //味方のターン
     if ($gameMap.isAllyTurn()) {
-      if($gameMap._turnUnit.isActor().checkHateState()){
+      if($gameMap._turnUnit.isActor().checkHateState() || $gameMap._turnUnit.isActor().checkHateGrantor()){
         this.updateEnemyTurn();
       }else{
         this.updateAllyTurn();
