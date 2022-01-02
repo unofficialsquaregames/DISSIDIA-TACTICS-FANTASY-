@@ -3080,6 +3080,9 @@ Imported.TacticsBattleSys = true;
               var state = $dataStates[id];
               var gainHp = state.meta.gainHp;
               if(gainHp){
+                if(parseInt(-gainHp) > actor.hp){
+                  gainHp = actor.hp - 1;
+                }
                 if(parseInt(gainHp) > 0 && invisibleAreaGrantorUnit.isCoverTarget(this)) {
                   actor.gainHp(Math.round(actor.mhp * parseInt(gainHp) / 100));
                   this.reserveDamagePopup(0);//リジェネ効果のポップアップ表示
