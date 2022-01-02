@@ -1,8 +1,8 @@
 [
 null,
-{"id":1,"expanded":false,"name":"VSモード","order":1,"parentId":0,"scrollX":1786.909090909091,"scrollY":1005.8181818181819},
-{"id":2,"expanded":false,"name":"公園","order":2,"parentId":0,"scrollX":1786.909090909091,"scrollY":1005.8181818181819},
-{"id":3,"expanded":false,"name":"オアシス","order":3,"parentId":0,"scrollX":1786.909090909091,"scrollY":1005.8181818181819},
-{"id":4,"expanded":false,"name":"雪の砦","order":4,"parentId":0,"scrollX":1769.4545454545455,"scrollY":1005.8181818181819},
-{"id":5,"expanded":true,"name":"森","order":5,"parentId":0,"scrollX":1782.5454545454545,"scrollY":994.909090909091}
+{"id":1,"expanded":false,"name":"VSモード","order":1,"parentId":0,"scrollX":744,"scrollY":579.3333333333334},
+{"id":2,"expanded":false,"name":"草原","order":2,"parentId":0,"scrollX":1186.6666666666667,"scrollY":862},
+{"id":3,"expanded":false,"name":"浜辺の道","order":3,"parentId":0,"scrollX":1782,"scrollY":862},
+{"id":4,"expanded":false,"name":"土の洞窟","order":4,"parentId":0,"scrollX":1088,"scrollY":1172},
+{"id":5,"expanded":false,"name":"鉱山","order":5,"parentId":0,"scrollX":848,"scrollY":624}
 ]

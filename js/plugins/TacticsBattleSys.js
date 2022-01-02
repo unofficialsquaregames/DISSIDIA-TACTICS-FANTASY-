@@ -4761,11 +4761,13 @@ Imported.TacticsBattleSys = true;
       if (useUnitID) this.updateUnitID();
     }else{
       if(this._hpGaugeSprite) this.removeChild(this._hpGaugeSprite);
+      if(this._tpGaugeSprite) this.removeChild(this._tpGaugeSprite);
       if(this._stateIconSprite) {
         for (var i =0; i<stateMax; i++){
           if (this._stateIconSprite[i]) {
             this.removeChild(this._stateIconSprite[i]);
             this.removeChild(this._stateTurnSprite[i]);
+            this.removeChild(this._stateFrameSprite[i]);
           }
         }
       }
@@ -4878,8 +4880,13 @@ Imported.TacticsBattleSys = true;
     if (character) {
       if (!this._hpGaugeSprite) {
         this._hpGaugeSprite = new Sprite_HpGauge(this._character);
-        this._hpGaugeSprite.y = -2;
+        this._hpGaugeSprite.y = -6;
         this.addChild(this._hpGaugeSprite);
+      }
+      if (!this._tpGaugeSprite) {
+        this._tpGaugeSprite = new Sprite_TpGauge(this._character);
+        this._tpGaugeSprite.y = -2;
+        this.addChild(this._tpGaugeSprite);
       }
     }
   };
@@ -4932,7 +4939,7 @@ Imported.TacticsBattleSys = true;
     if (character) {
       if (!this._unitIDSprite) {
         this._unitIDSprite = new Sprite_UnitID(this._character);
-        this._unitIDSprite.y = 0;
+        this._unitIDSprite.y = -4;
         this._unitIDSprite.z = 9;
         this._unitIDSprite.scale.x = 0.5;
         this._unitIDSprite.scale.y = 0.5;
@@ -4948,6 +4955,7 @@ Imported.TacticsBattleSys = true;
     _Sprite_Character_createHalfBodySprites.call(this);
     if (flag) {
       if (this._hpGaugeSprite) this.addChild(this.removeChild(this._hpGaugeSprite));
+      if (this._tpGaugeSprite) this.addChild(this.removeChild(this._tpGaugeSprite));
       if (this._stateIconSprite) this.addChild(this.removeChild(this._stateIconSprite));
       if (this._unitIDSprite) this.addChild(this.removeChild(this._unitIDSprite));
     }
@@ -5096,6 +5104,42 @@ Imported.TacticsBattleSys = true;
     this.bitmap.fillRect(0, 0, 32, 4, '#000000');
     var w = Math.floor(this._hp / this._mhp * 30);
     this.bitmap.fillRect(1, 1, w, 2, this._hp === this._mhp ? '#fff060' : '#ffa030');
+  };
+  //-----------------------------------------------------------------------------
+  // Sprite_TpGauge
+  //
+
+  function Sprite_TpGauge() {
+    this.initialize.apply(this, arguments);
+  }
+
+  Sprite_TpGauge.prototype = Object.create(Sprite.prototype);
+  Sprite_TpGauge.prototype.constructor = Sprite_TpGauge;
+
+  Sprite_TpGauge.prototype.initialize = function(character) {
+    this._battler = character.isActor();
+    Sprite.prototype.initialize.call(this);
+    this.bitmap = new Bitmap(32, 4);
+    this.z = 9;
+    this.anchor.x = 0.5;
+    this.anchor.y = 0;
+  };
+
+  Sprite_TpGauge.prototype.update = function() {
+    Sprite.prototype.update.call(this);
+    if (this._tp !== this._battler.tp || this._mtp !== this._battler.maxTp()) {
+      this._tp = this._battler.tp;
+      this._mtp = this._battler.maxTp();
+      this.refresh();
+    }
+  };
+
+  Sprite_TpGauge.prototype.refresh = function() {
+    this.bitmap.clear();
+    //if (this._tp === 0) return;
+    this.bitmap.fillRect(0, 0, 32, 4, '#000000');
+    var w = Math.floor(this._tp / this._mtp * 30);
+    this.bitmap.fillRect(1, 1, w, 2, this._tp === this._mtp ? '#5AFF19' : '#008000');
   };
 
   //-----------------------------------------------------------------------------
@@ -5792,10 +5836,10 @@ Imported.TacticsBattleSys = true;
     //this.setFaceSprite(userBattler, this._userFaceSprite);
     //this.drawActorIcons(userBattler, 0, lineHeight * 3);
     this.changeTextColor(this.systemColor());
-    this.drawText(TextManager.levelA, x, lineHeight, w);
+    //this.drawText(TextManager.levelA, x, lineHeight, w);
     this.resetTextColor();
     this.drawText(userBattler.name(), x, 0, statusNameWidth);
-    this.drawText(userBattler.level, x + w, lineHeight, 36, 'right');
+    //this.drawText(userBattler.level, x + w, lineHeight, 36, 'right');
     this.drawActorCharacter (userBattler, x + w, lineHeight * 4);
     
     this.drawActorGauges(userBattler, Window_Base._faceWidth, lineHeight * 2);
@@ -5805,7 +5849,7 @@ Imported.TacticsBattleSys = true;
       //this._targetFaceSprite.visible = true;
       this._arrowSprite.visible = true;
     } else {
-      this.refreshStatus(this._user);
+      this.refreshState(this._user);
       //this._targetFaceSprite.visible = false;
       this._arrowSprite.visible = false;
     }
@@ -5821,11 +5865,11 @@ Imported.TacticsBattleSys = true;
     //this.drawActorIcons(targetBattler, x, lineHeight * 3);
     x = this.contents.width - this.textPadding();
     this.changeTextColor(this.systemColor());
-    this.drawText(TextManager.levelA, x - 36 - w, lineHeight, w);
+    //this.drawText(TextManager.levelA, x - 36 - w, lineHeight, w);
     this.resetTextColor();
     this.drawText(targetBattler.name(), x - statusNameWidth, 0,
                   statusNameWidth, 'right');
-    this.drawText(targetBattler.level, x - 36, lineHeight, 36, 'right');
+    //this.drawText(targetBattler.level, x - 36, lineHeight, 36, 'right');
     x = this.contents.width - faceWidth - statusHpWidth;
     this.drawActorCharacter (targetBattler, this.contents.width-64, lineHeight * 4);
     this.drawActorGauges(targetBattler, x, lineHeight * 2);
@@ -5872,7 +5916,7 @@ Imported.TacticsBattleSys = true;
   
   // 結果予測テキストを作成
   Window_BattleStatus.prototype.makeEffectText = function(targetBattler, effect, hit) {
-    if (!effect) return '効果なし';
+    if (!effect) return '';
     switch (effect.code) {
     case Game_Action.EFFECT_RECOVER_HP:       // HP回復
       var n = targetBattler.mhp * effect.value1 + effect.value2;
@@ -5904,7 +5948,7 @@ Imported.TacticsBattleSys = true;
       var skill = $dataSkills[effect.dataId];
       return skill.name + '習得';
     default:
-      return '効果なし';
+      return '';
     }
   };
 
@@ -5928,7 +5972,40 @@ Imported.TacticsBattleSys = true;
       }
     }
   };
-  
+  Window_BattleStatus.prototype.refreshState = function(user) {
+    //this.contents.clear();
+    var userBattler = this.isActor(user);
+    var iconBoxWidth = Window_Base._iconWidth + 4;
+    var lineHeight = this.lineHeight();
+    var i = 0;
+    for(var id = 1; id < $dataStates.length; id++){
+      if (userBattler.isStateAffected(id)) {
+        var x = 360;
+        var y = lineHeight * i;
+        var state = $dataStates[id];
+        var icon = state.iconIndex;
+        var name = state.name //名前
+        var turn = userBattler._stateTurns[id]; //ステートの期間
+        this.drawIcon(icon, x + 2, y); //アイコンの描画
+        this.drawText(name, x + iconBoxWidth, y, this.spacing()*2); //ステートの名前の描画
+        this.changeTextColor(this.systemColor());
+        this.drawText("残り:", x + iconBoxWidth + this.spacing()*2, y, this.spacing(), "right");
+        this.resetTextColor();
+        this.drawText(turn + "Act", x + iconBoxWidth + this.spacing()*3, y, this.spacing(), "left"); //ステートの期間の描画
+        //以下、解除不能のバフデバフのフレーム化
+        if (state.meta.buffFixed || state.meta.debuffFixed) {
+          this.contents.fillRect(x + 2, y, 32, 4, '#ffffff');
+          this.contents.fillRect(x + 2, y, 4, 32, '#ffffff');
+          this.contents.fillRect(x + 2, y + 28, 32, 4, '#ffffff');
+          this.contents.fillRect(x + 30, y, 4, 32, '#ffffff');
+        }
+        i++;
+      }
+    }
+  };
+  Window_BattleStatus.prototype.spacing = function() {
+    return 80;
+  };
   Window_BattleStatus.prototype.setFaceSprite = function(battler, sprite) {
     var faceName  = battler.faceName();
     var faceIndex = battler.faceIndex();
@@ -6300,6 +6377,13 @@ Imported.TacticsBattleSys = true;
           }else if(type == "debuff"){
             this.drawText("デバフ", x + iconBoxWidth + this.spacing()*5, y2, this.spacing(), "left"); //ステートがバフであった場合
           }
+        }
+        //以下、解除不能のバフデバフのフレーム化
+        if (state.meta.buffFixed || state.meta.debuffFixed) {
+          this.contents.fillRect(x + 2, y2, 32, 4, '#ffffff');
+          this.contents.fillRect(x + 2, y2, 4, 32, '#ffffff');
+          this.contents.fillRect(x + 2, y2 + 28, 32, 4, '#ffffff');
+          this.contents.fillRect(x + 30, y2, 4, 32, '#ffffff');
         }
         i++;
       }
@@ -7632,6 +7716,7 @@ Imported.TacticsBattleSys = true;
     $gamePlayer.setTransparent(true); //透明化
     $gamePlayer.setThrough(true); //すり抜け
     $gamePlayer.hideFollowers(); //隊列歩行をOFFにする
+    $gamePlayer.setPriorityType(0);
     //$gamePlayer.refresh(); //カーソル化
     $gameTemp._startBattleFlag = false;
     //this._phaseState = 0;
@@ -7669,6 +7754,7 @@ Imported.TacticsBattleSys = true;
     this.endTurn();
     this._phaseState = 0;
     $gameSwitches.setValue(3, true); //コモンイベントと連携(スイッチNoはいずれプラグインの変数設定から行えるようにする)
+    $gamePlayer.setPriorityType(1);
     $gameTemp._commandTime = false;
     $gamePlayer.refresh();
     
