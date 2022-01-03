@@ -1175,6 +1175,15 @@ Imported.TacticsBattleSys = true;
     //this.gainSilentTp(5); //被ダメ時は10%分TP獲得される(TP使い放題になりそうなので廃止)
     //this.chargeTpByDamage(value / this.mhp);
   };
+  //コントロールステートが付与されているか
+  Game_Battler.prototype.checkCtrlGrantor = function() {
+    for(var stateId = 1; stateId < $dataStates.length; stateId++){
+      if (this.isStateAffected(stateId)) {
+        if($dataStates[stateId].meta.ctrlGrantor) return $dataStates[stateId].meta.ctrlGrantor;
+      }
+    }
+    return false;
+  };
   //ヘイトステートが付与されているか
   Game_Battler.prototype.checkHateGrantor = function() {
     for(var stateId = 1; stateId < $dataStates.length; stateId++){
@@ -1869,7 +1878,7 @@ Imported.TacticsBattleSys = true;
   Game_Map.prototype.unitAllyXy = function(x, y) {
     event = this.unitXy(x,y);
     if(event){
-      if(event.isAlly()){
+      if(event.isAlly() || (event.isEnemy() && event.isActor().checkCtrlGrantor())){
         return event;
       }
     }
@@ -1879,7 +1888,7 @@ Imported.TacticsBattleSys = true;
   Game_Map.prototype.unitEnemyXy = function(x, y) {
     event = this.unitXy(x,y);
     if(event){
-      if(event.isEnemy()){
+      if(event.isEnemy() || (event.isAlly() && event.isActor().checkCtrlGrantor())){
         return event;
       }
     }
@@ -2438,14 +2447,14 @@ Imported.TacticsBattleSys = true;
             if(!changeIsArea) actor.removeState(id);
           }
           //ヘイト系バフの扱い
-          if($dataStates[id].meta.hateClass || $dataStates[id].meta.hateState){
+          if($dataStates[id].meta.hateGrantor || $dataStates[id].meta.hateState){
             //マップ上にいるユニットのステートをチェックする
             for(var j = 0; j < this.unitList().length; j++){
               var hateUnit = this.unitList()[j];
               var hateActor = hateUnit.isActor();
               var hateIsArea = false;
               if(!hateUnit.isHostileUnit(target)) continue;
-              if($dataStates[id].meta.hateClass){
+              if($dataStates[id].meta.hateGrantor){
                 var hateGrantor = $dataStates[id].meta.hateGrantor;
                 if (hateActor._classId == parseInt(hateGrantor)){
                   hateIsArea = true;
@@ -2461,6 +2470,22 @@ Imported.TacticsBattleSys = true;
             }
             //付与者がいない場合スリップデバフは剥がれる
             if(!hateIsArea) actor.removeState(id);
+          }
+          //コントロール系バフの扱い
+          var ctrlGrantor = $dataStates[id].meta.ctrlGrantor;
+          if(ctrlGrantor){
+            //マップ上にいるユニットのステートをチェックする
+            for(var j = 0; j < this.unitList().length; j++){
+              var ctrlUnit = this.unitList()[j];
+              var ctrlActor = ctrlUnit.isActor();
+              var ctrlIsArea = false;
+              if (ctrlActor._classId == parseInt(ctrlGrantor) && !target.isHostileUnit(ctrlUnit)){
+                ctrlIsArea = true;
+                break;
+              }
+            }
+            //付与者がいない場合スリップデバフは剥がれる
+            if(!ctrlIsArea) actor.removeState(id);
           }
         }
       }
@@ -2515,7 +2540,7 @@ Imported.TacticsBattleSys = true;
       if($gameSystem.allyMembers()[parseInt(allyId)] <= 0){
         var n = 0;
         do{
-          n = parseInt(Math.floor( Math.random() * (100 - 1) + 1));
+          n = parseInt(Math.floor( Math.random() * (101 - 1) + 1));
         }while(!$gameSystem.allyMembers().indexOf(n));
         $gameSystem.allyMembers()[parseInt(allyId)] = n;
       }
@@ -2536,7 +2561,7 @@ Imported.TacticsBattleSys = true;
       if($gameSystem.enemyMembers()[parseInt(enemyId)] <= 0){
         var n = 0;
         do{
-          n = parseInt(Math.floor( Math.random() * (100 - 1) + 1));
+          n = parseInt(Math.floor( Math.random() * (101 - 1) + 1));
         }while(!$gameSystem.enemyMembers().indexOf(n));
         $gameSystem.enemyMembers()[parseInt(enemyId)] = n;
       }
@@ -4234,15 +4259,31 @@ Imported.TacticsBattleSys = true;
   Game_CharacterBase.prototype.isHostileUnit = function(target) {
     if(this.isAlly()){
       if(target.isAlly()){
-        return false;
+        if(this.isActor().checkCtrlGrantor()){
+          return true;
+        }else{
+          return false;
+        }
       }else if(target.isEnemy()){
-        return true;
+        if(this.isActor().checkCtrlGrantor()){
+          return false;
+        }else{
+          return true;
+        }
       }
     }else if(this.isEnemy()){
       if(target.isEnemy()){
-        return false;
+        if(this.isActor().checkCtrlGrantor()){
+          return true;
+        }else{
+          return false;
+        }
       }else if(target.isAlly()){
-        return true;
+        if(this.isActor().checkCtrlGrantor()){
+          return false;
+        }else{
+          return true;
+        }
       }
     }
   };
@@ -6913,12 +6954,16 @@ Imported.TacticsBattleSys = true;
     }
     //敵のターン
     if ($gameMap.isEnemyTurn()) {
-      this.updateEnemyTurn();       // 敵ターンの更新
+      if($gameMap._turnUnit.isActor().checkCtrlGrantor()){
+        this.updateAllyTurn();
+      }else{
+        this.updateEnemyTurn();       // 敵ターンの更新
+      }
       return;
     }
     //味方のターン
     if ($gameMap.isAllyTurn()) {
-      if($gameMap._turnUnit.isActor().checkHateState() || $gameMap._turnUnit.isActor().checkHateGrantor()){
+      if($gameMap._turnUnit.isActor().checkHateState() || $gameMap._turnUnit.isActor().checkHateGrantor() || $gameMap._turnUnit.isActor().checkCtrlGrantor()){
         this.updateEnemyTurn();
       }else{
         this.updateAllyTurn();
