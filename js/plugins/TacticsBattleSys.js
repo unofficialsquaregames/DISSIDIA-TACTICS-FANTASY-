@@ -844,7 +844,7 @@ Imported.TacticsBattleSys = true;
       var selfBuff = $gameTemp._selfState.contains(parseInt(stateId));
       if ((this._stateTurns[stateId] > 0) && !selfBuff) this._stateTurns[stateId]--;
     }
-    for(i = 0; i < this._states.length; i++){
+    for(i = this._states.length - 1; i >= 0; i--){
       var stateId = this._states[i];
       if (this._stateTurns[stateId] <= 0) this.removeState(stateId); //バフ期間が0になったらバフ除去(ステート配列除外によって処理にバグが発生)
     }
