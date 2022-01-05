@@ -5011,7 +5011,7 @@ Imported.TacticsBattleSys = true;
     if (flag) {
       if (this._hpGaugeSprite) this.addChild(this.removeChild(this._hpGaugeSprite));
       if (this._tpGaugeSprite) this.addChild(this.removeChild(this._tpGaugeSprite));
-      if (this._stateIconSprite) this.addChild(this.removeChild(this._stateIconSprite));
+      //if (this._stateIconSprite) this.addChild(this.removeChild(this._stateIconSprite));
       if (this._unitIDSprite) this.addChild(this.removeChild(this._unitIDSprite));
     }
   };
