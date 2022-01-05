@@ -1769,7 +1769,7 @@ Imported.TacticsBattleSys = true;
     }else{
       if (skill.scope == 1 || skill.scope == 2){
         this.setColorArea(colorAreaTargetEnemy);
-      } else if (skill.scope == 7 || skill.scope == 8){
+      } else if (skill.scope == 7 || skill.scope == 8 || skill.scope == 11){
         this.setColorArea(colorAreaTargetAlly);
       }
     }
@@ -1792,6 +1792,7 @@ Imported.TacticsBattleSys = true;
     
     //このあたりに射程延長ステートを反映させる
     for(var id = 1; id < $dataStates.length; id++){
+      if(skill.scope == 11) break;
       if (turnUnit.isActor().isStateAffected(id)) {
         var rangePlus = $dataStates[id].meta.rangePlus;
         if(rangePlus){
@@ -1816,7 +1817,7 @@ Imported.TacticsBattleSys = true;
     this.setColorInvisibleArea();
     if (skill.scope == 1 || skill.scope == 2){
       this.setColorArea(colorAreaTargetEnemy);
-    } else if (skill.scope == 7 || skill.scope == 8){
+    } else if (skill.scope == 7 || skill.scope == 8 || skill.scope == 11){
       this.setColorArea(colorAreaTargetAlly);
     }
   };
@@ -1846,6 +1847,7 @@ Imported.TacticsBattleSys = true;
     }
     //このあたりに効果延長ステートを反映させる
     for(var id = 1; id < $dataStates.length; id++){
+      if(skill.scope == 1 || skill.scope == 7 || skill.scope == 11) break;
       if (turnUnit.isActor().isStateAffected(id)) {
         var effectPlus = $dataStates[id].meta.effectPlus;
         if(effectPlus){
@@ -2726,7 +2728,7 @@ Imported.TacticsBattleSys = true;
           //以降は普通
           target = targets[i].isActor();
         }
-      }else if(this.useSkill().scope == 7 || this.useSkill().scope == 8){
+      }else if(this.useSkill().scope == 7 || this.useSkill().scope == 8 || this.useSkill().scope == 11){
       //回復系のスキル(対象が味方)の場合
         //対象が味方の場合
         if (this.isCoverTarget(targets[i])) target = targets[i].isActor();
@@ -3404,7 +3406,7 @@ Imported.TacticsBattleSys = true;
   };
   // 誘惑付与者が範囲内にいるかチェック
   Game_Event.prototype.effectCharmCheck = function(targets) {
-    if(this.useSkill().scope == 7 || this.useSkill().scope == 8) return false;
+    if(this.useSkill().scope == 7 || this.useSkill().scope == 8 || this.useSkill().scope == 11) return false;
     var actor = this.isActor();
     for(var id = 1; id < $dataStates.length; id++){
       if (actor.isStateAffected(id)) {
@@ -7548,7 +7550,7 @@ Imported.TacticsBattleSys = true;
         if(turnUnit.target()){
           if(turnUnit.target().nonTargetBuffCheck()) turnUnit.setTarget(null);
         }
-      }else if(turnUnit.useSkill().scope == 7 || turnUnit.useSkill().scope == 8){
+      }else if(turnUnit.useSkill().scope == 7 || turnUnit.useSkill().scope == 8 || turnUnit.useSkill().scope == 11){
         //対象が味方の場合
         turnUnit.setTarget($gameMap.unitAllyXy(x,y));
         //以下ターゲット選択時、座標のズレバグ対策
