@@ -430,6 +430,16 @@ Imported.TacticsBattleSys = true;
   Game_Action.prototype.subject = function() {
     return this._subject;
   };
+  
+  Game_Action.prototype.itemHit = function(target) {
+    if (this.isPhysical()) {
+        return this.item().successRate * 0.01 * this.subject().hit;
+    } else if (this.isMagical()) {
+        return this.item().successRate * 0.01 * this.subject().hit;
+    } else {
+        return this.item().successRate * 0.01;
+    }
+  };
 
   // SRPG用の行動結果適用
   Game_Action.prototype.actionApply = function(target) {
@@ -662,7 +672,7 @@ Imported.TacticsBattleSys = true;
         }
         var stoneskin = $dataStates[id].meta.stoneskin;
         if(stoneskin && value > 0){
-          value = parseInt(Math.max(value - target.hp * parseInt(stoneskin) / 100, 0));
+          value = parseInt(Math.max(value - (target.mhp - target.hp) * parseInt(stoneskin) / 100, 0));
         }
       }
     }
