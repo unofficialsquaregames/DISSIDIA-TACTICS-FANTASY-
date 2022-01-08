@@ -2578,13 +2578,13 @@ Imported.TacticsBattleSys = true;
     if (allyId) {
       this.initTacticsUnitSetting();
       if($gameSystem.allyMembers()[parseInt(allyId)] <= 0){
-        var n = 0;
+        this._allyId = 0;
         do{
-          n = parseInt(Math.floor( Math.random() * (104 - 1) + 1));
-        }while(!$gameSystem.allyMembers().indexOf(n));
-        $gameSystem.allyMembers()[parseInt(allyId)] = n;
+          this._allyId = parseInt(Math.floor( Math.random() * (104 - 1) + 1));
+        }while($gameSystem.allyMembers().indexOf(this._allyId.toString()) >= 0);
+      }else{
+        this._allyId = $gameSystem.allyMembers()[parseInt(allyId)];
       }
-      this._allyId = $gameSystem.allyMembers()[parseInt(allyId)];
       this.setActor(new Game_Actor(this._allyId));
         
       this.isActor().setCharacter(this); //イベントと紐づける用
@@ -2599,13 +2599,13 @@ Imported.TacticsBattleSys = true;
     else if (enemyId) {
       this.initTacticsUnitSetting();
       if($gameSystem.enemyMembers()[parseInt(enemyId)] <= 0){
-        var n = 0;
+        this._enemyId = 0;
         do{
-          n = parseInt(Math.floor( Math.random() * (104 - 1) + 1));
-        }while(!$gameSystem.enemyMembers().indexOf(n.toString()));
-        $gameSystem.enemyMembers()[parseInt(enemyId)] = n;
+          this._enemyId = parseInt(Math.floor( Math.random() * (104 - 1) + 1));
+        }while($gameSystem.enemyMembers().indexOf(this._enemyId.toString()) >= 0);
+      }else{
+        this._enemyId = $gameSystem.enemyMembers()[parseInt(enemyId)];
       }
-      this._enemyId = $gameSystem.enemyMembers()[parseInt(enemyId)];
       this.setActor(new Game_Actor(this._enemyId));
         
       this.isActor().setCharacter(this); //イベントと紐づける用
