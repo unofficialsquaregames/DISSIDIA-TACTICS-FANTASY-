@@ -1084,7 +1084,7 @@ Imported.TacticsBattleSys = true;
     }
     //即死攻撃の扱い
     if(stateId == this.deathStateId()){
-      if(this.isDying()){
+      if(this.isDying() && !this.isStateResist(this.deathStateId())){
         this.addNewState(stateId);
         this.refresh();
         this._result.pushAddedState(parseInt(stateId)); //指定ステートの付加を追加。
@@ -3537,7 +3537,7 @@ Imported.TacticsBattleSys = true;
   
   // 戦闘不能ユニット
   Game_Event.prototype.targetDeadSearch = function() {
-    for (var i = 0; i < $gameMap.allyList().length; i++){
+    for (var i = 0; i < $gameMap.enemyList().length; i++){
       if($gameMap.enemyList()[i].isActor().isDead()){
         return $gameMap.enemyList()[i];
       }
