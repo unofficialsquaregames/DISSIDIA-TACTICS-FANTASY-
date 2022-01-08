@@ -515,9 +515,15 @@ Imported.TacticsBattleSys = true;
         }
         
         //TPドロー
-        if(turnUnit.useSkill().meta.steal == "tp"){
-          this.subject().gainTp(target.tp);
-          target.gainTp(-target.tp);
+        if(turnUnit.useSkill().meta.stealTp){
+          var stealTp = target.maxTp() * parseInt(turnUnit.useSkill().meta.stealTp) / 100;
+          if(stealTp >= target.tp){
+            this.subject().gainTp(target.tp);
+            target.gainTp(-target.tp);
+          }else{
+            this.subject().gainTp(stealTp);
+            target.gainTp(-stealTp);
+          }
         }
         //TPダメージ
         if(turnUnit.useSkill().meta.damageTp){
@@ -1042,13 +1048,6 @@ Imported.TacticsBattleSys = true;
             return this.hp - 1;
           }
         }
-        //下はブラッド(HP回復無効)
-        var invalid = $dataStates[id].meta.invalid;
-        if(invalid){ 
-          if(invalid == "gainHp" && (value > 0)){ 
-            return 0;
-          }
-        }
       }
     }
     return value;
@@ -1249,6 +1248,7 @@ Imported.TacticsBattleSys = true;
     //ここからバフデバフ不可視領域の影響でパラメータの上げ下げを行う(ブラッドもここで取り扱った方がよい？)
     for(var id = 1; id < $dataStates.length; id++){
       if (this.isStateAffected(id)) {
+        /*
         //ブラッド系(最大HPを下げる)
         var invalid = $dataStates[id].meta.invalid;
         if(invalid){ 
@@ -1260,6 +1260,7 @@ Imported.TacticsBattleSys = true;
             break;
           }
         }
+        */
         //イカサマバフ
         var ikasama = $dataStates[id].meta.ikasama;
         if(ikasama){
@@ -2568,7 +2569,7 @@ Imported.TacticsBattleSys = true;
       if($gameSystem.allyMembers()[parseInt(allyId)] <= 0){
         var n = 0;
         do{
-          n = parseInt(Math.floor( Math.random() * (102 - 1) + 1));
+          n = parseInt(Math.floor( Math.random() * (103 - 1) + 1));
         }while(!$gameSystem.allyMembers().indexOf(n));
         $gameSystem.allyMembers()[parseInt(allyId)] = n;
       }
@@ -2589,7 +2590,7 @@ Imported.TacticsBattleSys = true;
       if($gameSystem.enemyMembers()[parseInt(enemyId)] <= 0){
         var n = 0;
         do{
-          n = parseInt(Math.floor( Math.random() * (102 - 1) + 1));
+          n = parseInt(Math.floor( Math.random() * (103 - 1) + 1));
         }while(!$gameSystem.enemyMembers().indexOf(n.toString()));
         $gameSystem.enemyMembers()[parseInt(enemyId)] = n;
       }
