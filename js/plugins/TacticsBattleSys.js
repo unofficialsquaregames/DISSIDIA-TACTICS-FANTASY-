@@ -824,8 +824,8 @@ Imported.TacticsBattleSys = true;
   
   // WTをリセットする
   Game_BattlerBase.prototype.resetWt = function(rate) {
-    var max = rate + 10;
-    var min = rate - 10;
+    var max = rate + 5;
+    var min = rate - 5;
     var distributed = Math.floor(Math.random() * (max - min) + min);
     this._wt = Math.round(this.wtTurn() * distributed / 100);//0;
   };
@@ -3206,10 +3206,10 @@ Imported.TacticsBattleSys = true;
         if($dataStates[id].meta.behavioralLoad){
           switch($dataStates[id].meta.behavioralLoad){
           case "row":
-            return 50;
+            return 25;
             break;
           case "high":
-            return -50;
+            return -25;
             break;
           }
         }
@@ -3220,10 +3220,10 @@ Imported.TacticsBattleSys = true;
       if(this.useSkill().meta.behavioralLoad){
         switch(this.useSkill().meta.behavioralLoad){
         case "row":
-          return 50;
+          return 25;
           break;
         case "high":
-          return -50;
+          return -25;
           break;
         }
       }
