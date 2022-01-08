@@ -2499,6 +2499,22 @@ Imported.TacticsBattleSys = true;
             //付与者がいない場合スリップデバフは剥がれる
             if(!ctrlIsArea) actor.removeState(id);
           }
+          //アクション系バフの扱い
+          var shiftGrantor = $dataStates[id].meta.shiftGrantor;
+          if(shiftGrantor){
+            //マップ上にいるユニットのステートをチェックする
+            for(var j = 0; j < this.unitList().length; j++){
+              var shiftUnit = this.unitList()[j];
+              var shiftActor = shiftUnit.isActor();
+              var shiftIsArea = false;
+              if (shiftActor._classId == parseInt(shiftGrantor) && !target.isHostileUnit(shiftUnit)){
+                shiftIsArea = true;
+                break;
+              }
+            }
+            //付与者がいない場合スリップデバフは剥がれる
+            if(!shiftIsArea) actor.removeState(id);
+          }
         }
       }
     }
@@ -3108,15 +3124,15 @@ Imported.TacticsBattleSys = true;
       }
     }
     
-    //マップ上にいるユニットの不可視領域侵入チェック
+    //マップ上にいるユニットのステートおよび不可視領域侵入チェック
     for(var i = 0; i < $gameMap.unitList().length; i++){
-      var invisibleAreaGrantorUnit = $gameMap.unitList()[i];
-      var invisibleAreaGrantorActor = invisibleAreaGrantorUnit.isActor();
+      var checkUnit = $gameMap.unitList()[i];
+      var checkActor = checkUnit.isActor();
       for(var id = 1; id < $dataStates.length; id++){
-        if (invisibleAreaGrantorActor.isStateAffected(id)) {
+        if (checkActor.isStateAffected(id)) {
           var field = $dataStates[id].meta.field;
           if(field){
-            if(this.targetRange(invisibleAreaGrantorUnit) <= parseInt(field)){
+            if(this.targetRange(checkUnit) <= parseInt(field)){
               //領域内の味方を回復するタイプ
               var state = $dataStates[id];
               var gainHp = state.meta.gainHp;
@@ -3124,33 +3140,37 @@ Imported.TacticsBattleSys = true;
                 if(parseInt(-gainHp) > actor.hp){
                   gainHp = actor.hp - 1;
                 }
-                if(parseInt(gainHp) > 0 && invisibleAreaGrantorUnit.isCoverTarget(this)) {
+                if(parseInt(gainHp) > 0 && checkUnit.isCoverTarget(this)) {
                   actor.gainHp(Math.round(actor.mhp * parseInt(gainHp) / 100));
                   this.reserveDamagePopup(0);//リジェネ効果のポップアップ表示
                 }
-                if(parseInt(gainHp) < 0 && invisibleAreaGrantorUnit.isAttackTarget(this)) {
+                if(parseInt(gainHp) < 0 && checkUnit.isAttackTarget(this)) {
                   actor.gainHp(Math.round(actor.mhp * parseInt(gainHp) / 100));
                   this.reserveDamagePopup(0);//リジェネ効果のポップアップ表示
                 }
               }
               var gainMp = state.meta.gainMp;
               if(gainMp){
-                if(parseInt(gainMp) > 0 && invisibleAreaGrantorUnit.isCoverTarget(this)) {
+                if(parseInt(gainMp) > 0 && checkUnit.isCoverTarget(this)) {
                   actor.gainMp(Math.round(actor.mmp * parseInt(gainMp) / 100));
                   this.reserveDamagePopup(0);//リジェネ効果のポップアップ表示
                 }
-                if(parseInt(gainMp) < 0 && invisibleAreaGrantorUnit.isAttackTarget(this)) {
+                if(parseInt(gainMp) < 0 && checkUnit.isAttackTarget(this)) {
                   actor.gainMp(Math.round(actor.mmp * parseInt(gainMp) / 100));
                   this.reserveDamagePopup(0);//リジェネ効果のポップアップ表示
                 }
               }
               //不可視領域内侵入でアビリティが発動するタイプ
-              if($dataStates[id].meta.activate && invisibleAreaGrantorUnit.isAttackTarget(this)){//this.isEnemy()){
+              if($dataStates[id].meta.activate && checkUnit.isAttackTarget(this)){//this.isEnemy()){
                 if($dataStates[id].meta.activate == "invasion" || $dataStates[id].meta.activate == "freeFight") {
-                  $gameMap.addReservationActionList(invisibleAreaGrantorUnit,$dataSkills[parseInt($dataStates[id].meta.skill)],this,$dataStates[id].meta.activate);
+                  $gameMap.addReservationActionList(checkUnit,$dataSkills[parseInt($dataStates[id].meta.skill)],this,$dataStates[id].meta.activate);
                 }
               }
             }                
+          }
+          var shiftGrantor = $dataStates[id].meta.shiftGrantor;
+          if(shiftGrantor){
+            if(parseInt(shiftGrantor) == actor._classId) checkActor.wtTurnAdvance();
           }
         }
       }
