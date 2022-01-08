@@ -525,6 +525,17 @@ Imported.TacticsBattleSys = true;
             target.gainTp(-stealTp);
           }
         }
+        //MP吸収
+        if(turnUnit.useSkill().meta.stealMp){
+          var stealMp = target.mmp * parseInt(turnUnit.useSkill().meta.stealMp) / 100;
+          if(stealMp >= target.mp){
+            this.subject().gainMp(target.mp);
+            target.gainMp(-target.mp);
+          }else{
+            this.subject().gainMp(stealMp);
+            target.gainMp(-stealMp);
+          }
+        }
         //TPダメージ
         if(turnUnit.useSkill().meta.damageTp){
           target.gainTp(-parseInt(turnUnit.useSkill().meta.damageTp));
