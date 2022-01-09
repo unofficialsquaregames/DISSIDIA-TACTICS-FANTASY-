@@ -2593,11 +2593,13 @@ Imported.TacticsBattleSys = true;
     //味方の配置
     if (allyId) {
       this.initTacticsUnitSetting();
+      var allyMembers = $gameSystem.allyMembers();
       if($gameSystem.allyMembers()[parseInt(allyId)] <= 0){
         this._allyId = 0;
         do{
           this._allyId = parseInt(Math.floor( Math.random() * (106 - 1) + 1));
-        }while($gameSystem.allyMembers().indexOf(this._allyId.toString()) >= 0);
+        }while(allyMembers.indexOf(this._allyId.toString()) >= 0);
+        allyMembers[parseInt(allyId)] = this._allyId;
       }else{
         this._allyId = $gameSystem.allyMembers()[parseInt(allyId)];
       }
@@ -2614,11 +2616,13 @@ Imported.TacticsBattleSys = true;
     //敵の配置
     else if (enemyId) {
       this.initTacticsUnitSetting();
+      var enemyMembers = $gameSystem.enemyMembers();
       if($gameSystem.enemyMembers()[parseInt(enemyId)] <= 0){
         this._enemyId = 0;
         do{
           this._enemyId = parseInt(Math.floor( Math.random() * (106 - 1) + 1));
         }while($gameSystem.enemyMembers().indexOf(this._enemyId.toString()) >= 0);
+        enemyMembers[parseInt(enemyId)] = this._enemyId;
       }else{
         this._enemyId = $gameSystem.enemyMembers()[parseInt(enemyId)];
       }
@@ -3162,6 +3166,18 @@ Imported.TacticsBattleSys = true;
                     }
                   }
                 }
+              }
+            }
+          }
+          //行動終了後の追撃判定
+          if($dataStates[id].meta.activate == "afterChase" && $dataStates[id].meta.field) {
+            //マップ上にいるユニットのステートをチェックする
+            for(var j = 0; j < $gameMap.unitList().length; j++){
+              var fieldUnit = $gameMap.unitList()[j];
+              var field = $dataStates[id].meta.field;
+              if (this.targetRange(fieldUnit) <= parseInt(field) && fieldUnit.isAttackTarget(this)){
+                $gameMap.addReservationActionList(this,$dataSkills[parseInt($dataStates[id].meta.skill)],fieldUnit,$dataStates[id].meta.activate);
+                break;
               }
             }
           }
