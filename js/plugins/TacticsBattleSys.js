@@ -2596,7 +2596,7 @@ Imported.TacticsBattleSys = true;
       if($gameSystem.allyMembers()[parseInt(allyId)] <= 0){
         this._allyId = 0;
         do{
-          this._allyId = parseInt(Math.floor( Math.random() * (105 - 1) + 1));
+          this._allyId = parseInt(Math.floor( Math.random() * (106 - 1) + 1));
         }while($gameSystem.allyMembers().indexOf(this._allyId.toString()) >= 0);
       }else{
         this._allyId = $gameSystem.allyMembers()[parseInt(allyId)];
@@ -2617,7 +2617,7 @@ Imported.TacticsBattleSys = true;
       if($gameSystem.enemyMembers()[parseInt(enemyId)] <= 0){
         this._enemyId = 0;
         do{
-          this._enemyId = parseInt(Math.floor( Math.random() * (105 - 1) + 1));
+          this._enemyId = parseInt(Math.floor( Math.random() * (106 - 1) + 1));
         }while($gameSystem.enemyMembers().indexOf(this._enemyId.toString()) >= 0);
       }else{
         this._enemyId = $gameSystem.enemyMembers()[parseInt(enemyId)];
@@ -3151,7 +3151,15 @@ Imported.TacticsBattleSys = true;
                   var trapGrantorActor = trapGrantorUnit.isActor();
                   var trapGrantorIsArea = false;
                   if ((trapGrantorActor._classId == parseInt(trapGrantor)) && trapGrantorUnit.isAttackTarget(this)){
-                    $gameMap.addReservationActionList(trapGrantorUnit,$dataSkills[parseInt($dataStates[id].meta.skill)],this,$dataStates[id].meta.activate);
+                    if($dataStates[id].meta.skill == "impersonation"){
+                      if(this.useSkill().scope == 1 || this.useSkill().scope == 2){
+                        $gameMap.addReservationActionList(trapGrantorUnit,this.useSkill(),this,$dataStates[id].meta.activate);
+                      }else if(this.useSkill().scope == 7 || this.useSkill().scope == 8 || this.useSkill().scope == 11){
+                        $gameMap.addReservationActionList(trapGrantorUnit,this.useSkill(),trapGrantorUnit,$dataStates[id].meta.activate);
+                      }
+                    }else{
+                      $gameMap.addReservationActionList(trapGrantorUnit,$dataSkills[parseInt($dataStates[id].meta.skill)],this,$dataStates[id].meta.activate);
+                    }
                   }
                 }
               }
