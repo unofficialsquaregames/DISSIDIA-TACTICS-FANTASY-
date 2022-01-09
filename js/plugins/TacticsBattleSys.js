@@ -824,8 +824,8 @@ Imported.TacticsBattleSys = true;
   
   // WTをリセットする
   Game_BattlerBase.prototype.resetWt = function(rate) {
-    var max = rate + 5;
-    var min = rate - 5;
+    var max = rate + 10;
+    var min = rate - 10;
     var distributed = Math.floor(Math.random() * (max - min) + min);
     this._wt = Math.round(this.wtTurn() * distributed / 100);//0;
   };
@@ -2527,6 +2527,22 @@ Imported.TacticsBattleSys = true;
             //付与者がいない場合スリップデバフは剥がれる
             if(!shiftIsArea) actor.removeState(id);
           }
+          //追跡系デバフの扱い
+          var traceGrantor = $dataStates[id].meta.traceGrantor;
+          if(traceGrantor){
+            //マップ上にいるユニットのステートをチェックする
+            for(var j = 0; j < this.unitList().length; j++){
+              var traceUnit = this.unitList()[j];
+              var traceActor = traceUnit.isActor();
+              var traceIsArea = false;
+              if (traceActor._classId == parseInt(traceGrantor) && target.isHostileUnit(traceUnit)){
+                traceIsArea = true;
+                break;
+              }
+            }
+            //付与者がいない場合スリップデバフは剥がれる
+            if(!traceIsArea) actor.removeState(id);
+          }
         }
       }
     }
@@ -2580,7 +2596,7 @@ Imported.TacticsBattleSys = true;
       if($gameSystem.allyMembers()[parseInt(allyId)] <= 0){
         this._allyId = 0;
         do{
-          this._allyId = parseInt(Math.floor( Math.random() * (104 - 1) + 1));
+          this._allyId = parseInt(Math.floor( Math.random() * (105 - 1) + 1));
         }while($gameSystem.allyMembers().indexOf(this._allyId.toString()) >= 0);
       }else{
         this._allyId = $gameSystem.allyMembers()[parseInt(allyId)];
@@ -2601,7 +2617,7 @@ Imported.TacticsBattleSys = true;
       if($gameSystem.enemyMembers()[parseInt(enemyId)] <= 0){
         this._enemyId = 0;
         do{
-          this._enemyId = parseInt(Math.floor( Math.random() * (104 - 1) + 1));
+          this._enemyId = parseInt(Math.floor( Math.random() * (105 - 1) + 1));
         }while($gameSystem.enemyMembers().indexOf(this._enemyId.toString()) >= 0);
       }else{
         this._enemyId = $gameSystem.enemyMembers()[parseInt(enemyId)];
@@ -3108,6 +3124,16 @@ Imported.TacticsBattleSys = true;
         if($dataStates[id].meta.shift){
           if($dataStates[id].meta.shift == "self") {
             this.isActor().wtTurnAdvance();
+          }
+        }
+        //追跡でバフチェック
+        var traceGrantor = $dataStates[id].meta.traceGrantor;
+        if(traceGrantor){
+          //マップ上にいるユニットのステートをチェックする
+          for(var j = 0; j < $gameMap.unitList().length; j++){
+            var traceGrantorUnit = $gameMap.unitList()[j];
+            var traceGrantorActor = traceGrantorUnit.isActor();
+            if(parseInt(traceGrantor) == traceGrantorActor._classId) traceGrantorActor.wtTurnAdvance();
           }
         }
         //行動終了後発動するスキルのあるバフデバフを持っているか
