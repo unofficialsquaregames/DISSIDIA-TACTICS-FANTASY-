@@ -2945,7 +2945,7 @@ Imported.TacticsBattleSys = true;
     for(var id = 1; id < $dataStates.length; id++){
       if (this.isActor().isStateAffected(id)) {
         if($dataStates[id].meta.activate && this.isAttackTarget(target)){
-          if($dataStates[id].meta.activate == "chase") {
+          if($dataStates[id].meta.activate == "chase" || $dataStates[id].meta.activate == "chaseCounter") {
             var skill = $dataStates[id].meta.skill;
             if(skill == "same"){
                 $gameMap.addReservationActionList(this,this.useSkill(),target,"chase");
@@ -2967,7 +2967,7 @@ Imported.TacticsBattleSys = true;
        if (actor.isStateAffected(id)) {
          var field = $dataStates[id].meta.field;
          if(field && $dataStates[id].meta.activate && target.isAttackTarget(this)){
-           if((this.targetRange(target) <= parseInt(field)) && ($dataStates[id].meta.activate == "counter")){
+           if((this.targetRange(target) <= parseInt(field)) && ($dataStates[id].meta.activate == "counter" || $dataStates[id].meta.activate == "chaseCounter")){
              var skill = $dataStates[id].meta.skill;
              if(skill == "impersonation"){ //ものまね時
                $gameMap.addReservationActionList(target,this.useSkill(),this,"counter");
