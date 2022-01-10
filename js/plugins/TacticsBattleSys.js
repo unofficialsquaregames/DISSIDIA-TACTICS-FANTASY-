@@ -2977,6 +2977,8 @@ Imported.TacticsBattleSys = true;
                $gameMap.addReservationActionList(target,this.useSkill(),this,"counter");
              }else if(skill == "magicCounter" && action.isMagical()){
                $gameMap.addReservationActionList(target,this.useSkill(),this,"counter");
+             }else if(skill == "shift"){
+               target.isActor().wtTurnAdvance();
              }else{
                $gameMap.addReservationActionList(target,$dataSkills[parseInt(skill)],this,"counter");
              }
