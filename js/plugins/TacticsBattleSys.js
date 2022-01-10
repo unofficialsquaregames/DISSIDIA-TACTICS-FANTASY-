@@ -2597,7 +2597,7 @@ Imported.TacticsBattleSys = true;
       if($gameSystem.allyMembers()[parseInt(allyId)] <= 0){
         this._allyId = 0;
         do{
-          this._allyId = parseInt(Math.floor( Math.random() * (106 - 1) + 1));
+          this._allyId = parseInt(Math.floor( Math.random() * (107 - 1) + 1));
         }while(allyMembers.indexOf(this._allyId.toString()) >= 0);
         allyMembers[parseInt(allyId)] = this._allyId;
       }else{
@@ -2620,7 +2620,7 @@ Imported.TacticsBattleSys = true;
       if($gameSystem.enemyMembers()[parseInt(enemyId)] <= 0){
         this._enemyId = 0;
         do{
-          this._enemyId = parseInt(Math.floor( Math.random() * (106 - 1) + 1));
+          this._enemyId = parseInt(Math.floor( Math.random() * (107 - 1) + 1));
         }while($gameSystem.enemyMembers().indexOf(this._enemyId.toString()) >= 0);
         enemyMembers[parseInt(enemyId)] = this._enemyId;
       }else{
