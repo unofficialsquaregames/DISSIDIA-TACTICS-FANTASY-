@@ -2377,6 +2377,7 @@ Imported.TacticsBattleSys = true;
       var actor = target.isActor();
       target._alreadyCover = false; //かばうフラグoff
       target._allyCounterFlag = false; //カウンターフラグoff
+      var invalidTargetFlag = false;
       for(var id = 1; id < $dataStates.length; id++){
         if (actor.isStateAffected(id)) {
           //瀕死時HP回復
@@ -2543,7 +2544,19 @@ Imported.TacticsBattleSys = true;
             //付与者がいない場合スリップデバフは剥がれる
             if(!traceIsArea) actor.removeState(id);
           }
+          //タゲ無効時透過
+          var invalid = $dataStates[id].meta.invalid;
+          if(invalid){
+            if(invalid == "target"){
+              invalidTargetFlag = true;
+            }
+          }
         }
+      }
+      if(invalidTargetFlag){
+        target.setOpacity(128);
+      }else{
+        target.setOpacity(255);
       }
     }
   };
@@ -2598,7 +2611,7 @@ Imported.TacticsBattleSys = true;
         this._allyId = 0;
         do{
           this._allyId = parseInt(Math.floor( Math.random() * (107 - 1) + 1));
-        }while(allyMembers.indexOf(this._allyId.toString()) >= 0);
+        }while(allyMembers.indexOf(this._allyId) >= 0);
         allyMembers[parseInt(allyId)] = this._allyId;
       }else{
         this._allyId = $gameSystem.allyMembers()[parseInt(allyId)];
@@ -2621,7 +2634,7 @@ Imported.TacticsBattleSys = true;
         this._enemyId = 0;
         do{
           this._enemyId = parseInt(Math.floor( Math.random() * (107 - 1) + 1));
-        }while($gameSystem.enemyMembers().indexOf(this._enemyId.toString()) >= 0);
+        }while(enemyMembers.indexOf(this._enemyId) >= 0);
         enemyMembers[parseInt(enemyId)] = this._enemyId;
       }else{
         this._enemyId = $gameSystem.enemyMembers()[parseInt(enemyId)];
