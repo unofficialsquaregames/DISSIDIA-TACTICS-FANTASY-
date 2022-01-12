@@ -735,4 +735,34 @@
         Scene_Base.prototype.start.call(this);
         SceneManager.push(Scene_CharacterSelect);
     };
+    /*
+    Window_SavefileList.prototype.drawContents = function(info, rect, valid) {
+        var bottom = rect.y + rect.height;
+        if (rect.width >= 420) {
+            this.drawGameTitle(info, rect.x + 192, rect.y, rect.width - 192);
+            if (valid) {
+           // $gameSystem.allyMembers()[parseInt(allyId)]
+           // $gameSystem.enemyMembers()[parseInt(enemyId)]
+                this.drawPartyCharacters(info, rect.x + 220, bottom - 4);
+            }
+        }
+        var lineHeight = this.lineHeight();
+        var y2 = bottom - lineHeight;
+        if (y2 >= lineHeight) {
+            this.drawPlaytime(info, rect.x, y2, rect.width);
+        }
+    };
+    Window_SavefileList.prototype.drawPartyCharacters = function(info, x, y) {
+        if (info.characters) {
+            for (var i = 0; i < $gameSystem.allyMembers().length; i++) {
+                var data = [];
+                if($dataActors[$gameSystem.allyMembers()[i]]){
+                    data.push($dataActors[$gameSystem.allyMembers()[i]].characterName);
+                    data.push($dataActors[$gameSystem.allyMembers()[i]].characterIndex);
+                }
+                this.drawCharacter(data[0], data[1], x + i * 48, y);
+            }
+        }
+    };
+    */
 })();

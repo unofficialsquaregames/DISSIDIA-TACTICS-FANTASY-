@@ -2392,6 +2392,13 @@ Imported.TacticsBattleSys = true;
                 actor.gainHp(Math.round((actor.mhp * parseInt(dying) / 100) - actor.hp));
                 //actor.gainHp(Math.round(actor.mhp * isDyingHp / 100));
                 target.reserveDamagePopup(0);
+              }else if(compensation == "buff"){
+                //ダメージ受けた後瀕死状態であった場合
+                actor.gainHp(Math.round((actor.mhp * parseInt(dying) / 100) - actor.hp));
+                //actor.gainHp(Math.round(actor.mhp * isDyingHp / 100));
+                //バフ消去
+                actor.removeState(id);
+                target.reserveDamagePopup(0);
               }else if(compensation == "mpCost" && actor.mp >= 1){
                 //actor.gainMp(Math.round(-actor.mmp * 20 / 100));
                 actor.gainMp(Math.round(-actor.mp));
@@ -2610,12 +2617,13 @@ Imported.TacticsBattleSys = true;
       if($gameSystem.allyMembers()[parseInt(allyId)] <= 0){
         this._allyId = 0;
         do{
-          this._allyId = parseInt(Math.floor( Math.random() * (107 - 1) + 1));
+          this._allyId = parseInt(Math.floor( Math.random() * ($gameSystem.selectMembers().length - 2) + 1));
         }while(allyMembers.indexOf(this._allyId) >= 0);
         allyMembers[parseInt(allyId)] = this._allyId;
       }else{
         this._allyId = $gameSystem.allyMembers()[parseInt(allyId)];
       }
+      $gameVariables.setValue(11 + parseInt(allyId),this._allyId); //変数設定
       this.setActor(new Game_Actor(this._allyId));
         
       this.isActor().setCharacter(this); //イベントと紐づける用
@@ -2633,12 +2641,13 @@ Imported.TacticsBattleSys = true;
       if($gameSystem.enemyMembers()[parseInt(enemyId)] <= 0){
         this._enemyId = 0;
         do{
-          this._enemyId = parseInt(Math.floor( Math.random() * (107 - 1) + 1));
+          this._enemyId = parseInt(Math.floor( Math.random() * ($gameSystem.selectMembers().length - 2) + 1));
         }while(enemyMembers.indexOf(this._enemyId) >= 0);
         enemyMembers[parseInt(enemyId)] = this._enemyId;
       }else{
         this._enemyId = $gameSystem.enemyMembers()[parseInt(enemyId)];
       }
+      $gameVariables.setValue(15 + parseInt(enemyId),this._enemyId); //変数設定
       this.setActor(new Game_Actor(this._enemyId));
         
       this.isActor().setCharacter(this); //イベントと紐づける用
