@@ -2386,11 +2386,11 @@ Imported.TacticsBattleSys = true;
           if(dying && compensation){
             if(actor.isDying()){
               if (compensation == "buffTurn"){
-                //バフターン短縮
-                actor.reduceStateTurns(id);
                 //ダメージ受けた後瀕死状態であった場合
                 actor.gainHp(Math.round((actor.mhp * parseInt(dying) / 100) - actor.hp));
                 //actor.gainHp(Math.round(actor.mhp * isDyingHp / 100));
+                //バフターン短縮
+                actor.reduceStateTurns(id);
                 target.reserveDamagePopup(0);
               }else if(compensation == "buff"){
                 //ダメージ受けた後瀕死状態であった場合
@@ -3249,7 +3249,12 @@ Imported.TacticsBattleSys = true;
               //不可視領域内侵入でアビリティが発動するタイプ
               if($dataStates[id].meta.activate && checkUnit.isAttackTarget(this)){//this.isEnemy()){
                 if($dataStates[id].meta.activate == "invasion" || $dataStates[id].meta.activate == "freeFight") {
-                  $gameMap.addReservationActionList(checkUnit,$dataSkills[parseInt($dataStates[id].meta.skill)],this,$dataStates[id].meta.activate);
+                  if($dataStates[id].meta.skill == "shift"){
+                    checkActor.wtTurnAdvance();
+                    checkActor.extendBuffStateTurns();
+                  }else{
+                    $gameMap.addReservationActionList(checkUnit,$dataSkills[parseInt($dataStates[id].meta.skill)],this,$dataStates[id].meta.activate);
+                  }
                 }
               }
             }                
