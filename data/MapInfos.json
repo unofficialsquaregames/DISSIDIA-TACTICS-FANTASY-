@@ -7,5 +7,6 @@ null,
 {"id":5,"expanded":false,"name":"鉱山","order":5,"parentId":0,"scrollX":1089.3333333333333,"scrollY":607.3333333333334},
 {"id":6,"expanded":false,"name":"砂漠","order":6,"parentId":0,"scrollX":1765.0909090909092,"scrollY":988.3636363636364},
 {"id":7,"expanded":true,"name":"自作","order":7,"parentId":0,"scrollX":1782.5454545454545,"scrollY":988.3636363636364},
-{"id":8,"expanded":false,"name":"砂漠","order":8,"parentId":7,"scrollX":1782.5454545454545,"scrollY":988.3636363636364}
+{"id":8,"expanded":false,"name":"ダルマスカ砂漠","order":8,"parentId":7,"scrollX":1782.5454545454545,"scrollY":988.3636363636364},
+{"id":9,"expanded":false,"name":"ジークデン砦","order":9,"parentId":7,"scrollX":1782.5454545454545,"scrollY":988.3636363636364}
 ]

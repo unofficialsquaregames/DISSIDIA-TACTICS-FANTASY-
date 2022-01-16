@@ -1102,7 +1102,10 @@ Imported.TacticsBattleSys = true;
       }
     }else{
       //チャーム系の扱い(女性ユニットならスルー)
-      if($dataStates[stateId].meta.charm && ($dataClasses[this._classId].meta.gender == "female")) return;
+      if($dataStates[stateId].meta.gender){
+        if($dataStates[stateId].meta.gender == "male" && $dataClasses[this._classId].meta.gender == "female") return;
+        if($dataStates[stateId].meta.gender == "female" && $dataClasses[this._classId].meta.gender == "male") return;
+      }
       
       //上書きしようとするとスルーされる(呼び出されてない)
       if (this.isStateAddable(parseInt(stateId))) { //指定ステートが付与可能か

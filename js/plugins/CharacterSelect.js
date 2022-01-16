@@ -114,7 +114,7 @@
  * @text 項目の高さ
  * @desc 選択項目の行の高さを指定します。
  * @type number
- * @default 32
+ * @default 64
  * 
  * @param wwRowTop
  * @parent layoutWW
@@ -316,7 +316,7 @@
 
     Window_CharacterSelectMainCommand.prototype.initialize = function () {
         var w = Graphics.boxWidth, h = Graphics.boxHeight,
-        a = eval("[0, 0, 250, 256]");
+        a = eval("[0, 0, w, 72]");
         this.__windowWidth = a[2], this.__windowHeight = a[3];
         Window_Command.prototype.initialize.call(this, a[0], a[1]);
     }
@@ -328,19 +328,30 @@
     Window_CharacterSelectMainCommand.prototype.windowHeight = function () {
         return this.__windowHeight;
     }
+    Window_CharacterSelectMainCommand.prototype.maxCols = function() {
+        return this._list.length;
+    };
 
     Window_CharacterSelectMainCommand.prototype.makeCommandList = function (x, y) {
         if (param.allyTerm) this.addCommand(param.allyTerm, "ally");
-        if (param.enemyTerm) this.addCommand(param.enemyTerm, "enemy");
+        /*
         if(Utils.isOptionValid('test')){
           if (param.saveTerm) this.addCommand(param.saveTerm, "save");
           if (param.loadTerm) this.addCommand(param.loadTerm, "load");
         }
+        */
         if (param.finishTerm) this.addCommand(param.finishTerm, "cancel");
+        if (param.enemyTerm) this.addCommand(param.enemyTerm, "enemy");
     }
 
     Window_CharacterSelectMainCommand.prototype.itemTextAlign = function() {
         return param.alignmentOfCommand;
+    };
+    Window_CharacterSelectMainCommand.prototype.drawItem = function(index) {
+        var rect = this.itemRectForText(index);
+        this.resetTextColor();
+        this.changePaintOpacity(this.isCommandEnabled(index));
+        this.drawText(this.commandName(index), rect.x, rect.y, rect.width, "center");
     };
 
 
@@ -355,21 +366,21 @@
 
     Window_AllyBattlerList.prototype.initialize = function () {
         var w = Graphics.boxWidth, h = Graphics.boxHeight,
-        a = eval("[250, 0, w - 250, 128]");
+        a = eval("[0, 72, 160, h - 72]");
         Window_Selectable.prototype.initialize.call(this, a[0], a[1], a[2], a[3]);
         this.refresh();
     }
 
-    Window_AllyBattlerList.prototype.maxCols = function() {
+    Window_AllyBattlerList.prototype.maxRows = function() {
         return param.actorListColMax;
     };
 
-    Window_AllyBattlerList.prototype.itemHeight = function() {
-        return this.contentsHeight();
+    Window_AllyBattlerList.prototype.itemWidth = function() {
+        return this.contentsWidth();
     };
 
     Window_AllyBattlerList.prototype.maxItems = function() {
-        return $gameSystem._kanjiPCMaxParty || param.maxAllParty;
+        return param.maxAllParty;
     };
 
     Window_AllyBattlerList.prototype.standardFontSize = function() {
@@ -379,17 +390,21 @@
     Window_AllyBattlerList.prototype.drawItem = function (index) {
         var id = $gameSystem.allyMembers()[index];
         var actor = $gameActors.actor(id), rect = this.itemRect(index);
+        this.changeTextColor(this.systemColor());
+        var number = index + 1;
+        this.drawText(number + ": ", rect.x, rect.y, 32);
+        this.changeTextColor(this.normalColor());
         if (actor) {
-            this.drawActorCharacter(actor, rect.x + rect.width / 2,
-            rect.y + rect.height - 30);
-            this.drawText(actor.name(), rect.x,
-            rect.y + rect.height - this.standardFontSize() - 14, rect.width, "center");
+            this.drawActorCharacter(actor, rect.x + 80, rect.y + 56);
         } else {
             this.contents.paintOpacity = 128;
-            this.drawText(param.emptyFrame, rect.x, rect.y + (this.itemHeight() - this.standardFontSize()) / 2,
-            rect.width, "center")
+            this.drawText(param.emptyFrame, rect.x + 32, rect.y,
+            rect.width - 32, "center");
             this.contents.paintOpacity = 255;
         }
+    }
+    Window_AllyBattlerList.prototype.lineHeight = function () {
+        return param.wwRowHeight;
     }
     
     // Window_EnemyBattlerList
@@ -402,21 +417,21 @@
 
     Window_EnemyBattlerList.prototype.initialize = function () {
         var w = Graphics.boxWidth, h = Graphics.boxHeight,
-        a = eval("[250, 128, w - 250, 128]");
+        a = eval("[w - 160, 72, 160, h - 72]");
         Window_Selectable.prototype.initialize.call(this, a[0], a[1], a[2], a[3]);
         this.refresh();
     }
 
-    Window_EnemyBattlerList.prototype.maxCols = function() {
+    Window_EnemyBattlerList.prototype.maxRows = function() {
         return param.actorListColMax;
     };
 
-    Window_EnemyBattlerList.prototype.itemHeight = function() {
-        return this.contentsHeight();
+    Window_EnemyBattlerList.prototype.itemWidth = function() {
+        return this.contentsWidth();
     };
 
     Window_EnemyBattlerList.prototype.maxItems = function() {
-        return $gameSystem._kanjiPCMaxParty || param.maxAllParty;
+        return param.maxAllParty;
     };
 
     Window_EnemyBattlerList.prototype.standardFontSize = function() {
@@ -426,17 +441,22 @@
     Window_EnemyBattlerList.prototype.drawItem = function (index) {
         var id = $gameSystem.enemyMembers()[index];
         var actor = $gameActors.actor(id), rect = this.itemRect(index);
+        this.changeTextColor(this.systemColor());
+        var number = index + 1;
+        this.drawText(number + ": ", rect.x, rect.y, 32);
+        this.changeTextColor(this.normalColor());
         if (actor) {
-            this.drawActorCharacter(actor, rect.x + rect.width / 2,
-            rect.y + rect.height - 30);
-            this.drawText(actor.name(), rect.x,
-            rect.y + rect.height - this.standardFontSize() - 14, rect.width, "center");
+            this.drawActorCharacter(actor, rect.x + 80, rect.y + 56);
         } else {
             this.contents.paintOpacity = 128;
-            this.drawText(param.emptyFrame, rect.x, rect.y + (this.itemHeight() - this.standardFontSize()) / 2,
-            rect.width, "center")
+           
+            this.drawText(param.emptyFrame, rect.x + 32, rect.y,
+            rect.width - 32, "center");
             this.contents.paintOpacity = 255;
         }
+    }
+    Window_EnemyBattlerList.prototype.lineHeight = function () {
+        return param.wwRowHeight;
     }
 
     // Window_ReserveMember
@@ -449,13 +469,16 @@
 
     Window_ReserveMember.prototype.initialize = function () {
         var w = Graphics.boxWidth, h = Graphics.boxHeight,
-        a = eval("[0, 256, 250, h - 256]");
+        a = eval("[160, 256, w - 320, h - 256]");
         Window_Selectable.prototype.initialize.call(this, a[0], a[1], a[2], a[3]);
         this.refresh();
     }
 
     Window_ReserveMember.prototype.maxItems = function() {
         return $gameSystem.selectMembers().length + (param.removeOnReserveTerm ? 1 : 0);
+    };
+    Window_ReserveMember.prototype.maxCols = function() {
+        return 8
     };
 
     Window_ReserveMember.prototype.drawItem = function (index) {
@@ -471,8 +494,8 @@
               paintOpacity = 255;
             }
             */
-            this.drawActorCharacter(actor, rect.x + 20, rect.y,rect.width, rect.height);
-            this.drawText(actor.name(), rect.x+42, rect.y,rect.width);
+            this.drawActorCharacter(actor, rect.x + 24, rect.y + 8,rect.width, rect.height);
+            //this.drawText(actor.name(), rect.x + 42, rect.y,rect.width);
         }else{
             this.drawText(param.removeOnReserveTerm, rect.x, rect.y,rect.width, "center");
         }
@@ -509,16 +532,61 @@
                 var w = Graphics.boxWidth, h = Graphics.boxHeight, a, x, y, width;
 
                 window.contents.fontSize = 26;
-                a = eval("[0, 0]");
-                window.drawActorCharacter(actor, a[0] + Window_Base._faceWidth / 2,
-                a[1] + Window_Base._faceHeight - 8);
-                
+                a = eval("[64, 56]");
+                window.drawActorCharacter(actor, a[0], a[1]);
                 if (param.nameShow) {
                     a = eval("[150, 0, 180]");
                     window.drawActorName(actor, a[0], a[1], a[2] || 180);
                 }
+                //ユニットのタイプを表示
+                var type = $dataClasses[actor._classId].meta.type;
+                window.changeTextColor(window.systemColor());
+                a = eval("[330, 0, 64]");
+                window.drawText("Type: ", a[0], a[1], a[2]);
+                switch (type) {
+                case "B":
+                    window.changeTextColor('red');
+                    break;
+                case "R":
+                    window.changeTextColor('orange');
+                    break;
+                case "Q":
+                    window.changeTextColor('blue');
+                    break;
+                case "L":
+                    window.changeTextColor('hotpink');
+                    break;
+                case "J":
+                    window.changeTextColor('purple');
+                    break;
+                case "S":
+                    window.changeTextColor('aquamarine');
+                    break;
+                case "C":
+                    window.changeTextColor('yellow');
+                    break;
+                case "A":
+                    window.changeTextColor('lime');
+                    break;
+                case "O":
+                    window.changeTextColor('gray');
+                    break;
+                }
+                a = eval("[394, 0, 32]");
+                window.drawText(type, a[0], a[1], a[2]);
+                window.resetTextColor();
+                
                 a = eval("[330, 36, 180]");
                 if (a[2]) window.drawActorIcons(actor, a[0], a[1], a[2]);
+                
+                //ユニットの詳細を表示
+                var description = $dataClasses[actor._classId].meta.description.split(",");
+                a = eval("[0, 64, w - 304]");
+                for (var i = 0; i < description.length; i++) {
+                  window.resetFontSettings();
+                  window.makeFontSmaller();
+                  window.drawText(description[i], a[0], a[1] + i * 32, a[2]);
+                }
 
                 window.contents.paintOpacity = 48;
                 a = eval(param.horzLineYPos);
@@ -567,12 +635,14 @@
     Scene_CharacterSelect.prototype.createMainCommandsWindow = function () {
         this.commandWindow = new Window_CharacterSelectMainCommand();
         this.commandWindow.setHandler('ally', this.commandAllyChange.bind(this));
-        this.commandWindow.setHandler('enemy', this.commandEnemyChange.bind(this));
+        /*
         if(Utils.isOptionValid('test')){
           this.commandWindow.setHandler('save', this.commandSave.bind(this));
           this.commandWindow.setHandler('load', this.commandLoad.bind(this));
         }
+        */
         this.commandWindow.setHandler('cancel', this.commandFinish.bind(this));
+        this.commandWindow.setHandler('enemy', this.commandEnemyChange.bind(this));
         this.commandWindow.activate();
         this.addWindow(this.commandWindow);
     }
@@ -603,7 +673,7 @@
 
     Scene_CharacterSelect.prototype.createStatusWindow = function () {
         var w = Graphics.boxWidth, h = Graphics.boxHeight,
-        a = eval("[250, 256, w - 250, h - 256]");
+        a = eval("[160, 72, w - 320, 184]");
         this.statusWindow = new Window_Base(a[0], a[1], a[2], a[3]);
         this.allyBattlerListWindow.setHelpWindow(this.statusWindow);
         //this.enemyBattlerListWindow.setHelpWindow(this.statusWindow);
@@ -656,12 +726,12 @@
 
     // Window_ReserveMember
     Scene_CharacterSelect.prototype.commandOkReserve = function () {
-        var id = $gameParty._actors[this.allyBattlerListWindow._index],
-        data = $gameSystem.selectMembers();
+        //var id = $gameParty._actors[this.allyBattlerListWindow._index];
+        var data = $gameSystem.selectMembers();
         if (param.removeOnReserveTerm && this.reserveMemberWindow._index == 0) {
-          if(this.commandWindow._index == 0 && id){
+          if(this.commandWindow._index == 0){
             $gameSystem.allyMembers()[this.allyBattlerListWindow._index] = 0;
-          }else if(this.commandWindow._index == 1){
+          }else if(this.commandWindow._index == 2){
             $gameSystem.enemyMembers()[this.enemyBattlerListWindow._index] = 0;
           }
         }else{
@@ -673,7 +743,7 @@
             }else{
                 SoundManager.playBuzzer();
             }
-          }else if(this.commandWindow._index == 1){
+          }else if(this.commandWindow._index == 2){
             if (!$gameSystem.enemyMembers().includes(data[index])){
               $gameSystem.enemyMembers()[this.enemyBattlerListWindow._index] = data[index];
             }else{
@@ -684,7 +754,7 @@
         if(this.commandWindow._index == 0){
           this.allyBattlerListWindow.refresh();
           this.allyBattlerListWindow.activate();
-        }else if(this.commandWindow._index == 1){
+        }else if(this.commandWindow._index == 2){
           this.enemyBattlerListWindow.refresh();
           this.enemyBattlerListWindow.activate();
         }
@@ -693,7 +763,11 @@
     }
 
     Scene_CharacterSelect.prototype.commandCancelReserve = function () {
-        this.allyBattlerListWindow.activate();
+        if(this.commandWindow._index == 0){
+            this.allyBattlerListWindow.activate();
+        }else if(this.commandWindow._index == 2){
+            this.enemyBattlerListWindow.activate();
+        }
         this.reserveMemberWindow.select(-1);
     }
 
