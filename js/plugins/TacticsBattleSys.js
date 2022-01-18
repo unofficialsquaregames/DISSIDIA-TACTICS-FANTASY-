@@ -1315,6 +1315,19 @@ Imported.TacticsBattleSys = true;
             value += Math.round((value + this.paramBase(paramId)) * rate / 100);
           }
         }
+        //リユニオンバフ(セフィロスのステータスをアップ)
+        var field = $dataStates[id].meta.field;
+        var reunion = $dataStates[id].meta.reunion;
+        if(field && reunion && $gameMap.unitList()){
+          //マップ上にいるユニットのステートをチェックする
+          for(var i = 0; i < $gameMap.unitList().length; i++){
+            var reunionUnit = $gameMap.unitList()[i];
+            var reunionActor = reunionUnit.isActor();
+            if(this.isCharacter().targetRange(reunionUnit) <= parseInt(field)){
+              value += Math.round((value + this.paramBase(paramId)) * 5 / 100);
+            }
+          }
+        }
       }
     }
     if($gameMap.unitList()){
@@ -1322,6 +1335,7 @@ Imported.TacticsBattleSys = true;
       for(var i = 0; i < $gameMap.unitList().length; i++){
         var robbedUnit = $gameMap.unitList()[i];
         var robbedActor = robbedUnit.isActor();
+        if(robbedUnit == this.isCharacter()) continue;
         for(var id = 1; id < $dataStates.length; id++){
           if (robbedActor.isStateAffected(id)) {
             var stealGrantor = $dataStates[id].meta.stealGrantor;
@@ -1348,6 +1362,14 @@ Imported.TacticsBattleSys = true;
                   var rate = parseInt(agi);
                   value += Math.round((value + this.paramBase(paramId)) * rate / 100);
                 }
+              }
+            }
+            //リユニオンバフ(領域内のユニットのステータスをダウン)
+            var field = $dataStates[id].meta.field;
+            var reunion = $dataStates[id].meta.reunion;
+            if(field && reunion){
+              if(robbedUnit.targetRange(this.isCharacter()) <= parseInt(field)){
+                value -= Math.round((value + this.paramBase(paramId)) * 5 / 100);
               }
             }
           }
@@ -2974,7 +2996,7 @@ Imported.TacticsBattleSys = true;
     for(var id = 1; id < $dataStates.length; id++){
       if (this.isActor().isStateAffected(id)) {
         if($dataStates[id].meta.activate && this.isAttackTarget(target)){
-          if($dataStates[id].meta.activate == "chase" || $dataStates[id].meta.activate == "chaseCounter") {
+          if($dataStates[id].meta.activate == "chase" || $dataStates[id].meta.activate == "chaseCounter" || $dataStates[id].meta.activate == "chaseInvasion") {
             var skill = $dataStates[id].meta.skill;
             if(skill == "same"){
                 $gameMap.addReservationActionList(this,this.useSkill(),target,"chase");
@@ -3251,7 +3273,7 @@ Imported.TacticsBattleSys = true;
               }
               //不可視領域内侵入でアビリティが発動するタイプ
               if($dataStates[id].meta.activate && checkUnit.isAttackTarget(this)){//this.isEnemy()){
-                if($dataStates[id].meta.activate == "invasion" || $dataStates[id].meta.activate == "freeFight") {
+                if($dataStates[id].meta.activate == "invasion" || $dataStates[id].meta.activate == "chaseInvasion" || $dataStates[id].meta.activate == "freeFight") {
                   if($dataStates[id].meta.skill == "shift"){
                     checkActor.wtTurnAdvance();
                     checkActor.extendBuffStateTurns();
@@ -5643,7 +5665,7 @@ Imported.TacticsBattleSys = true;
       //リスト一覧画面
       this.addCommand("ユニットリスト", 'unitList', true);
       
-      this.move(Graphics.boxWidth-256, 0, 256, this.windowHeight()); //指定した座標へ移動し大きさも変更する
+      this.move(Graphics.boxWidth-256, 72, 256, this.windowHeight()); //指定した座標へ移動し大きさも変更する
       //描画(されなかった、おそらく呼び出し順？)
       for(var i = 0; i < this.maxItems(); i++){
         this.drawItem(i);
@@ -5651,12 +5673,72 @@ Imported.TacticsBattleSys = true;
     }   
   };
   
-  Window_BattleCommand.prototype.refresh = function(actor) {
+  Window_BattleCommand.prototype.refresh = function(character) {
     this.clearCommandList();
-    this.makeCommandList(actor);
+    this.makeCommandList(character);
     this.createContents();
     Window_Selectable.prototype.refresh.call(this);
   };
+    //-----------------------------------------------------------------------------
+  // Window_BattleCommandInfo(MP消費量とか)
+  //
+
+  function Window_BattleCommandInfo() {
+    this.initialize.apply(this, arguments);
+  }
+
+  Window_BattleCommandInfo.prototype = Object.create(Window_Base.prototype);
+  Window_BattleCommandInfo.prototype.constructor = Window_BattleCommandInfo;
+
+  Window_BattleCommandInfo.prototype.initialize = function() {
+    Window_Base.prototype.initialize.call(this, Graphics.boxWidth-256, 0, 256, 72);
+    this.hide();
+    //this.setBackgroundType(statusBackground);
+    //this.openness = 0;
+    
+  };
+
+  Window_BattleCommandInfo.prototype.setSkill = function(skill) {
+    if(!skill) return;
+    if (this._skill !== skill) {
+        this._skill = skill;
+        this.refresh();
+    }
+  };
+  
+  //ステートリストの描画
+  Window_BattleCommandInfo.prototype.drawItem = function() {
+    var skill = this._skill;
+    if(!skill) return;
+    if(skill.stypeId == 1 || skill.stypeId == 2){
+       this.changeTextColor(this.systemColor());
+       this.drawText("消費MP：", 8, 0, 96);
+       this.resetTextColor();
+       var cost = skill.mpCost;
+       this.drawText(cost, 112, 0, 64);
+    }else if(skill.stypeId == 3){
+       this.changeTextColor(this.systemColor());
+       this.drawText("消費TP：", 8, 0, 96);
+       this.resetTextColor();
+       var cost = skill.tpCost;
+       this.drawText(cost, 112, 0, 64);
+    }
+  };
+  Window_BattleCommandInfo.prototype.refresh = function(character, index) {
+    this.createContents();
+    if(index == 1){
+      this.setSkill(character._myAbility[0]);
+      this.drawItem();
+    }else if(index == 2){
+      this.setSkill(character._myAbility[1]);
+      this.drawItem();
+    }else if(index == 4){
+      this.setSkill(character._myAbility[2]);
+      this.drawItem();
+    }
+  };
+  
+
     //-----------------------------------------------------------------------------
   // Window_DeadUnitList(戦闘不能者を表示するウインドウ)
   //
@@ -6870,6 +6952,8 @@ Imported.TacticsBattleSys = true;
     this._commandWindow.setHandler('wait', this.commandWait.bind(this));
     this._commandWindow.setHandler('unitList', this.commandUnitList.bind(this));
     this.addWindow(this._commandWindow);
+    this._commandInfoWindow = new Window_BattleCommandInfo();
+    this.addWindow(this._commandInfoWindow);
   };
   
   // コマンドウインドウを開ける
@@ -6877,13 +6961,16 @@ Imported.TacticsBattleSys = true;
     if(!this._commandWindow.active){
       this._commandWindow.show();
       this._commandWindow.activate();
+      this._commandInfoWindow.show();
+      this._commandInfoWindow.activate();
     }
   };
   
   // コマンドウインドウを更新する
-  Scene_Map.prototype.updateCommandWindow = function(actor) {
+  Scene_Map.prototype.updateCommandWindow = function(character) {
     this._commandWindow.clearCommandList();
-    this._commandWindow.refresh(actor);
+    this._commandWindow.refresh(character);
+    this._commandInfoWindow.refresh(character, this._commandWindow.index());
   };
   
   // コマンドウインドウを閉じる
@@ -6891,6 +6978,8 @@ Imported.TacticsBattleSys = true;
     this._commandWindow.clearCommandList();
     this._commandWindow.hide();
     this._commandWindow.deactivate();
+    this._commandInfoWindow.hide();
+    this._commandInfoWindow.deactivate();
   };
   
   //YesNo選択画面作成
