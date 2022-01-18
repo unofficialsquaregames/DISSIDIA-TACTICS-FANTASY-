@@ -256,6 +256,46 @@
  * @dir img/characters/
  * @type file
  *
+ * @param ally1Id
+ * @desc 味方1の変数
+ * @default 11
+ *
+ * @param ally2Id
+ * @desc 味方1の変数
+ * @default 12
+ *
+ * @param ally3Id
+ * @desc 味方3の変数
+ * @default 13
+ *
+ * @param ally4Id
+ * @desc 味方4の変数
+ * @default 14
+ *
+ * @param ally5Id
+ * @desc 味方5の変数
+ * @default 15
+ *
+ * @param enemy1Id
+ * @desc 敵1の変数
+ * @default 16
+ *
+ * @param enemy2Id
+ * @desc 敵2の変数
+ * @default 17
+ *
+ * @param enemy3Id
+ * @desc 敵3の変数
+ * @default 18
+ *
+ * @param enemy4Id
+ * @desc 敵4の変数
+ * @default 19
+ *
+ * @param enemy5Id
+ * @desc 敵5の変数
+ * @default 20
+ *
  * @noteParam faceName
  * @noteRequire 1
  * @noteDir img/faces/
@@ -318,6 +358,16 @@ Imported.TacticsBattleSys = true;
   var paramCriticalDamage   = +parameters['CriticalDamage'];
   var paramMaxElementDamage   = +parameters['MaxElementDamage'];
   var cursorImage = parameters['cursorImage'];
+  var ally1Id = +parameters['ally1Id'];
+  var ally2Id = +parameters['ally2Id'];
+  var ally3Id = +parameters['ally3Id'];
+  var ally4Id = +parameters['ally4Id'];
+  var ally5Id = +parameters['ally5Id'];
+  var enemy1Id = +parameters['enemy1Id'];
+  var enemy2Id = +parameters['enemy2Id'];
+  var enemy3Id = +parameters['enemy3Id'];
+  var enemy4Id = +parameters['enemy4Id'];
+  var enemy5Id = +parameters['enemy5Id'];
 'use strict';
   
   //プラグインコマンド設定
@@ -416,6 +466,16 @@ Imported.TacticsBattleSys = true;
     this._resurrectionUnit = null;
   };
   
+  //-----------------------------------------------------------------------------
+  // Game_System
+  //
+
+  // 初期化処理
+  var _Game_System_initialize = Game_System.prototype.initialize;
+  Game_System.prototype.initialize = function() {
+    _Game_System_initialize.call(this);
+    this.helpShow = true;
+  }
 
   //-----------------------------------------------------------------------------
   // Game_Action
@@ -2648,7 +2708,20 @@ Imported.TacticsBattleSys = true;
       }else{
         this._allyId = $gameSystem.allyMembers()[parseInt(allyId)];
       }
-      $gameVariables.setValue(11 + parseInt(allyId),this._allyId); //変数設定
+      switch(parseInt(allyId)){
+      case 0:
+        $gameVariables.setValue(ally1Id,this._allyId); //変数設定
+        break;
+      case 1:
+        $gameVariables.setValue(ally2Id,this._allyId); //変数設定
+        break;
+      case 2:
+        $gameVariables.setValue(ally3Id,this._allyId); //変数設定
+        break;
+      case 3:
+        $gameVariables.setValue(ally4Id,this._allyId); //変数設定
+        break;
+      }
       this.setActor(new Game_Actor(this._allyId));
         
       this.isActor().setCharacter(this); //イベントと紐づける用
@@ -2672,7 +2745,21 @@ Imported.TacticsBattleSys = true;
       }else{
         this._enemyId = $gameSystem.enemyMembers()[parseInt(enemyId)];
       }
-      $gameVariables.setValue(15 + parseInt(enemyId),this._enemyId); //変数設定
+      
+      switch(parseInt(enemyId)){
+      case 0:
+        $gameVariables.setValue(enemy1Id,this._enemyId); //変数設定
+        break;
+      case 1:
+        $gameVariables.setValue(enemy2Id,this._enemyId); //変数設定
+        break;
+      case 2:
+        $gameVariables.setValue(enemy3Id,this._enemyId); //変数設定
+        break;
+      case 3:
+        $gameVariables.setValue(enemy4Id,this._enemyId); //変数設定
+        break;
+      }
       this.setActor(new Game_Actor(this._enemyId));
         
       this.isActor().setCharacter(this); //イベントと紐づける用
@@ -5636,7 +5723,7 @@ Imported.TacticsBattleSys = true;
       }else{
         this.addCommand("-", 'second', false);
       }
-      
+      /*
       //第三アビリティ
       if (event.checkSpecialSkill()){
         if (actor.meetsSkillConditions($dataSkills[event.checkSpecialSkill()])) {
@@ -5647,7 +5734,7 @@ Imported.TacticsBattleSys = true;
       }else{
         this.addCommand("-", 'third', false);
       }
-      
+      */
       //バーストアビリティ
       if (event._myAbility[2]){
         if (actor.meetsSkillConditions(event._myAbility[2])) {
@@ -5665,7 +5752,14 @@ Imported.TacticsBattleSys = true;
       //リスト一覧画面
       this.addCommand("ユニットリスト", 'unitList', true);
       
-      this.move(Graphics.boxWidth-256, 72, 256, this.windowHeight()); //指定した座標へ移動し大きさも変更する
+      //ヘルプ表示非表示
+      if ($gameSystem.helpShow){
+        this.addCommand("ヘルプ非表示", 'help', true);
+      }else{
+        this.addCommand("ヘルプ表示", 'help', true);
+      }
+      
+      this.move(Graphics.boxWidth-256, 152, 256, this.windowHeight()); //指定した座標へ移動し大きさも変更する
       //描画(されなかった、おそらく呼び出し順？)
       for(var i = 0; i < this.maxItems(); i++){
         this.drawItem(i);
@@ -5691,7 +5785,7 @@ Imported.TacticsBattleSys = true;
   Window_BattleCommandInfo.prototype.constructor = Window_BattleCommandInfo;
 
   Window_BattleCommandInfo.prototype.initialize = function() {
-    Window_Base.prototype.initialize.call(this, Graphics.boxWidth-256, 0, 256, 72);
+    Window_Base.prototype.initialize.call(this, Graphics.boxWidth-256, 0, 256, 152);
     this.hide();
     //this.setBackgroundType(statusBackground);
     //this.openness = 0;
@@ -5712,28 +5806,47 @@ Imported.TacticsBattleSys = true;
     if(!skill) return;
     if(skill.stypeId == 1 || skill.stypeId == 2){
        this.changeTextColor(this.systemColor());
-       this.drawText("消費MP：", 8, 0, 96);
+       this.drawText("消費MP:", 8, 0, 64);
        this.resetTextColor();
        var cost = skill.mpCost;
-       this.drawText(cost, 112, 0, 64);
+       this.drawText(cost, 72, 0, 32);
     }else if(skill.stypeId == 3){
        this.changeTextColor(this.systemColor());
-       this.drawText("消費TP：", 8, 0, 96);
+       this.drawText("消費TP:", 8, 0, 64);
        this.resetTextColor();
        var cost = skill.tpCost;
-       this.drawText(cost, 112, 0, 64);
+       this.drawText(cost, 72, 0, 32);
+    }
+    var a = (skill.meta.range || 'diamond 1').split(' ');
+    var range = a[1];
+    a = (skill.meta.effect || 'diamond 0').split(' ');
+    var effect = a[1];
+    //射程
+    this.changeTextColor(this.systemColor());
+    this.drawText("射程:", 112, 0, 64);
+    this.resetTextColor();
+    this.drawText(range, 176, 0, 32);
+    
+    //効果範囲
+    this.changeTextColor(this.systemColor());
+    this.drawText("効果範囲:", 8, 40, 128);
+    this.resetTextColor();
+    if(effect == "self"){
+      if(range == 0){
+        this.drawText("自身のみ", 8, 80, 256);
+      }else{
+        this.drawText("自身から"+ range + "マス", 8, 80, 256);
+      }
+    }else if(effect == 0){
+      this.drawText("対象のみ", 8, 80, 256);
+    }else{
+      this.drawText("対象から"+ effect + "マス", 8, 80, 256);
     }
   };
   Window_BattleCommandInfo.prototype.refresh = function(character, index) {
     this.createContents();
-    if(index == 1){
-      this.setSkill(character._myAbility[0]);
-      this.drawItem();
-    }else if(index == 2){
-      this.setSkill(character._myAbility[1]);
-      this.drawItem();
-    }else if(index == 4){
-      this.setSkill(character._myAbility[2]);
+    if(index >= 1 && index <= 3){
+      this.setSkill(character._myAbility[index-1]);
       this.drawItem();
     }
   };
@@ -6526,7 +6639,11 @@ Imported.TacticsBattleSys = true;
       this.drawText("効果範囲:", x + iconBoxWidth + this.spacing()*6, y2, this.spacing(), "right");
       this.resetTextColor();
       if(effect == "self"){
-        this.drawText("自身から"+ range + "マス", x + iconBoxWidth + this.spacing()*7, y2, this.spacing()*2,"left");
+        if(range == 0){
+          this.drawText("自身のみ", x + iconBoxWidth + this.spacing()*7, y2, this.spacing()*2,"left");
+        }else{
+          this.drawText("自身から"+ range + "マス", x + iconBoxWidth + this.spacing()*7, y2, this.spacing()*2,"left");
+        }
       }else if(effect == 0){
         this.drawText("対象のみ", x + iconBoxWidth + this.spacing()*7, y2, this.spacing()*2,"left");
       }else{
@@ -6756,6 +6873,9 @@ Imported.TacticsBattleSys = true;
       this.setText('');
     }
   };
+  Window_Help.prototype.standardFontSize = function() {
+      return 18;
+  };
   //-----------------------------------------------------------------------------
   // Window_TitleCommand
   // 
@@ -6772,8 +6892,8 @@ Imported.TacticsBattleSys = true;
   var _Scene_Status_create = Scene_Status.prototype.create;
   Scene_Status.prototype.create = function() {
     Scene_MenuBase.prototype.create.call(this);
-    this.createHelpWindow();
     this.createActorWindow();
+    this.createHelpWindow();
     this.createCategoryWindow();
     this.createSkillWindow();
     this.createStatusWindow();
@@ -6783,7 +6903,7 @@ Imported.TacticsBattleSys = true;
     this._categoryWindow = new Window_StatusCategory();
     
     this._categoryWindow.setHelpWindow(this._helpWindow);
-    this._categoryWindow.y = this._helpWindow.height;
+    this._categoryWindow.y = 0;
     
     this._categoryWindow.setHandler('skill',     this.onCategorySkill.bind(this));
     this._categoryWindow.setHandler('status',     this.onCategoryStatus.bind(this));
@@ -6799,7 +6919,7 @@ Imported.TacticsBattleSys = true;
 
   Scene_Status.prototype.createSkillWindow = function() {
     var wy = this._categoryWindow.y + this._categoryWindow.height;
-    var wh = Graphics.boxHeight - wy - this._actorWindow.height;
+    var wh = Graphics.boxHeight - wy - this._helpWindow.height - this._actorWindow.height;
     this._skillWindow = new Window_SkillInfo(0, wy, Graphics.boxWidth, wh);
     this._skillWindow.setActor(this._actor);
     
@@ -6813,7 +6933,7 @@ Imported.TacticsBattleSys = true;
 
   Scene_Status.prototype.createStatusWindow = function() {
     var wy = this._categoryWindow.y + this._categoryWindow.height;
-    var wh = Graphics.boxHeight - wy - this._actorWindow.height;
+    var wh = Graphics.boxHeight - wy - this._helpWindow.height - this._actorWindow.height;
     this._statusWindow = new Window_StatusInfo(0, wy, Graphics.boxWidth, wh);
     this._statusWindow.setActor(this._actor);
     
@@ -6823,6 +6943,11 @@ Imported.TacticsBattleSys = true;
     this._statusWindow.setHandler('cancel', this.onStatusCancel.bind(this));
     this.addWindow(this._statusWindow);
     //this._categoryWindow.setStatusWindow(this._skillWindow);
+  };
+  Scene_Status.prototype.createHelpWindow = function() {
+    this._helpWindow = new Window_Help();
+    this._helpWindow.y = Graphics.boxHeight - this._actorWindow.height - this._helpWindow.height;
+    this.addWindow(this._helpWindow);
   };
   
   Scene_Status.prototype.user = function() {
@@ -6914,7 +7039,7 @@ Imported.TacticsBattleSys = true;
   var _Scene_Map_createAllWindows = Scene_Map.prototype.createAllWindows;
   Scene_Map.prototype.createAllWindows = function() {
     _Scene_Map_createAllWindows.call(this);
-    this.createHelpWindow();
+    //this.createHelpWindow();
     this.createBattleStatusWindow();
     this.createYesNoWindow();
     this.createCommandWindow();
@@ -6943,15 +7068,23 @@ Imported.TacticsBattleSys = true;
   //コマンドリスト作成
   Scene_Map.prototype.createCommandWindow = function() {
     //アクターコマンドクラスが使えないから新たにwindowを作成する必要あり
+    this._helpWindow = new Window_Help();
     this._commandWindow = new Window_BattleCommand();
     this._commandWindow.setHandler('move', this.commandMove.bind(this));
     this._commandWindow.setHandler('first', this.firstAbility.bind(this));
     this._commandWindow.setHandler('second', this.secondAbility.bind(this));
-    this._commandWindow.setHandler('third', this.thirdAbility.bind(this));
+    //this._commandWindow.setHandler('third', this.thirdAbility.bind(this));
     this._commandWindow.setHandler('burst', this.burstAbility.bind(this));
     this._commandWindow.setHandler('wait', this.commandWait.bind(this));
     this._commandWindow.setHandler('unitList', this.commandUnitList.bind(this));
+    this._commandWindow.setHandler('help', this.commandHelpShow.bind(this));
+    this._commandWindow.setHelpWindow(this._helpWindow);
+    this._commandWindow.hideHelpWindow();
     this.addWindow(this._commandWindow);
+    this._helpWindow.x = 96;
+    this._helpWindow.y = 152;
+    this._helpWindow.width = Graphics.boxWidth - this._commandWindow.width - 112;
+    this.addWindow(this._helpWindow);
     this._commandInfoWindow = new Window_BattleCommandInfo();
     this.addWindow(this._commandInfoWindow);
   };
@@ -6960,6 +7093,7 @@ Imported.TacticsBattleSys = true;
   Scene_Map.prototype.openCommandWindow = function() {
     if(!this._commandWindow.active){
       this._commandWindow.show();
+      //this._commandWindow.showHelpWindow();
       this._commandWindow.activate();
       this._commandInfoWindow.show();
       this._commandInfoWindow.activate();
@@ -6971,11 +7105,51 @@ Imported.TacticsBattleSys = true;
     this._commandWindow.clearCommandList();
     this._commandWindow.refresh(character);
     this._commandInfoWindow.refresh(character, this._commandWindow.index());
+    if($gameSystem.helpShow){
+      this._commandWindow.updateHelp();
+      this._commandWindow.showHelpWindow();
+    
+      var skill = null
+      switch(this._commandWindow.index()){
+      case 0:
+        skill = $dataSkills[2];
+        break;
+      case 1:
+        skill = character._myAbility[0];
+        break;
+      case 2:
+        skill = character._myAbility[1];
+        break;
+      /*case 3:
+        skill = $dataSkills[character.checkSpecialSkill()];
+        break;*/
+      case 3:
+        skill = character._myAbility[2];
+        break;
+      case 4:
+        skill = $dataSkills[3];
+        break;
+      case 5:
+        skill = $dataSkills[4];
+        break;
+      case 6:
+        skill = $dataSkills[5];
+        break;
+      }
+      if(skill){
+        this._commandWindow.setHelpWindowItem(skill);
+      }else{
+        this._commandWindow.hideHelpWindow();
+      }
+    }else{
+      this._commandWindow.hideHelpWindow();
+    }
   };
   
   // コマンドウインドウを閉じる
   Scene_Map.prototype.closeCommandWindow = function() {
     this._commandWindow.clearCommandList();
+    this._commandWindow.hideHelpWindow();
     this._commandWindow.hide();
     this._commandWindow.deactivate();
     this._commandInfoWindow.hide();
@@ -7667,6 +7841,15 @@ Imported.TacticsBattleSys = true;
     ///ユニットリストウインドウを開く
     this.openUnitListWindow();
     $gameMap._phaseState = 13;//ユニットリスト選択フェーズへ移行
+  };
+  
+  // 2,SRPGコマンド【ヘルプ】
+  Scene_Map.prototype.commandHelpShow = function() {
+    if($gameSystem.helpShow){
+      $gameSystem.helpShow = false;
+    }else{
+      $gameSystem.helpShow = true;
+    }
   };
   // 3,移動先選択
   Scene_Map.prototype.updateMoveInput = function() {
