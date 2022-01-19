@@ -87,7 +87,7 @@
  * @type string
  * @text 「完了」表示テキスト
  * @desc 「完了」表示テキストを指定。空にするとコマンドが消えます。
- * @default 完了
+ * @default 準備完了
  *
  * @param layoutPW
  * @text パーティ選択ウィンドウ

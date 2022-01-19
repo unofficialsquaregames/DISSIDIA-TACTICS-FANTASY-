@@ -6598,7 +6598,7 @@ Imported.TacticsBattleSys = true;
         break;
       case 6:
         this.changeTextColor(this.systemColor());
-        this.drawText("反撃", x + iconBoxWidth + this.spacing()*2, y2, this.spacing()*2, "left");
+        this.drawText("カウンター", x + iconBoxWidth + this.spacing()*2, y2, this.spacing()*2, "left");
         this.resetTextColor();
         break;
       case 7:
@@ -6608,7 +6608,7 @@ Imported.TacticsBattleSys = true;
         break;
       case 8:
         this.changeTextColor(this.systemColor());
-        this.drawText("罠", x + iconBoxWidth + this.spacing()*2, y2, this.spacing()*2, "left");
+        this.drawText("トラップ", x + iconBoxWidth + this.spacing()*2, y2, this.spacing()*2, "left");
         this.resetTextColor();
         break;
       case 9:
@@ -6624,6 +6624,16 @@ Imported.TacticsBattleSys = true;
       case 11:
         this.changeTextColor(this.systemColor());
         this.drawText("フリーファイト", x + iconBoxWidth + this.spacing()*2, y2, this.spacing()*2, "left");
+        this.resetTextColor();
+        break;
+      case 12:
+        this.changeTextColor(this.systemColor());
+        this.drawText("追撃カウンター", x + iconBoxWidth + this.spacing()*2, y2, this.spacing()*2, "left");
+        this.resetTextColor();
+        break;
+      case 13:
+        this.changeTextColor(this.systemColor());
+        this.drawText("追撃迎撃", x + iconBoxWidth + this.spacing()*2, y2, this.spacing()*2, "left");
         this.resetTextColor();
         break;
       }
