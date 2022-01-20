@@ -60,12 +60,12 @@
  * @default 255 255 32 128
  *
  * @param colorAreaInvisible
- * @desc 不可視領域のトナー設定
+ * @desc バフフィールドのトナー設定
  * 初期値: 255 255 255 128
  * @default 255 255 255 128
  *
  * @param colorAreaInvisibleCover
- * @desc 不可視領域(被り)のトナー設定
+ * @desc バフフィールド(被り)のトナー設定
  * 初期値: 0 0 0 128
  * @default 0 0 0 128
  *
@@ -1319,7 +1319,7 @@ Imported.TacticsBattleSys = true;
             value += item.params[paramId];
         }
     }
-    //ここからバフデバフ不可視領域の影響でパラメータの上げ下げを行う(ブラッドもここで取り扱った方がよい？)
+    //ここからバフデバフバフフィールドの影響でパラメータの上げ下げを行う(ブラッドもここで取り扱った方がよい？)
     for(var id = 1; id < $dataStates.length; id++){
       if (this.isStateAffected(id)) {
         /*
@@ -1464,7 +1464,7 @@ Imported.TacticsBattleSys = true;
     this._wtTurnList = []; //行動順リスト
     this._turnUnit = []; //ターンが回ったユニット
     this._area = {}; //エリアトーン表示
-    this._invisibleArea = {}; //不可視領域表示
+    this._invisibleArea = {}; //バフフィールド表示
     this._targetArea = {}; //効果範囲のバトラー登録
     
     //以下トラップやカウンター用の変数設定
@@ -1756,7 +1756,7 @@ Imported.TacticsBattleSys = true;
   // 範囲表示カラーをセット
   Game_Map.prototype.setColorArea = function(colorParam) {
     if (!Imported.SAN_TileToner) return;
-    //移動・射程など(不可視領域と被ってる箇所を別色で塗りたい)
+    //移動・射程など(バフフィールドと被ってる箇所を別色で塗りたい)
     var keys = Object.keys(this._area);
     for (var i = 0, a; i < keys.length; i++) {
       a = keys[i].split(',').map(Number);
@@ -1764,11 +1764,11 @@ Imported.TacticsBattleSys = true;
     }
   };
 
-  // 不可視領域カラーをセット
+  // バフフィールドカラーをセット
   Game_Map.prototype.setColorInvisibleArea = function() {
     if (!Imported.SAN_TileToner) return;
     this.clearTileTones();
-    //不可視領域を先に描画する
+    //バフフィールドを先に描画する
     var keys = Object.keys(this._invisibleArea);
     for (var i = 0, a; i < keys.length; i++) {
       a = keys[i].split(',').map(Number);
@@ -1796,7 +1796,7 @@ Imported.TacticsBattleSys = true;
     this.memoryMovableArea();  //移動可能範囲を記憶する
   };
 
-  // 不可視領域を設定する
+  // バフフィールドを設定する
   Game_Map.prototype.setInvisibleArea = function(unitList){
     this._invisibleArea = {};
     for(var i = 0; i < unitList.length; i++){
@@ -1814,14 +1814,14 @@ Imported.TacticsBattleSys = true;
   };
   
   
-  // 不可視領域を作成する
+  // バフフィールドを作成する
   Game_Map.prototype.createInvisibleArea = function(x, y, field, area) {
     var a = (field || 'diamond 0').split(' ');
     //return this.createArea(x, y, ['diamond', field]);
     return this.createAreaCombine(x, y, ['diamond', field], area);
   };
   
-  // 不可視領域を表示する
+  // バフフィールドを表示する
   Game_Map.prototype.showInvisibleArea = function(unit){
      this.initColorArea();
      this.setColorInvisibleArea();
@@ -2240,10 +2240,10 @@ Imported.TacticsBattleSys = true;
       var check2 = (!this.canMoveArea(x,y)); //this.terrainTag(x, y) == 1; //城、海などのエリアかチェック
       if(type == "move"){
         var check3 = (unit.findAreaTo(x, y) == 0); //キャラやオブジェクトの配置によって移動できないエリアかチェック(経路探索できてない)
-        //var check6 = unit.cantMoveInvisibleArea() && !(x == unit.x && y == unit.y);//進行不可の不可視領域に既に入っている場合移動不可//バランス考慮して領域外への移動は可能にしたいためコメントアウト
+        //var check6 = unit.cantMoveInvisibleArea() && !(x == unit.x && y == unit.y);//進行不可のバフフィールドに既に入っている場合移動不可//バランス考慮して領域外への移動は可能にしたいためコメントアウト
       }
       var check4 = (!(unit._actor.meetsSkillConditions($dataSkills[2])) && !(x == unit.x && y == unit.y));//そもそもドンムブなどで移動できない状態
-      var check5 = (!unit.checkProceedInvisibleArea(x, y) && !(x == unit.x && y == unit.y));//進行不可の不可視領域か
+      var check5 = (!unit.checkProceedInvisibleArea(x, y) && !(x == unit.x && y == unit.y));//進行不可のバフフィールドか
       
       //チェックされたエリアを削除
       if(type == "move"){
@@ -2905,7 +2905,7 @@ Imported.TacticsBattleSys = true;
       //攻撃スキル(対象が敵)の場合
       if(this.useSkill().scope == 1 || this.useSkill().scope == 2){
         if (this.isAttackTarget(targets[i])){
-          //まふうけん不可視領域内に入っているかチェック
+          //まふうけんバフフィールド内に入っているかチェック
           //領域内に入ってかつ魔法攻撃であった場合ターゲットをまふうけん付与者に切り替える
           var receiveUnit = targets[i].receiveArea(action.isMagical());
           if(receiveUnit) targets[i] = receiveUnit;
@@ -3143,7 +3143,7 @@ Imported.TacticsBattleSys = true;
   
   // 味方による追撃チェック
   Game_Event.prototype.checkAllyChase = function(target) {
-    //マップ上にいるユニットの不可視領域侵入チェック
+    //マップ上にいるユニットのバフフィールド侵入チェック
     for(var i = 0; i < $gameMap.unitList().length; i++){
       var allyChaseUnit = $gameMap.unitList()[i];
       var allyChaseUnitActor = allyChaseUnit.isActor();
@@ -3152,8 +3152,9 @@ Imported.TacticsBattleSys = true;
         if (allyChaseUnitActor.isStateAffected(id)) {
           var field = $dataStates[id].meta.field;
           if(field){
-            if((this.targetRange(allyChaseUnit) <= parseInt(field)) && (target.targetRange(allyChaseUnit) <= parseInt(field))){
-              //不可視領域内侵入していた場合追撃発生する
+            //if((this.targetRange(allyChaseUnit) <= parseInt(field)) && (target.targetRange(allyChaseUnit) <= parseInt(field))){
+            if(target.targetRange(allyChaseUnit) <= parseInt(field)){
+              //バフフィールド内侵入していた場合追撃発生する
               if($dataStates[id].meta.activate && allyChaseUnit.isAttackTarget(target) && this.isAttackTarget(target)){
                 if($dataStates[id].meta.activate == "allyChase" || $dataStates[id].meta.activate == "freeFight") {
                   $gameMap.addReservationActionList(allyChaseUnit,$dataSkills[parseInt($dataStates[id].meta.skill)],target,"allyChase");
@@ -3169,7 +3170,7 @@ Imported.TacticsBattleSys = true;
   
   // 味方による反撃チェック
   Game_Event.prototype.checkAllyCounter = function(target) {
-    //マップ上にいるユニットの不可視領域侵入チェック
+    //マップ上にいるユニットのバフフィールド侵入チェック
     for(var i = 0; i < $gameMap.unitList().length; i++){
       var allyCounterUnit = $gameMap.unitList()[i];
       var allyCounterUnitActor = allyCounterUnit.isActor();
@@ -3180,7 +3181,7 @@ Imported.TacticsBattleSys = true;
           if(field){
             //if((this.targetRange(allyCounterUnit) <= parseInt(field)) && (target.targetRange(allyCounterUnit) <= parseInt(field))){
             if(target.targetRange(allyCounterUnit) <= parseInt(field)){ //味方が領域内に入っていれば、敵が領域外でもカウンターが発動する
-              //不可視領域内侵入していた場合反撃発生する
+              //バフフィールド内侵入していた場合反撃発生する
               if($dataStates[id].meta.activate && allyCounterUnit.isCoverTarget(target) && allyCounterUnit.isAttackTarget(this)){
                 if($dataStates[id].meta.activate == "allyCounter" || $dataStates[id].meta.activate == "freeFight") {
                   if($dataStates[id].meta.skill == "shift"){
@@ -3322,7 +3323,7 @@ Imported.TacticsBattleSys = true;
       }
     }
     
-    //マップ上にいるユニットのステートおよび不可視領域侵入チェック
+    //マップ上にいるユニットのステートおよびバフフィールド侵入チェック
     for(var i = 0; i < $gameMap.unitList().length; i++){
       var checkUnit = $gameMap.unitList()[i];
       var checkActor = checkUnit.isActor();
@@ -3358,7 +3359,7 @@ Imported.TacticsBattleSys = true;
                   this.reserveDamagePopup(0);//リジェネ効果のポップアップ表示
                 }
               }
-              //不可視領域内侵入でアビリティが発動するタイプ
+              //バフフィールド内侵入でアビリティが発動するタイプ
               if($dataStates[id].meta.activate && checkUnit.isAttackTarget(this)){//this.isEnemy()){
                 if($dataStates[id].meta.activate == "invasion" || $dataStates[id].meta.activate == "chaseInvasion" || $dataStates[id].meta.activate == "freeFight") {
                   if($dataStates[id].meta.skill == "shift"){
@@ -3424,7 +3425,7 @@ Imported.TacticsBattleSys = true;
     
   /*
   //findAreaToで使用するcanPass関数
-  //オリジナルで作成した進行不可の不可視領域跨ぐ移動を制限する目的で載せた
+  //オリジナルで作成した進行不可のバフフィールド跨ぐ移動を制限する目的で載せた
   //現状動作不能でバランス考慮して跨ぐ移動は可能にした方がいいと考えたためコメントアウト
   var _Game_CharacterBase_canPass = Game_CharacterBase.prototype.canPass;
   Game_Event.prototype.canPass = function(x, y, d) {
@@ -3435,7 +3436,7 @@ Imported.TacticsBattleSys = true;
     if (!$gameMap.isValid(x2, y2)) {
         return false;
     }
-    //オリジナル、進行不可の不可視領域内であるか
+    //オリジナル、進行不可のバフフィールド内であるか
     if (!this.checkProceedInvisibleArea(x, y)){
       return false;
     }
@@ -3455,7 +3456,7 @@ Imported.TacticsBattleSys = true;
   };
   */
   
-  // 進行不可の不可視領域に入れるか
+  // 進行不可のバフフィールドに入れるか
   Game_Event.prototype.checkProceedInvisibleArea = function(x, y) {
     var unitList = $gameMap.unitList();
     for(var i = 0; i < unitList.length; i++){
@@ -3479,7 +3480,7 @@ Imported.TacticsBattleSys = true;
     return true;
   };
   
-  // 進行不可の不可視領域に入っているか
+  // 進行不可のバフフィールドに入っているか
   Game_Event.prototype.checkInInvisibleArea = function() {
     var unitList = $gameMap.unitList();
     for(var i = 0; i < unitList.length; i++){
@@ -3502,7 +3503,7 @@ Imported.TacticsBattleSys = true;
     }
     return false;
   };
-  // 既に進行不可の不可視領域に入っているか
+  // 既に進行不可のバフフィールドに入っているか
   Game_Event.prototype.cantMoveInvisibleArea = function() {
     var unitList = $gameMap.unitList();
     for(var i = 0; i < unitList.length; i++){
@@ -6019,7 +6020,7 @@ Imported.TacticsBattleSys = true;
       /*
       var unitList = [];
       unitList.push(unit);
-      $gameMap.setInvisibleArea(unitList);         // 不可視領域を表示する
+      $gameMap.setInvisibleArea(unitList);         // バフフィールドを表示する
       */
       $gameMap.showInvisibleArea(unit);
       this._statusWindow.setUnit(unit);
@@ -6753,7 +6754,7 @@ Imported.TacticsBattleSys = true;
         this.drawText("タイプ:", x + iconBoxWidth + this.spacing() * 4, y2, this.spacing(), "right");
         this.resetTextColor();
         if(field){
-          this.drawText("不可視領域", x + iconBoxWidth + this.spacing()*5, y2, this.spacing(), "left"); //不可視領域系
+          this.drawText("バフフィールド", x + iconBoxWidth + this.spacing()*5, y2, this.spacing(), "left"); //バフフィールド系
           //効果範囲
           this.changeTextColor(this.systemColor());
           this.drawText("効果領域:", x + iconBoxWidth + this.spacing()*7, y2, this.spacing(), "right");
