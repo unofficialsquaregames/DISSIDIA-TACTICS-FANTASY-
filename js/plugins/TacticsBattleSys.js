@@ -3364,7 +3364,6 @@ Imported.TacticsBattleSys = true;
                 if($dataStates[id].meta.activate == "invasion" || $dataStates[id].meta.activate == "chaseInvasion" || $dataStates[id].meta.activate == "freeFight") {
                   if($dataStates[id].meta.skill == "shift"){
                     checkActor.wtTurnAdvance();
-                    checkActor.extendBuffStateTurns();
                   }else{
                     $gameMap.addReservationActionList(checkUnit,$dataSkills[parseInt($dataStates[id].meta.skill)],this,$dataStates[id].meta.activate);
                   }
@@ -7028,6 +7027,7 @@ Imported.TacticsBattleSys = true;
   //カテゴリ「スキル」を選択したときの処理
   Scene_Status.prototype.onCategorySkill = function() {
     this._grantedStatusWindow.hide();
+    this._relatingStatusWindow.hide();
     this._categoryWindow.deactivate();
     this._skillWindow.activate();
     this._skillWindow.show();
