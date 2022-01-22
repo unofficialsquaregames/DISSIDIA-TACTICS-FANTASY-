@@ -3104,7 +3104,7 @@ Imported.TacticsBattleSys = true;
      for(var id = 1; id < $dataStates.length; id++){
        if (actor.isStateAffected(id)) {
          var field = $dataStates[id].meta.field;
-         if(field && $dataStates[id].meta.activate && target.isAttackTarget(this)){
+         if(field && $dataStates[id].meta.activate && target.isAttackTarget(this) && target.targetIsInvalid(this)){
            if((this.targetRange(target) <= parseInt(field)) && ($dataStates[id].meta.activate == "counter" || $dataStates[id].meta.activate == "chaseCounter")){
              var skill = $dataStates[id].meta.skill;
              if(skill == "impersonation"){ //ものまね時
@@ -3182,7 +3182,7 @@ Imported.TacticsBattleSys = true;
             //if((this.targetRange(allyCounterUnit) <= parseInt(field)) && (target.targetRange(allyCounterUnit) <= parseInt(field))){
             if(target.targetRange(allyCounterUnit) <= parseInt(field)){ //味方が領域内に入っていれば、敵が領域外でもカウンターが発動する
               //バフフィールド内侵入していた場合反撃発生する
-              if($dataStates[id].meta.activate && allyCounterUnit.isCoverTarget(target) && allyCounterUnit.isAttackTarget(this)){
+              if($dataStates[id].meta.activate && allyCounterUnit.isCoverTarget(target) && allyCounterUnit.isAttackTarget(this) && allyCounterUnit.targetIsInvalid(this)){
                 if($dataStates[id].meta.activate == "allyCounter" || $dataStates[id].meta.activate == "freeFight") {
                   if($dataStates[id].meta.skill == "shift"){
                     allyCounterUnitActor.wtTurnAdvance();
@@ -3360,7 +3360,7 @@ Imported.TacticsBattleSys = true;
                 }
               }
               //バフフィールド内侵入でアビリティが発動するタイプ
-              if($dataStates[id].meta.activate && checkUnit.isAttackTarget(this)){//this.isEnemy()){
+              if($dataStates[id].meta.activate && checkUnit.isAttackTarget(this) && checkUnit.targetIsInvalid(this)){//this.isEnemy()){
                 if($dataStates[id].meta.activate == "invasion" || $dataStates[id].meta.activate == "chaseInvasion" || $dataStates[id].meta.activate == "freeFight") {
                   if($dataStates[id].meta.skill == "shift"){
                     checkActor.wtTurnAdvance();
@@ -3702,7 +3702,11 @@ Imported.TacticsBattleSys = true;
         return null;
       }
     }else{
-      return target;
+      if(this.targetIsInvalid(target)){
+        return target;
+      }else{
+        return null;
+      }
     }
   };
   
@@ -3715,7 +3719,11 @@ Imported.TacticsBattleSys = true;
         return null;
       }
     }else{
-      return target;
+      if(this.targetIsInvalid(target)){
+        return target;
+      }else{
+        return null;
+      }
     }
   };
   
@@ -5753,6 +5761,9 @@ Imported.TacticsBattleSys = true;
       //リスト一覧画面
       this.addCommand("ユニットリスト", 'unitList', true);
       
+      //ステート確認
+      this.addCommand("ステート確認", 'checkState', true);
+      
       //ヘルプ表示非表示
       if ($gameSystem.helpShow){
         this.addCommand("ヘルプ非表示", 'help', true);
@@ -5760,7 +5771,7 @@ Imported.TacticsBattleSys = true;
         this.addCommand("ヘルプ表示", 'help', true);
       }
       
-      this.move(Graphics.boxWidth-256, 152, 256, this.windowHeight()); //指定した座標へ移動し大きさも変更する
+      this.move(Graphics.boxWidth-256, 112, 256, this.windowHeight()); //指定した座標へ移動し大きさも変更する
       //描画(されなかった、おそらく呼び出し順？)
       for(var i = 0; i < this.maxItems(); i++){
         this.drawItem(i);
@@ -5786,7 +5797,7 @@ Imported.TacticsBattleSys = true;
   Window_BattleCommandInfo.prototype.constructor = Window_BattleCommandInfo;
 
   Window_BattleCommandInfo.prototype.initialize = function() {
-    Window_Base.prototype.initialize.call(this, Graphics.boxWidth-256, 0, 256, 152);
+    Window_Base.prototype.initialize.call(this, Graphics.boxWidth-256, 0, 256, 112);
     this.hide();
     //this.setBackgroundType(statusBackground);
     //this.openness = 0;
@@ -5830,18 +5841,18 @@ Imported.TacticsBattleSys = true;
     
     //効果範囲
     this.changeTextColor(this.systemColor());
-    this.drawText("効果範囲:", 8, 40, 128);
+    this.drawText("範囲:", 8, 40, 64);
     this.resetTextColor();
     if(effect == "self"){
       if(range == 0){
-        this.drawText("自身のみ", 8, 80, 256);
+        this.drawText("自身のみ", 76, 40, 128);
       }else{
-        this.drawText("自身から"+ range + "マス", 8, 80, 256);
+        this.drawText("自身から"+ range + "マス", 76, 40, 128);
       }
     }else if(effect == 0){
-      this.drawText("対象のみ", 8, 80, 256);
+      this.drawText("対象のみ", 76, 40, 128);
     }else{
-      this.drawText("対象から"+ effect + "マス", 8, 80, 256);
+      this.drawText("対象から"+ effect + "マス", 76, 40, 128);
     }
   };
   Window_BattleCommandInfo.prototype.refresh = function(character, index) {
@@ -5968,6 +5979,7 @@ Imported.TacticsBattleSys = true;
     this.openness = 0;
     this._data = [];
     this._lastindex = this.index();
+    this._stateWindow = null;
   };
   Window_UnitList.prototype.update = function() {
     Window_Selectable.prototype.update.call(this);
@@ -5980,6 +5992,10 @@ Imported.TacticsBattleSys = true;
 
   Window_UnitList.prototype.setStatusWindow = function(statusWindow) {
     this._statusWindow = statusWindow;
+  };
+  
+  Window_UnitList.prototype.setStateWindow = function(stateWindow) {
+    this._stateWindow = stateWindow;
   };
 
   Window_UnitList.prototype.maxItems = function() {
@@ -6017,16 +6033,13 @@ Imported.TacticsBattleSys = true;
     var unit = this.item();
     if (unit) {
       $gamePlayer.setCameraEvent(unit);   // カメラ移動
-      /*
-      var unitList = [];
-      unitList.push(unit);
-      $gameMap.setInvisibleArea(unitList);         // バフフィールドを表示する
-      */
       $gameMap.showInvisibleArea(unit);
       this._statusWindow.setUnit(unit);
+      this._stateWindow.setActor(unit.isActor());
     } else {
       $gameMap.initColorArea();                // 範囲表示を隠す
       this._statusWindow.close();
+      this._stateWindow.close();
     }
   };
 
@@ -6071,8 +6084,8 @@ Imported.TacticsBattleSys = true;
   //YesNoリスト
   Window_YesNoCommand.prototype.makeYesNoCommandList = function() {
     //this.setHandler('cancel', this._handlers['noCommand']);
-    this.addCommand("Yes", 'yesCommand', true);
-    this.addCommand("No", 'noCommand', true);
+    this.addCommand("実行", 'yesCommand', true);
+    this.addCommand("キャンセル", 'noCommand', true);
     var width = this.windowWidth();
     this.move(Graphics.boxWidth - width, 0, width, this.windowHeight());
   };
@@ -6107,9 +6120,11 @@ Imported.TacticsBattleSys = true;
     this.createArrowSprite();
     this._user = null;
     this._target = null;
-    
+    this._stateWindow = null;
   };
-  
+  Window_BattleStatus.prototype.setStateWindow = function(stateWindow) {
+    this._stateWindow = stateWindow;
+  };
   Window_BattleStatus.prototype.createFaceSprites = function() {
     var faceWidth = Window_Base._faceWidth;
     this._userFaceSprite = new Sprite();
@@ -6196,9 +6211,6 @@ Imported.TacticsBattleSys = true;
     if (user._actor) {
       return user._actor;
     }
-    // else if (user._enemy){
-    //  return user._enemy;
-    //}
   };
   
   Window_BattleStatus.prototype.refresh = function() {
@@ -6208,24 +6220,20 @@ Imported.TacticsBattleSys = true;
     var lineHeight = this.lineHeight();
     var x = this.textPadding();
     var w = this.textWidth(TextManager.levelA);
-    //this.setFaceSprite(userBattler, this._userFaceSprite);
-    //this.drawActorIcons(userBattler, 0, lineHeight * 3);
     this.changeTextColor(this.systemColor());
-    //this.drawText(TextManager.levelA, x, lineHeight, w);
     this.resetTextColor();
     this.drawText(userBattler.name(), x, 0, statusNameWidth);
-    //this.drawText(userBattler.level, x + w, lineHeight, 36, 'right');
     this.drawActorCharacter (userBattler, x + w, lineHeight * 4);
     
     this.drawActorGauges(userBattler, Window_Base._faceWidth, lineHeight * 2);
     if (this._target) {
+      this._stateWindow.hide();
       this.refreshTarget();
       this.refreshAction();
       //this._targetFaceSprite.visible = true;
       this._arrowSprite.visible = true;
     } else {
-      this.refreshState(this._user);
-      //this._targetFaceSprite.visible = false;
+      this._stateWindow.show();
       this._arrowSprite.visible = false;
     }
   };
@@ -6236,15 +6244,11 @@ Imported.TacticsBattleSys = true;
     var faceWidth = Window_Base._faceWidth;
     var x = this.contents.width - faceWidth;
     var w = this.textWidth(TextManager.levelA);
-    //this.setFaceSprite(targetBattler, this._targetFaceSprite);
-    //this.drawActorIcons(targetBattler, x, lineHeight * 3);
     x = this.contents.width - this.textPadding();
     this.changeTextColor(this.systemColor());
-    //this.drawText(TextManager.levelA, x - 36 - w, lineHeight, w);
     this.resetTextColor();
     this.drawText(targetBattler.name(), x - statusNameWidth, 0,
                   statusNameWidth, 'right');
-    //this.drawText(targetBattler.level, x - 36, lineHeight, 36, 'right');
     x = this.contents.width - faceWidth - statusHpWidth;
     this.drawActorCharacter (targetBattler, this.contents.width-64, lineHeight * 4);
     this.drawActorGauges(targetBattler, x, lineHeight * 2);
@@ -6304,80 +6308,11 @@ Imported.TacticsBattleSys = true;
     case Game_Action.EFFECT_ADD_STATE:        // ステート付加
       var stateId = effect.dataId;
       return $dataStates[stateId].name + '付加' + '(' + hit + '%)';
-    case Game_Action.EFFECT_REMOVE_STATE:     // ステート解除
-      var stateId = effect.dataId;
-      return $dataStates[stateId].name + '解除' + '(' + hit + '%)';
-    case Game_Action.EFFECT_ADD_BUFF:         // 強化
-      var buffId = effect.dataId;
-      return TextManager.param(buffId) + '強化' + effect.value1 + 'ターン' + '(' + hit + '%)';
-    case Game_Action.EFFECT_ADD_DEBUFF:       // 弱体
-      var buffId = effect.dataId;
-      return TextManager.param(buffId) + '弱体' + effect.value1 + 'ターン' + '(' + hit + '%)';
-    case Game_Action.EFFECT_REMOVE_BUFF:      // 強化解除
-      var buffId = effect.dataId;
-      return TextManager.param(buffId) + '強化解除' + '(' + hit + '%)';
-    case Game_Action.EFFECT_REMOVE_DEBUFF:    // 弱体解除
-      var buffId = effect.dataId;
-      return TextManager.param(buffId) + '弱体解除' + '(' + hit + '%)';
-    case Game_Action.EFFECT_LEARN_SKILL:      // スキル習得
-      var skill = $dataSkills[effect.dataId];
-      return skill.name + '習得';
     default:
       return '';
     }
   };
 
-  Window_BattleStatus.prototype.refreshStatus = function(user) {
-    var userBattler = this.isActor(user);
-    var lineHeight = this.lineHeight();
-    for (var i = 0; i < 6; i++) {
-      var paramId = i + 2;
-      var x = i % 2 * 224 + 360;
-      var y = lineHeight * Math.floor(i / 2);
-      if(i == 5){
-        this.changeTextColor(this.systemColor());
-        this.drawText("移動力", x, y, 120);
-        this.resetTextColor();
-        this.drawText(user._move, x + 120, y, 60, 'right');
-      }else{
-        this.changeTextColor(this.systemColor());
-        this.drawText(TextManager.param(paramId), x, y, 120);
-        this.resetTextColor();
-        this.drawText(userBattler.param(paramId), x + 120, y, 60, 'right');
-      }
-    }
-  };
-  Window_BattleStatus.prototype.refreshState = function(user) {
-    //this.contents.clear();
-    var userBattler = this.isActor(user);
-    var iconBoxWidth = Window_Base._iconWidth + 4;
-    var lineHeight = this.lineHeight();
-    var i = 0;
-    for(var id = 1; id < $dataStates.length; id++){
-      if (userBattler.isStateAffected(id)) {
-        var x = 360;
-        var y = lineHeight * i;
-        var state = $dataStates[id];
-        var icon = state.iconIndex;
-        var name = state.name //名前
-        var turn = userBattler._stateTurns[id]; //ステートの期間
-        this.drawIcon(icon, x + 2, y); //アイコンの描画
-        this.drawText(name, x + iconBoxWidth, y, this.spacing()*2); //ステートの名前の描画
-        this.changeTextColor(this.systemColor());
-        this.drawText("残り:", x + iconBoxWidth + this.spacing()*2, y, this.spacing(), "right");
-        this.resetTextColor();
-        this.drawText(turn + "Act", x + iconBoxWidth + this.spacing()*3, y, this.spacing(), "left"); //ステートの期間の描画
-        //以下、解除不能のバフデバフのフレーム化
-        if (state.meta.buffFixed || state.meta.debuffFixed) {
-          this.contents.fillRect(x + 2, y, 32, 4, '#ffffff');
-          this.contents.fillRect(x + 2, y, 4, 32, '#ffffff');
-          this.contents.fillRect(x + 2, y + 28, 32, 4, '#ffffff');
-          this.contents.fillRect(x + 30, y, 4, 32, '#ffffff');
-        }
-        i++;
-      }
-    }
-  };
   Window_BattleStatus.prototype.spacing = function() {
     return 80;
   };
@@ -6402,7 +6337,104 @@ Imported.TacticsBattleSys = true;
       this.drawActorMp(actor, x, y, statusHpWidth);
     }
   };
-  
+  //-----------------------------------------------------------------------------
+  // Window_BattleState
+  //
+  function Window_BattleState() {
+    this.initialize.apply(this, arguments);
+  }
+
+  Window_BattleState.prototype = Object.create(Window_Selectable.prototype);
+  Window_BattleState.prototype.constructor = Window_BattleState;
+
+  Window_BattleState.prototype.initialize = function(x, y, width, height) {
+    var width = Graphics.boxWidth / 2;
+    var height = this.fittingHeight(4);
+    var y = Graphics.boxHeight - height;
+    Window_Selectable.prototype.initialize.call(this, Graphics.boxWidth / 2, y, width, height);
+    this._data = [];
+    this.deactivate();
+    this.hide();
+    this._index = -1;
+    this.setBackgroundType(statusBackground);
+    //this.openness = 0;
+  };
+
+  Window_BattleState.prototype.setActor = function(actor) {
+    if (this._actor !== actor) {
+        this._actor = actor;
+        this.refresh();
+    }
+  };
+
+  Window_BattleState.prototype.maxCols = function() {
+    return 1;
+  };
+
+  Window_BattleState.prototype.spacing = function() {
+    return 80;
+  };
+
+  Window_BattleState.prototype.maxItems = function() {
+    return this._data ? this._data.length : 1;
+  };
+
+  Window_BattleState.prototype.item = function() {
+    return this._data && this.index() >= 0 ? this._data[this.index()] : null;
+  };
+
+  //ステートリストの作成
+  Window_BattleState.prototype.makeItemList = function() {
+    this._data = [];
+    for(var id = 1; id < $dataStates.length; id++){
+      if (this._actor.isStateAffected(id)) {
+        this._data.push($dataStates[id]);
+      }
+    }
+  };
+
+  //ステートリストの描画
+  Window_BattleState.prototype.drawItem = function() {
+    //this.contents.clear();
+    var iconBoxWidth = Window_Base._iconWidth + 4;
+    var lineHeight = this.lineHeight();
+    var i = 0;
+    for(var id = 1; id < $dataStates.length; id++){
+      if (this._actor.isStateAffected(id)) {
+        var x = 8;
+        var y = lineHeight * i;
+        var state = $dataStates[id];
+        var icon = state.iconIndex;
+        var name = state.name //名前
+        var turn = this._actor._stateTurns[id]; //ステートの期間
+        this.drawIcon(icon, x + 2, y); //アイコンの描画
+        this.drawText(name, x + iconBoxWidth, y, this.spacing()*2); //ステートの名前の描画
+        this.changeTextColor(this.systemColor());
+        this.drawText("残り:", x + iconBoxWidth + this.spacing()*2, y, this.spacing(), "right");
+        this.resetTextColor();
+        this.drawText(turn + "act", x + iconBoxWidth + this.spacing()*3, y, this.spacing(), "left"); //ステートの期間の描画
+        //以下、解除不能のバフデバフのフレーム化
+        if (state.meta.buffFixed || state.meta.debuffFixed) {
+          this.contents.fillRect(x + 2, y, 32, 4, '#ffffff');
+          this.contents.fillRect(x + 2, y, 4, 32, '#ffffff');
+          this.contents.fillRect(x + 2, y + 28, 32, 4, '#ffffff');
+          this.contents.fillRect(x + 30, y, 4, 32, '#ffffff');
+        }
+        i++;
+      }
+    }
+  };
+
+  Window_BattleState.prototype.updateHelp = function() {
+    this.setHelpWindowItem(this.item());
+  };
+  Window_BattleState.prototype.refresh = function() {
+    this.contents.clear();
+    if(this._actor){
+      this.makeItemList();
+      this.drawItem();
+    }
+  };
 //-----------------------------------------------------------------------------
 // Window_Menu
 //
@@ -6486,7 +6518,7 @@ Imported.TacticsBattleSys = true;
   };
 
   Window_StatusCategory.prototype.maxCols = function() {
-    return 2;
+    return 3;
   };
 
   Window_StatusCategory.prototype.update = function() {
@@ -6497,8 +6529,9 @@ Imported.TacticsBattleSys = true;
   };
 
   Window_StatusCategory.prototype.makeCommandList = function() {
-    this.addCommand(TextManager.skill,    'skill');
-    this.addCommand(TextManager.status,  'status');
+    this.addCommand("使用スキル",    'skill');
+    this.addCommand("付与されたステート",  'granted');
+    this.addCommand("関連ステート",  'relating');
   };
 
 
@@ -6571,71 +6604,49 @@ Imported.TacticsBattleSys = true;
       var y2 = y + lineHeight * i;
       this.drawIcon(icon, x + 2, y2); //アイコンの描画
       this.drawText(name, x + iconBoxWidth, y2, this.spacing()*2); //スキルの名前の描画
+      this.changeTextColor(this.systemColor());
       //リキャストアビリティは消費MPを表示しない
       switch (skill.stypeId) {
       case 1:
       case 2:
-        this.changeTextColor(this.systemColor());
         this.drawText("消費MP:", x + iconBoxWidth + this.spacing()*2, y2, this.spacing(), "right"); //スキルの消費MPの描画
         this.resetTextColor();
         this.drawText(mpCost, x + iconBoxWidth + this.spacing()*3, y2, this.spacing(),"left"); //スキルの消費MPの描画
         break;
       case 3:
-        this.changeTextColor(this.systemColor());
-        //this.drawText("リキャストアビリティ", x + iconBoxWidth + this.spacing()*2, y2, this.spacing()*2, "right"); //リキャストアビリティの場合
         this.drawText("消費TP:", x + iconBoxWidth + this.spacing()*2, y2, this.spacing(), "right"); //スキルの消費MPの描画
         this.resetTextColor();
         this.drawText(tpCost, x + iconBoxWidth + this.spacing()*3, y2, this.spacing(),"left"); //スキルの消費MPの描画
         break;
       case 4:
-        this.changeTextColor(this.systemColor());
         this.drawText("特殊アビ", x + iconBoxWidth + this.spacing()*2, y2, this.spacing()*2, "left");
-        this.resetTextColor();
         break;
       case 5:
-        this.changeTextColor(this.systemColor());
         this.drawText("追撃", x + iconBoxWidth + this.spacing()*2, y2, this.spacing()*2, "left");
-        this.resetTextColor();
         break;
       case 6:
-        this.changeTextColor(this.systemColor());
         this.drawText("カウンター", x + iconBoxWidth + this.spacing()*2, y2, this.spacing()*2, "left");
-        this.resetTextColor();
         break;
       case 7:
-        this.changeTextColor(this.systemColor());
         this.drawText("迎撃", x + iconBoxWidth + this.spacing()*2, y2, this.spacing()*2, "left");
-        this.resetTextColor();
         break;
       case 8:
-        this.changeTextColor(this.systemColor());
         this.drawText("トラップ", x + iconBoxWidth + this.spacing()*2, y2, this.spacing()*2, "left");
-        this.resetTextColor();
         break;
       case 9:
-        this.changeTextColor(this.systemColor());
         this.drawText("追撃(連携)", x + iconBoxWidth + this.spacing()*2, y2, this.spacing()*2, "left");
-        this.resetTextColor();
         break;
       case 10:
-        this.changeTextColor(this.systemColor());
         this.drawText("反撃(連携)", x + iconBoxWidth + this.spacing()*2, y2, this.spacing()*2, "left");
-        this.resetTextColor();
         break;
       case 11:
-        this.changeTextColor(this.systemColor());
         this.drawText("フリーファイト", x + iconBoxWidth + this.spacing()*2, y2, this.spacing()*2, "left");
-        this.resetTextColor();
         break;
       case 12:
-        this.changeTextColor(this.systemColor());
         this.drawText("追撃カウンター", x + iconBoxWidth + this.spacing()*2, y2, this.spacing()*2, "left");
-        this.resetTextColor();
         break;
       case 13:
-        this.changeTextColor(this.systemColor());
         this.drawText("追撃迎撃", x + iconBoxWidth + this.spacing()*2, y2, this.spacing()*2, "left");
-        this.resetTextColor();
         break;
       }
       //射程
@@ -6647,7 +6658,7 @@ Imported.TacticsBattleSys = true;
       }
       //効果範囲
       this.changeTextColor(this.systemColor());
-      this.drawText("効果範囲:", x + iconBoxWidth + this.spacing()*6, y2, this.spacing(), "right");
+      this.drawText("範囲:", x + iconBoxWidth + this.spacing()*6, y2, this.spacing(), "right");
       this.resetTextColor();
       if(effect == "self"){
         if(range == 0){
@@ -6722,59 +6733,53 @@ Imported.TacticsBattleSys = true;
 
   //ステートリストの作成
   Window_StatusInfo.prototype.makeItemList = function() {
-    for(var id = 1; id < $dataStates.length; id++){
-      if (this._actor.isStateAffected(id)) {
-        this._data.push($dataStates[id]);
-      }
-    }
+    
   };
 
   //ステートリストの描画
   Window_StatusInfo.prototype.drawItem = function(x, y) {
     var iconBoxWidth = Window_Base._iconWidth + 4;
     var lineHeight = this.lineHeight();
-    var i = 0;
-    for(var id = 1; id < $dataStates.length; id++){
-      if (this._actor.isStateAffected(id)) {
-        var state = $dataStates[id];
-        var icon = state.iconIndex;
-        var name = state.name //名前
-        var turn = this._actor._stateTurns[id]; //ステートの期間
-        var type = $dataStates[id].meta.type;
-        var field = $dataStates[id].meta.field;
+    for(var i = 0; i < this._data.length; i++){
+      var state = this._data[i];
+      var icon = state.iconIndex;
+      var name = state.name //名前
+      var turn = this._actor._stateTurns[this._data[i].id]; //ステートの期間
+      var type = $dataStates[this._data[i].id].meta.type;
+      var field = $dataStates[this._data[i].id].meta.field;
         
-        var y2 = y + lineHeight * i;
-        this.drawIcon(icon, x + 2, y2); //アイコンの描画
-        this.drawText(name, x + iconBoxWidth, y2, this.spacing()*2); //ステートの名前の描画
-        this.changeTextColor(this.systemColor());
+      var y2 = y + lineHeight * i;
+      this.drawIcon(icon, x + 2, y2); //アイコンの描画
+      this.drawText(name, x + iconBoxWidth, y2, this.spacing()*2); //ステートの名前の描画
+      this.changeTextColor(this.systemColor());
+      if(parseInt(turn) > 0){
         this.drawText("残り:", x + iconBoxWidth + this.spacing()*2, y2, this.spacing(), "right");
         this.resetTextColor();
         this.drawText(turn + "Act", x + iconBoxWidth + this.spacing()*3, y2, this.spacing(), "left"); //ステートの期間の描画
+      }
+      this.changeTextColor(this.systemColor());
+      this.drawText("タイプ:", x + iconBoxWidth + this.spacing() * 4, y2, this.spacing(), "right");
+      this.resetTextColor();
+      if(field){
+        this.drawText("バフフィールド", x + iconBoxWidth + this.spacing()*5, y2, this.spacing(), "left"); //バフフィールド系
+        //効果範囲
         this.changeTextColor(this.systemColor());
-        this.drawText("タイプ:", x + iconBoxWidth + this.spacing() * 4, y2, this.spacing(), "right");
+        this.drawText("効果範囲:", x + iconBoxWidth + this.spacing()*7, y2, this.spacing(), "right");
         this.resetTextColor();
-        if(field){
-          this.drawText("バフフィールド", x + iconBoxWidth + this.spacing()*5, y2, this.spacing(), "left"); //バフフィールド系
-          //効果範囲
-          this.changeTextColor(this.systemColor());
-          this.drawText("効果領域:", x + iconBoxWidth + this.spacing()*7, y2, this.spacing(), "right");
-          this.resetTextColor();
-          this.drawText(field + "マス内", x + iconBoxWidth + this.spacing()*8, y2, this.spacing(),"left");
-        }else{
-          if(type == "buff"){
-            this.drawText("バフ", x + iconBoxWidth + this.spacing()*5, y2, this.spacing(), "left"); //ステートがバフであった場合
-          }else if(type == "debuff"){
-            this.drawText("デバフ", x + iconBoxWidth + this.spacing()*5, y2, this.spacing(), "left"); //ステートがバフであった場合
-          }
+        this.drawText(field + "マス内", x + iconBoxWidth + this.spacing()*8, y2, this.spacing(),"left");
+      }else{
+        if(type == "buff"){
+          this.drawText("バフ", x + iconBoxWidth + this.spacing()*5, y2, this.spacing(), "left"); //ステートがバフであった場合
+        }else if(type == "debuff"){
+          this.drawText("デバフ", x + iconBoxWidth + this.spacing()*5, y2, this.spacing(), "left"); //ステートがバフであった場合
         }
-        //以下、解除不能のバフデバフのフレーム化
-        if (state.meta.buffFixed || state.meta.debuffFixed) {
-          this.contents.fillRect(x + 2, y2, 32, 4, '#ffffff');
-          this.contents.fillRect(x + 2, y2, 4, 32, '#ffffff');
-          this.contents.fillRect(x + 2, y2 + 28, 32, 4, '#ffffff');
-          this.contents.fillRect(x + 30, y2, 4, 32, '#ffffff');
-        }
-        i++;
+      }
+      //以下、解除不能のバフデバフのフレーム化
+      if (state.meta.buffFixed || state.meta.debuffFixed) {
+        this.contents.fillRect(x + 2, y2, 32, 4, '#ffffff');
+        this.contents.fillRect(x + 2, y2, 4, 32, '#ffffff');
+        this.contents.fillRect(x + 2, y2 + 28, 32, 4, '#ffffff');
+        this.contents.fillRect(x + 30, y2, 4, 32, '#ffffff');
       }
     }
   };
@@ -6791,6 +6796,44 @@ Imported.TacticsBattleSys = true;
     //this.createContents();
     //this.drawAllItems();
   };
+  //-----------------------------------------------------------------------------
+  // Window_GrantedStatusInfo
+  //
+  function Window_GrantedStatusInfo() {
+    this.initialize.apply(this, arguments);
+  }
+
+  Window_GrantedStatusInfo.prototype = Object.create(Window_StatusInfo.prototype);
+  Window_GrantedStatusInfo.prototype.constructor = Window_GrantedStatusInfo;
+
+  //ステートリストの作成
+  Window_GrantedStatusInfo.prototype.makeItemList = function() {
+    for(var id = 1; id < $dataStates.length; id++){
+      if (this._actor.isStateAffected(id)) {
+        this._data.push($dataStates[id]);
+      }
+    }
+  };
+  //-----------------------------------------------------------------------------
+  // Window_RelatingStatusInfo
+  //
+  function Window_RelatingStatusInfo() {
+    this.initialize.apply(this, arguments);
+  }
+
+  Window_RelatingStatusInfo.prototype = Object.create(Window_StatusInfo.prototype);
+  Window_RelatingStatusInfo.prototype.constructor = Window_RelatingStatusInfo;
+
+  //ステートリストの作成
+  Window_RelatingStatusInfo.prototype.makeItemList = function() {
+    if($dataClasses[this._actor._classId].meta.relatingState){
+      var relatingState = $dataClasses[this._actor._classId].meta.relatingState.split(',');
+      for(var id = 0; id < relatingState.length; id++){
+        this._data.push($dataStates[relatingState[id]]);
+      }
+    }
+  };
+
   //-----------------------------------------------------------------------------
   // Window_ActorInfo(ステータス画面内にて選択したアクターの情報が表示されるウインドウ)
   //
@@ -6907,7 +6950,8 @@ Imported.TacticsBattleSys = true;
     this.createHelpWindow();
     this.createCategoryWindow();
     this.createSkillWindow();
-    this.createStatusWindow();
+    this.createGrantedStatusWindow();
+    this.createRelatingStatusWindow();
   };
 
   Scene_Status.prototype.createCategoryWindow = function() {
@@ -6917,7 +6961,8 @@ Imported.TacticsBattleSys = true;
     this._categoryWindow.y = 0;
     
     this._categoryWindow.setHandler('skill',     this.onCategorySkill.bind(this));
-    this._categoryWindow.setHandler('status',     this.onCategoryStatus.bind(this));
+    this._categoryWindow.setHandler('granted',     this.onCategoryGrantedStatus.bind(this));
+    this._categoryWindow.setHandler('relating',     this.onCategoryRelatingStatus.bind(this));
     this._categoryWindow.setHandler('cancel', this.popScene.bind(this));
     this.addWindow(this._categoryWindow);
   };
@@ -6936,24 +6981,31 @@ Imported.TacticsBattleSys = true;
     
     this._skillWindow.setHelpWindow(this._helpWindow);
     
-    //this._skillWindow.setHandler('ok',     this.onItemOk.bind(this)); //説明文が入りきらない場合に使うかも
     this._skillWindow.setHandler('cancel', this.onSkillCancel.bind(this));
     this.addWindow(this._skillWindow);
     //this._categoryWindow.setStatusWindow(this._skillWindow);
   };
 
-  Scene_Status.prototype.createStatusWindow = function() {
+  Scene_Status.prototype.createGrantedStatusWindow = function() {
     var wy = this._categoryWindow.y + this._categoryWindow.height;
     var wh = Graphics.boxHeight - wy - this._helpWindow.height - this._actorWindow.height;
-    this._statusWindow = new Window_StatusInfo(0, wy, Graphics.boxWidth, wh);
-    this._statusWindow.setActor(this._actor);
+    this._grantedStatusWindow = new Window_GrantedStatusInfo(0, wy, Graphics.boxWidth, wh);
+    this._grantedStatusWindow.setActor(this._actor);
     
-    this._statusWindow.setHelpWindow(this._helpWindow);
+    this._grantedStatusWindow.setHelpWindow(this._helpWindow);
+    this._grantedStatusWindow.setHandler('cancel', this.onGrantedStatusCancel.bind(this));
+    this.addWindow(this._grantedStatusWindow);
+  };
+  
+  Scene_Status.prototype.createRelatingStatusWindow = function() {
+    var wy = this._categoryWindow.y + this._categoryWindow.height;
+    var wh = Graphics.boxHeight - wy - this._helpWindow.height - this._actorWindow.height;
+    this._relatingStatusWindow = new Window_RelatingStatusInfo(0, wy, Graphics.boxWidth, wh);
+    this._relatingStatusWindow.setActor(this._actor);
     
-    //this._statusWindow.setHandler('ok',     this.onItemOk.bind(this)); //説明文が入りきらない場合に使うかも
-    this._statusWindow.setHandler('cancel', this.onStatusCancel.bind(this));
-    this.addWindow(this._statusWindow);
-    //this._categoryWindow.setStatusWindow(this._skillWindow);
+    this._relatingStatusWindow.setHelpWindow(this._helpWindow);
+    this._relatingStatusWindow.setHandler('cancel', this.onRelatingStatusCancel.bind(this));
+    this.addWindow(this._relatingStatusWindow);
   };
   Scene_Status.prototype.createHelpWindow = function() {
     this._helpWindow = new Window_Help();
@@ -6975,18 +7027,27 @@ Imported.TacticsBattleSys = true;
   };
   //カテゴリ「スキル」を選択したときの処理
   Scene_Status.prototype.onCategorySkill = function() {
-    this._statusWindow.hide();
+    this._grantedStatusWindow.hide();
     this._categoryWindow.deactivate();
     this._skillWindow.activate();
     this._skillWindow.show();
   };
 
-  //カテゴリ「ステータス」を選択したときの処理
-  Scene_Status.prototype.onCategoryStatus = function() {
+  //カテゴリ「付与されたステート」を選択したときの処理
+  Scene_Status.prototype.onCategoryGrantedStatus = function() {
     this._skillWindow.hide();
+    this._relatingStatusWindow.hide();
     this._categoryWindow.deactivate();
-    this._statusWindow.activate();
-    this._statusWindow.show();
+    this._grantedStatusWindow.activate();
+    this._grantedStatusWindow.show();
+  };
+  //カテゴリ「関連ステート」を選択したときの処理
+  Scene_Status.prototype.onCategoryRelatingStatus = function() {
+    this._skillWindow.hide();
+    this._grantedStatusWindow.hide();
+    this._categoryWindow.deactivate();
+    this._relatingStatusWindow.activate();
+    this._relatingStatusWindow.show();
   };
 
   //カテゴリ「スキル」時にキャンセルを押した場合
@@ -6995,9 +7056,15 @@ Imported.TacticsBattleSys = true;
     this._categoryWindow.activate();
   };
 
-  //カテゴリ「ステータス」時にキャンセルを押した場合
-  Scene_Status.prototype.onStatusCancel = function() {
-    this._statusWindow.deactivate();
+  //カテゴリ「付与されたステート」時にキャンセルを押した場合
+  Scene_Status.prototype.onGrantedStatusCancel = function() {
+    this._grantedStatusWindow.deactivate();
+    this._categoryWindow.activate();
+  };
+  
+  //カテゴリ「関連ステート」時にキャンセルを押した場合
+  Scene_Status.prototype.onRelatingStatusCancel = function() {
+    this._relatingStatusWindow.deactivate();
     this._categoryWindow.activate();
   };
 
@@ -7010,6 +7077,13 @@ Imported.TacticsBattleSys = true;
       this._actor = $gameParty.menuActor();
     }
   };
+  
+  Scene_Status.prototype.refreshActor = function() {
+    var actor = this.actor();
+    this._grantedStatusWindow.setActor(actor);
+    this._relatingStatusWindow.setActor(actor);
+  };
+
   
 //-----------------------------------------------------------------------------
 // Scene_Base
@@ -7051,9 +7125,9 @@ Imported.TacticsBattleSys = true;
   Scene_Map.prototype.createAllWindows = function() {
     _Scene_Map_createAllWindows.call(this);
     //this.createHelpWindow();
+    this.createCommandWindow();
     this.createBattleStatusWindow();
     this.createYesNoWindow();
-    this.createCommandWindow();
     this.createUnitListWindow();
     this.createDeadUnitListWindow();
     
@@ -7088,12 +7162,13 @@ Imported.TacticsBattleSys = true;
     this._commandWindow.setHandler('burst', this.burstAbility.bind(this));
     this._commandWindow.setHandler('wait', this.commandWait.bind(this));
     this._commandWindow.setHandler('unitList', this.commandUnitList.bind(this));
+    this._commandWindow.setHandler('checkState', this.commandCheckState.bind(this));
     this._commandWindow.setHandler('help', this.commandHelpShow.bind(this));
     this._commandWindow.setHelpWindow(this._helpWindow);
     this._commandWindow.hideHelpWindow();
     this.addWindow(this._commandWindow);
     this._helpWindow.x = 96;
-    this._helpWindow.y = 152;
+    this._helpWindow.y = 112;
     this._helpWindow.width = Graphics.boxWidth - this._commandWindow.width - 112;
     this.addWindow(this._helpWindow);
     this._commandInfoWindow = new Window_BattleCommandInfo();
@@ -7116,7 +7191,7 @@ Imported.TacticsBattleSys = true;
     this._commandWindow.clearCommandList();
     this._commandWindow.refresh(character);
     this._commandInfoWindow.refresh(character, this._commandWindow.index());
-    if($gameSystem.helpShow){
+    if($gameSystem.helpShow && $gameMap._phaseState == 2){
       this._commandWindow.updateHelp();
       this._commandWindow.showHelpWindow();
     
@@ -7131,9 +7206,6 @@ Imported.TacticsBattleSys = true;
       case 2:
         skill = character._myAbility[1];
         break;
-      /*case 3:
-        skill = $dataSkills[character.checkSpecialSkill()];
-        break;*/
       case 3:
         skill = character._myAbility[2];
         break;
@@ -7145,6 +7217,9 @@ Imported.TacticsBattleSys = true;
         break;
       case 6:
         skill = $dataSkills[5];
+        break;
+      case 7:
+        skill = $dataSkills[6];
         break;
       }
       if(skill){
@@ -7199,12 +7274,19 @@ Imported.TacticsBattleSys = true;
   Scene_Map.prototype.createBattleStatusWindow = function() {
     this._battleStatusWindow = new Window_BattleStatus();
     this.addWindow(this._battleStatusWindow);
+    this._battleStateWindow = new Window_BattleState();
+    this._battleStateWindow.setHandler('cancel', this.cancelCheckState.bind(this));
+    this._battleStateWindow.setHelpWindow(this._helpWindow);
+    this._battleStatusWindow.setStateWindow(this._battleStateWindow);
+    this.addWindow(this._battleStateWindow);
   };
   
   // 戦闘用ステータスウインドウを開く
   Scene_Map.prototype.openBattleStatusWindow = function(event) {
     if(!this._battleStatusWindow.isOpen()){
       this._battleStatusWindow.setUnit(event);
+      this._battleStateWindow.setActor(event.isActor());
+      this._battleStateWindow.show();
     }
   };
   // 戦闘用ステータスウインドウにてターゲットを設定する
@@ -7212,14 +7294,24 @@ Imported.TacticsBattleSys = true;
     this._battleStatusWindow.setAction(skill, target);
   };
   
-  // 戦闘用ステータスウインドウをを更新する
+  // 戦闘用ステータスウインドウを更新する
   Scene_Map.prototype.updateBattleStatusWindow = function() {
+    this._battleStateWindow.refresh();
     this._battleStatusWindow.refresh();
+    if($gameSystem.helpShow && $gameMap._phaseState == 15){
+      this._battleStateWindow.updateHelp();
+      this._battleStateWindow.showHelpWindow();
+    }else{
+      this._battleStateWindow.hideHelpWindow();
+    }
   };
   
   // 戦闘用ステータスウインドウを閉じる
   Scene_Map.prototype.closeBattleStatusWindow = function() {
     this._battleStatusWindow.setUnit(null);
+    this._battleStateWindow.setActor(null);
+    this._battleStateWindow.hide();
+    //this._battleStateWindow.deactivate();
   };
   
   //ユニットリストウインドウ
@@ -7228,6 +7320,7 @@ Imported.TacticsBattleSys = true;
     this._unitListWindow.setHandler('ok', this.okUnitList.bind(this));
     this._unitListWindow.setHandler('cancel', this.cancelUnitList.bind(this));
     this._unitListWindow.setStatusWindow(this._battleStatusWindow);
+    this._unitListWindow.setStateWindow(this._battleStateWindow);
     this.addWindow(this._unitListWindow);
   };
   
@@ -7235,7 +7328,6 @@ Imported.TacticsBattleSys = true;
   Scene_Map.prototype.openUnitListWindow = function() {
     this._unitListWindow.refresh();
     this._unitListWindow.selectLast();
-    //this._unitListWindow.changeUnit();
     this._unitListWindow.activeOpen();
     this._unitListWindow.show();
   };
@@ -7373,22 +7465,6 @@ Imported.TacticsBattleSys = true;
     
   };
   
-  /*
-  味方ターンの流れ
-  0、カメラ移動完了後コマンド表示
-  1、ターン開始前処理(リジェネ回復など)
-  2、コマンド選択＆入力処理
-  3、移動選択＆入力処理
-  4、移動処理
-  5、対象選択＆入力処理
-  6、範囲確認YesNo＆入力処理
-  7、コマンド実行処理(攻撃予約)
-  8、コマンド実行処理(詠唱側アニメーション)
-  9、コマンド実行処理(対象アニメーション)
-  10、コマンド実行処理(ダメージ表示)
-  11、ターン終了後処理(トラップなど)
-  12、事後処理
-  */
   // 味方ターンの更新
   Scene_Map.prototype.updateAllyTurn = function() {
     
@@ -7516,6 +7592,9 @@ Imported.TacticsBattleSys = true;
       break;
     case 14: //蘇生ユニット選択フェーズ
       this.updateDeadUnitListWindow();
+      break;
+    case 15: //ステート確認フェーズ
+      this.updateBattleStatusWindow();
       break;
     }
   };
@@ -7854,6 +7933,14 @@ Imported.TacticsBattleSys = true;
     $gameMap._phaseState = 13;//ユニットリスト選択フェーズへ移行
   };
   
+  // 2,SRPGコマンド【ステート確認】
+  Scene_Map.prototype.commandCheckState = function() {
+    this._battleStateWindow._index = 0;
+    this._battleStateWindow.activate();
+    this._commandWindow.deactivate();
+    $gameMap._phaseState = 15;//ユニットリスト選択フェーズへ移行
+  };
+  
   // 2,SRPGコマンド【ヘルプ】
   Scene_Map.prototype.commandHelpShow = function() {
     if($gameSystem.helpShow){
@@ -8129,6 +8216,14 @@ Imported.TacticsBattleSys = true;
     $gameMap._phaseState = 2;//コマンド選択に戻る
   };
   
+  // 15,ステート確認ウインドウ【キャンセル】
+  Scene_Map.prototype.cancelCheckState = function() {
+    this._battleStateWindow._index = -1;
+    this._battleStateWindow.deactivate();
+    this._commandWindow.activate();
+    $gameMap._phaseState = 2;//コマンド選択に戻る
+    
+  };
   
   // 移動選択ウェイト中か
   Scene_Map.prototype.isMoveWaitingMode = function() {
