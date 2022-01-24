@@ -8,5 +8,5 @@ null,
 {"id":6,"expanded":false,"name":"砂漠","order":6,"parentId":0,"scrollX":1769.4545454545455,"scrollY":1005.8181818181819},
 {"id":7,"expanded":true,"name":"自作","order":7,"parentId":0,"scrollX":1782.5454545454545,"scrollY":988.3636363636364},
 {"id":8,"expanded":false,"name":"ダルマスカ砂漠","order":8,"parentId":7,"scrollX":1786.909090909091,"scrollY":1005.8181818181819},
-{"id":9,"expanded":false,"name":"ビサイド島","order":9,"parentId":7,"scrollX":1078.6666666666667,"scrollY":900.6666666666666}
+{"id":9,"expanded":false,"name":"ビサイド島","order":9,"parentId":7,"scrollX":1077.3333333333333,"scrollY":900.6666666666666}
 ]
