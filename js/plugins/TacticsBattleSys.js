@@ -1247,7 +1247,7 @@ Imported.TacticsBattleSys = true;
             var debuffAllFixed = false;
             for(var allId = 1; allId < $dataStates.length; allId++){
               if (this.isStateAffected(allId)) {
-                if($dataStates[allId].meta.debuffAllFixed){
+                if($dataStates[allId].meta.debuffAllFixed && !burst){
                   debuffAllFixed = true;
                 }
               }
@@ -2709,13 +2709,12 @@ Imported.TacticsBattleSys = true;
     //味方の配置
     if (allyId) {
       this.initTacticsUnitSetting();
-      var allyMembers = $gameSystem.allyMembers();
       if($gameSystem.allyMembers()[parseInt(allyId)] <= 0){
         this._allyId = 0;
         do{
           this._allyId = parseInt(Math.floor( Math.random() * ($gameSystem.selectMembers().length - 2) + 1));
-        }while(allyMembers.indexOf(this._allyId) >= 0);
-        allyMembers[parseInt(allyId)] = this._allyId;
+        }while($gameSystem.allyMembers().indexOf(this._allyId) >= 0);
+        $gameSystem.allyMembers()[parseInt(allyId)] = this._allyId;
       }else{
         this._allyId = $gameSystem.allyMembers()[parseInt(allyId)];
       }
@@ -2746,13 +2745,12 @@ Imported.TacticsBattleSys = true;
     //敵の配置
     else if (enemyId) {
       this.initTacticsUnitSetting();
-      var enemyMembers = $gameSystem.enemyMembers();
       if($gameSystem.enemyMembers()[parseInt(enemyId)] <= 0){
         this._enemyId = 0;
         do{
           this._enemyId = parseInt(Math.floor( Math.random() * ($gameSystem.selectMembers().length - 2) + 1));
-        }while(enemyMembers.indexOf(this._enemyId) >= 0);
-        enemyMembers[parseInt(enemyId)] = this._enemyId;
+        }while($gameSystem.enemyMembers().indexOf(this._enemyId) >= 0);
+        $gameSystem.enemyMembers()[parseInt(enemyId)] = this._enemyId;
       }else{
         this._enemyId = $gameSystem.enemyMembers()[parseInt(enemyId)];
       }
@@ -5067,8 +5065,14 @@ Imported.TacticsBattleSys = true;
       if (useUnitStateIcon) this.updateStateIcon();
       if (useUnitID) this.updateUnitID();
     }else{
-      if(this._hpGaugeSprite) this.removeChild(this._hpGaugeSprite);
-      if(this._tpGaugeSprite) this.removeChild(this._tpGaugeSprite);
+      if(this._hpGaugeSprite){
+        this.removeChild(this._hpGaugeSprite);
+        this._hpGaugeSprite = null;
+      }
+      if(this._tpGaugeSprite){
+        this.removeChild(this._tpGaugeSprite);
+        this._tpGaugeSprite = null;
+      }
       if(this._stateIconSprite) {
         for (var i =0; i<stateMax; i++){
           if (this._stateIconSprite[i]) {
@@ -5077,9 +5081,14 @@ Imported.TacticsBattleSys = true;
             this.removeChild(this._stateFrameSprite[i]);
           }
         }
+        this._stateIconSprite = null;
+        this._stateTurnSprite = null;
+        this._stateFrameSprite = null;
       }
-      if(this._unitIDSprite) this.removeChild(this._unitIDSprite);
-      
+      if(this._unitIDSprite){
+        this.removeChild(this._unitIDSprite);
+        this._unitIDSprite = null;
+      }
     }
   };
 
@@ -8352,7 +8361,7 @@ Imported.TacticsBattleSys = true;
     $gamePlayer.setPriorityType(1);
     $gameTemp._commandTime = false;
     $gamePlayer.refresh();
-    
+    $gameSystem.resetMembers()
   };
 
   // 戦闘不能ユニットの処理

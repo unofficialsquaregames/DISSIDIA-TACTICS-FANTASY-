@@ -293,6 +293,14 @@
         }
         return this._enemyMembers;
     }
+    Game_System.prototype.resetMembers = function () {
+        this._allyMembers = [];
+        this._enemyMembers = [];
+        for(var i = 0; i < 8; i++){
+          this._allyMembers[i] = 0;
+          this._enemyMembers[i] = 0;
+        }
+    }
 
 
     const __Scene_Menu_createCommandWindow = Scene_Menu.prototype.createCommandWindow
