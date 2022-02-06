@@ -6000,7 +6000,7 @@ Imported.TacticsBattleSys = true;
   Window_UnitList.prototype.initialize = function() {
     
     var width = unitListWidth;
-    var height = this.fittingHeight(unitListRows);
+    var height = this.fittingHeight(unitListRows + 1);
     Window_Selectable.prototype.initialize.call(this, Graphics.boxWidth-256, 0, width, height);
     this.select(0);
     this.hide();
@@ -6012,6 +6012,7 @@ Imported.TacticsBattleSys = true;
     this._stateWindow = null;
   };
   Window_UnitList.prototype.update = function() {
+    this._lastindex = this.index();
     Window_Selectable.prototype.update.call(this);
     if((Input.isRepeated('down') || Input.isRepeated('up')) && this.index() !== this._lastindex) this.changeUnit();
 };
@@ -6043,12 +6044,13 @@ Imported.TacticsBattleSys = true;
     this._data = $gameMap.unitList();
   };
 
-  //
+  /*
   Window_UnitList.prototype.selectLast = function() {
     var lastUnit = $gameMap._unitList[unitListRows];
     var lastIndex = this._data.indexOf(lastUnit);
     this.select(lastIndex >= 0 ? lastIndex : 0);
   };
+  */
   
   //▽選択時の挙動
   Window_UnitList.prototype.onTouch = function(triggered) {
@@ -7370,9 +7372,10 @@ Imported.TacticsBattleSys = true;
   // ユニットリストウインドウを開く
   Scene_Map.prototype.openUnitListWindow = function() {
     this._unitListWindow.refresh();
-    this._unitListWindow.selectLast();
+    //this._unitListWindow.selectLast();
     this._unitListWindow.activeOpen();
     this._unitListWindow.show();
+    this._unitListWindow.changeUnit();
   };
   
   // ユニットリストウインドウを更新する
