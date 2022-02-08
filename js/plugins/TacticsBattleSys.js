@@ -1443,6 +1443,13 @@ Imported.TacticsBattleSys = true;
                 value -= Math.round((value + this.paramBase(paramId)) * 5 / 100);
               }
             }
+            //テラー(領域内のユニットのステータスをダウン)
+            var teller = $dataStates[id].meta.teller;
+            if(field && teller && robbedUnit.isAttackTarget(this.isCharacter())){
+              if(robbedUnit.targetRange(this.isCharacter()) <= parseInt(field)){
+                value -= Math.round((value + this.paramBase(paramId)) * 20 / 100);
+              }
+            }
           }
         }
       }
