@@ -8095,7 +8095,7 @@ Imported.TacticsBattleSys = true;
         
         //「警戒」付与者が対象ならnull
         if(turnUnit.target()){
-          if(turnUnit.target().nonTargetBuffCheck()) turnUnit.setTarget(null);
+          if(turnUnit.target().nonTargetBuffCheck() && !(turnUnit == turnUnit.target())) turnUnit.setTarget(null);
         }
       }else if(turnUnit.useSkill().scope == 7 || turnUnit.useSkill().scope == 8 || turnUnit.useSkill().scope == 11){
         //対象が味方の場合
