@@ -2911,10 +2911,11 @@ Imported.TacticsBattleSys = true;
     //var targets = $gameMap.unitsArea(null, true); //対象とその周囲を設定
     var targets = $gameMap.unitsArea($gameMap._targetArea, true); //対象とその周囲を設定
     //対象にチャーム付与者がいた場合、攻撃中止する
-    if(this.effectCharmCheck(targets)) {
+    if(this.effectCharmCheck(targets) || this.effectLieCryingCheck(targets)) {
       SoundManager.playBuzzer();//ブザー
       return;
     }
+    
     for (var i = 0; i < targets.length; i++) {
       var target = null;
       //回復魔法は敵に適用させず、攻撃は味方に適用させない
@@ -3323,7 +3324,7 @@ Imported.TacticsBattleSys = true;
             }
           }
           //行動終了後の追撃判定
-          if($dataStates[id].meta.activate == "afterChase" && $dataStates[id].meta.field) {
+          if(($dataStates[id].meta.activate == "afterChase" || $dataStates[id].meta.activate == "afterChaseInvasion") && $dataStates[id].meta.field) {
             //マップ上にいるユニットのステートをチェックする
             for(var j = 0; j < $gameMap.unitList().length; j++){
               var fieldUnit = $gameMap.unitList()[j];
@@ -3377,7 +3378,7 @@ Imported.TacticsBattleSys = true;
               }
               //バフフィールド内侵入でアビリティが発動するタイプ
               if($dataStates[id].meta.activate && checkUnit.isAttackTarget(this) && checkUnit.targetIsInvalid(this)){//this.isEnemy()){
-                if($dataStates[id].meta.activate == "invasion" || $dataStates[id].meta.activate == "chaseInvasion" || $dataStates[id].meta.activate == "freeFight") {
+                if($dataStates[id].meta.activate == "invasion" || $dataStates[id].meta.activate == "chaseInvasion" || $dataStates[id].meta.activate == "afterChaseInvasion" || $dataStates[id].meta.activate == "freeFight") {
                   if($dataStates[id].meta.skill == "shift"){
                     checkActor.wtTurnAdvance();
                   }else{
@@ -3672,6 +3673,24 @@ Imported.TacticsBattleSys = true;
     }
     return false;
   };
+  // うそなき付与者かチェック
+  Game_Event.prototype.effectLieCryingCheck = function(targets) {
+    if(this.useSkill().scope == 7 || this.useSkill().scope == 8 || this.useSkill().scope == 11) return false;
+    for(var i = 0; i < targets.length; i++){
+      var actor = targets[i].isActor();
+      for(var id = 1; id < $dataStates.length; id++){
+        if (actor.isStateAffected(id)) {
+          var lieCrying = $dataStates[id].meta.lieCrying;
+          if(lieCrying){
+            actor.wtTurnAdvance();
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  };
+  
   // ダメージ無効エリアに入っているか
   Game_Event.prototype.checkInvalidArea = function(target) {
     var unitList = $gameMap.unitList();
