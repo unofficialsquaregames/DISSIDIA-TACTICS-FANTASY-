@@ -1296,6 +1296,15 @@ Imported.TacticsBattleSys = true;
     }
     return false;
   };
+  //操作不能ステートが付与されているか
+  Game_Battler.prototype.checkNoCtrlState = function() {
+    for(var stateId = 1; stateId < $dataStates.length; stateId++){
+      if (this.isStateAffected(stateId)) {
+        if($dataStates[stateId].meta.noCtrl) return true;
+      }
+    }
+    return false;
+  };
   //-----------------------------------------------------------------------------
   // Game_Actor
   //
@@ -7527,7 +7536,7 @@ Imported.TacticsBattleSys = true;
     }
     //味方のターン
     if ($gameMap.isAllyTurn()) {
-      if($gameMap._turnUnit.isActor().checkHateState() || $gameMap._turnUnit.isActor().checkHateGrantor() || $gameMap._turnUnit.isActor().checkCtrlGrantor()){
+      if($gameMap._turnUnit.isActor().checkHateState() || $gameMap._turnUnit.isActor().checkHateGrantor() || $gameMap._turnUnit.isActor().checkCtrlGrantor() || $gameMap._turnUnit.isActor().checkNoCtrlState()){
         this.updateEnemyTurn();
       }else{
         this.updateAllyTurn();
