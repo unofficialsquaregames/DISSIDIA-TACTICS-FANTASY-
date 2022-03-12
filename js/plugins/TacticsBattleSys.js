@@ -3425,8 +3425,14 @@ Imported.TacticsBattleSys = true;
           case "row":
             return 25;
             break;
+          case "veryRow":
+            return 50;
+            break;
           case "high":
             return -25;
+            break;
+          case "veryHigh":
+            return -50;
             break;
           }
         }
@@ -3439,8 +3445,14 @@ Imported.TacticsBattleSys = true;
         case "row":
           return 25;
           break;
+        case "veryRow":
+          return 50;
+          break;
         case "high":
           return -25;
+          break;
+        case "veryHigh":
+          return -50;
           break;
         }
       }
