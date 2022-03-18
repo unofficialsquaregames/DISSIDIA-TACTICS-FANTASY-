@@ -3721,7 +3721,7 @@ Imported.TacticsBattleSys = true;
       for(var id = 1; id < $dataStates.length; id++){
         if (actor.isStateAffected(id)) {
           var lieCrying = $dataStates[id].meta.lieCrying;
-          if(lieCrying){
+          if(lieCrying && this.isAttackTarget(targets[i])){
             actor.wtTurnAdvance();
             return true;
           }
