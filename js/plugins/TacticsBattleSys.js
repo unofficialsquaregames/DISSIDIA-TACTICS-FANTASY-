@@ -632,7 +632,7 @@ Imported.TacticsBattleSys = true;
         value = this.makeDamageValue(target, false, result.critical);
         this.executeDamage(target, value);
         //リフレクターチェック
-        if($gameTemp.lastMultiHit() && !$gameMap.isReservationActionTurn()) turnUnit.checkReflector(targetUnit, turnUnit.useSkill(), this);
+        //if($gameTemp.lastMultiHit() && !$gameMap.isReservationActionTurn()) turnUnit.checkReflector(targetUnit, turnUnit.useSkill(), this);
         //バフ奪取(クリティカル発生時のみ)
         if(turnUnit.useSkill().meta.steal){
           if((turnUnit.useSkill().meta.steal == "buff" && result.critical) || turnUnit.useSkill().meta.steal == "burst"){
@@ -2962,6 +2962,11 @@ Imported.TacticsBattleSys = true;
             SoundManager.playBuzzer();//ブザー
             continue;
           }
+          //リフレクターチェック
+          if(this.checkReflector(targets[i], this.useSkill(), action)){
+            SoundManager.playBuzzer();//ブザー
+            continue;
+          }
           //以降は普通
           target = targets[i].isActor();
         }
@@ -3001,7 +3006,7 @@ Imported.TacticsBattleSys = true;
     //以下メモ欄に記載されたタグ処理(敵に攻撃したあと味方にバフや回復を行いたいとき、味方全体に回復を行った後に自身にバフをつけたい場合の処理)
     var target = this.useSkill().meta.target;
     //対象が自身であった場合
-    if (target == "self" && $gameTemp.lastMultiHit()){
+    if (target == "self" && $gameTemp.lastMultiHit() && !($gameMap.isReservationActionType("reflector") && $gameMap.isReservationActionTurn())){
       var actor = this.isActor();
       //ステート追加処理
       var state = this.useSkill().meta.state;
@@ -3030,7 +3035,7 @@ Imported.TacticsBattleSys = true;
       //その他、ダメージなどの処理も入れる予定
       //action.actionApply(this, target);
       //targets[i].reserveDamagePopup(i * damagePopupInterval);
-    }else if (target == "ally" && $gameTemp.lastMultiHit()){
+    }else if (target == "ally" && $gameTemp.lastMultiHit() && !($gameMap.isReservationActionType("reflector") && $gameMap.isReservationActionTurn())){
     //対象が味方であった場合
       for (var i = 0; i < targets.length; i++) {
         var actor = null;
@@ -3177,13 +3182,14 @@ Imported.TacticsBattleSys = true;
          if($dataStates[id].meta.activate){
            if($dataStates[id].meta.activate == "reflector"){
              if(($dataStates[id].meta.reflectType == "physical" && action.isPhysical()) || ($dataStates[id].meta.reflectType == "magical" && action.isMagical())){
-               $gameMap.addReservationActionList(target,skill,this,"reflector");
-               return;
+               if($gameTemp.lastMultiHit() && !$gameMap.isReservationActionTurn()) $gameMap.addReservationActionList(target,skill,this,"reflector");
+               return true;
              }
            }
          }
        }
      }
+     return false;
   };
   
   // 味方による追撃チェック
