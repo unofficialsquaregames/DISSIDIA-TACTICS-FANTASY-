@@ -3448,15 +3448,9 @@ Imported.TacticsBattleSys = true;
         if($dataStates[id].meta.behavioralLoad){
           switch($dataStates[id].meta.behavioralLoad){
           case "row":
-            return 25;
-            break;
-          case "veryRow":
             return 50;
             break;
           case "high":
-            return -25;
-            break;
-          case "veryHigh":
             return -50;
             break;
           }
@@ -3468,15 +3462,9 @@ Imported.TacticsBattleSys = true;
       if(this.useSkill().meta.behavioralLoad){
         switch(this.useSkill().meta.behavioralLoad){
         case "row":
-          return 25;
-          break;
-        case "veryRow":
           return 50;
           break;
         case "high":
-          return -25;
-          break;
-        case "veryHigh":
           return -50;
           break;
         }
