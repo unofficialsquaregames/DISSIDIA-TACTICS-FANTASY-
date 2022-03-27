@@ -550,18 +550,18 @@
                 var type = $dataClasses[actor._classId].meta.type;
                 window.changeTextColor(window.systemColor());
                 a = eval("[330, 0, 64]");
-                window.drawText("Type: ", a[0], a[1], a[2]);
+                window.drawText("役割: ", a[0], a[1], a[2]);
                 switch (type) {
-                case "B":
+                case "A":
                     window.changeTextColor('red');
                     break;
-                case "R":
+                case "D":
                     window.changeTextColor('orange');
                     break;
-                case "Q":
-                    window.changeTextColor('blue');
+                case "H":
+                    window.changeTextColor('lime');
                     break;
-                case "L":
+                case "C":
                     window.changeTextColor('hotpink');
                     break;
                 case "J":
@@ -569,15 +569,6 @@
                     break;
                 case "S":
                     window.changeTextColor('aquamarine');
-                    break;
-                case "C":
-                    window.changeTextColor('yellow');
-                    break;
-                case "A":
-                    window.changeTextColor('lime');
-                    break;
-                case "O":
-                    window.changeTextColor('gray');
                     break;
                 }
                 a = eval("[394, 0, 32]");
