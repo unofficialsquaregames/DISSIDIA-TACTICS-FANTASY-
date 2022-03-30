@@ -550,25 +550,22 @@
                 var type = $dataClasses[actor._classId].meta.type;
                 window.changeTextColor(window.systemColor());
                 a = eval("[330, 0, 64]");
-                window.drawText("役割: ", a[0], a[1], a[2]);
+                window.drawText("タイプ: ", a[0], a[1], a[2]);
                 switch (type) {
-                case "A":
+                case "強襲":
                     window.changeTextColor('red');
                     break;
-                case "D":
-                    window.changeTextColor('orange');
+                case "結束":
+                    window.changeTextColor('aquamarine');
                     break;
-                case "H":
+                case "支援":
                     window.changeTextColor('lime');
                     break;
-                case "C":
-                    window.changeTextColor('hotpink');
+                case "守備":
+                    window.changeTextColor('orange');
                     break;
-                case "J":
-                    window.changeTextColor('purple');
-                    break;
-                case "S":
-                    window.changeTextColor('aquamarine');
+                case "策略":
+                    window.changeTextColor('fuchsia');
                     break;
                 }
                 a = eval("[394, 0, 32]");
