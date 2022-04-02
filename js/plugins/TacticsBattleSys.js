@@ -2939,7 +2939,7 @@ Imported.TacticsBattleSys = true;
     //var targets = $gameMap.unitsArea(null, true); //対象とその周囲を設定
     var targets = $gameMap.unitsArea($gameMap._targetArea, true); //対象とその周囲を設定
     //対象にチャーム付与者がいた場合、攻撃中止する
-    if(this.effectCharmCheck(targets) || this.effectLieCryingCheck(targets)) {
+    if(this.effectLieCryingCheck(targets)) {
       SoundManager.playBuzzer();//ブザー
       return;
     }
@@ -3688,25 +3688,7 @@ Imported.TacticsBattleSys = true;
     }
     return false;
   };
-  // 誘惑付与者が範囲内にいるかチェック
-  Game_Event.prototype.effectCharmCheck = function(targets) {
-    if(this.useSkill().scope == 7 || this.useSkill().scope == 8 || this.useSkill().scope == 11) return false;
-    var actor = this.isActor();
-    for(var id = 1; id < $dataStates.length; id++){
-      if (actor.isStateAffected(id)) {
-        var charm = $dataStates[id].meta.charm;
-        if(charm){
-          for(var i = 0; i < targets.length; i++){
-            if ((targets[i].isActor()._classId == parseInt(charm)) && this.isAttackTarget(targets[i])) {
-              if($gameTemp.lastMultiHit()) $gameMap.addReservationActionList(targets[i],$dataSkills[parseInt($dataStates[id].meta.skill)],this,$dataStates[id].meta.activate);
-              return true;
-            }
-          }
-        }
-      }
-    }
-    return false;
-  };
+  
   // うそなき付与者かチェック
   Game_Event.prototype.effectLieCryingCheck = function(targets) {
     if(this.useSkill().scope == 7 || this.useSkill().scope == 8 || this.useSkill().scope == 11) return false;
@@ -3856,7 +3838,7 @@ Imported.TacticsBattleSys = true;
   // 特殊なステートにかかってないユニット
   Game_Event.prototype.targetNonstateSearch = function(target,stateId) {
     if(!(target.isActor().isStateAffected(stateId)) && this.targetIsInvalid(target)){
-      if(!($dataStates[stateId].meta.charm && ($dataClasses[target.isActor()._classId].meta.gender == "female"))) return this.targetNearSearch(target);
+      return this.targetNearSearch(target);
     }
     return null;
   };
