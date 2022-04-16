@@ -409,6 +409,9 @@ Imported.TacticsBattleSys = true;
     this._resurrectionFlag = false; //蘇生フラグ
     this._multiHitCount = 0; //多段ヒット時のカウント用
     this._selectUnit = []; //ユニットリストからのステータス画面で使用する
+    //以下オンライン時
+    this._allyTeamID = 0; //味方チームのID
+    this._enemyTeamID = 0; //敵チームのID
   };
   // 多段ヒット時のカウントセット
   Game_Temp.prototype.setMultiHit = function(skill) {
@@ -2742,7 +2745,7 @@ Imported.TacticsBattleSys = true;
     }
     
     //味方の配置
-    if (allyId) {
+    if (allyId || (enemyId && $gameSwitches.value(15))) {
       this.initTacticsUnitSetting();
       if($gameSystem.allyMembers()[parseInt(allyId)] <= 0){
         this._allyId = 0;
@@ -2778,7 +2781,7 @@ Imported.TacticsBattleSys = true;
       if(Utils.isOptionValid('test')) this._actor.gainTp(100);//テスト用
     }
     //敵の配置
-    else if (enemyId) {
+    else if (enemyId && !$gameSwitches.value(15)) {
       this.initTacticsUnitSetting();
       if($gameSystem.enemyMembers()[parseInt(enemyId)] <= 0){
         this._enemyId = 0;
@@ -7033,7 +7036,8 @@ Imported.TacticsBattleSys = true;
   // 
   //
   Window_TitleCommand.prototype.makeCommandList = function() {
-    this.addCommand("VSモード",   'versus');
+    this.addCommand("トレーニング",   'training');
+    this.addCommand("オンライン",   'online');
   };
 
   //-----------------------------------------------------------------------------
@@ -7544,25 +7548,46 @@ Imported.TacticsBattleSys = true;
       $gameMap.countWt();
       return;
     }
-    //敵のターン
-    if ($gameMap.isEnemyTurn()) {
-      if($gameMap._turnUnit.isActor().checkCtrlGrantor()){
-        this.updateAllyTurn();
-      }else{
-        this.updateEnemyTurn();       // 敵ターンの更新
+    //オンライン対戦の場合
+    if($gameSwitches.value(15)){
+      //敵のターン
+      if ($gameMap.isEnemyTurn()) {
+        if($gameMap._turnUnit.isActor().checkCtrlGrantor()){
+          if($gameVariables.value(8) == $gameTemp._allyTeamID) this.updateAllyTurn();
+        }else{
+          if($gameVariables.value(8) == $gameTemp._enemyTeamID) this.updateAllyTurn();       // 敵ターンの更新
+        }
+        return;
       }
-      return;
-    }
-    //味方のターン
-    if ($gameMap.isAllyTurn()) {
-      if($gameMap._turnUnit.isActor().checkHateState() || $gameMap._turnUnit.isActor().checkHateGrantor() || $gameMap._turnUnit.isActor().checkCtrlGrantor() || $gameMap._turnUnit.isActor().checkNoCtrlState()){
-        this.updateEnemyTurn();
-      }else{
-        this.updateAllyTurn();
+      //味方のターン
+      if ($gameMap.isAllyTurn()) {
+        if($gameMap._turnUnit.isActor().checkHateState() || $gameMap._turnUnit.isActor().checkHateGrantor() || $gameMap._turnUnit.isActor().checkCtrlGrantor() || $gameMap._turnUnit.isActor().checkNoCtrlState()){
+          if($gameVariables.value(8) == $gameTemp._enemyTeamID) this.updateAllyTurn();
+        }else{
+          if($gameVariables.value(8) == $gameTemp._allyTeamID) this.updateAllyTurn();
+        }
+        return;
       }
-      return;
+    }else{
+      //敵のターン
+      if ($gameMap.isEnemyTurn()) {
+        if($gameMap._turnUnit.isActor().checkCtrlGrantor()){
+          this.updateAllyTurn();
+        }else{
+          this.updateEnemyTurn();       // 敵ターンの更新
+        }
+        return;
+      }
+      //味方のターン
+      if ($gameMap.isAllyTurn()) {
+        if($gameMap._turnUnit.isActor().checkHateState() || $gameMap._turnUnit.isActor().checkHateGrantor() || $gameMap._turnUnit.isActor().checkCtrlGrantor() || $gameMap._turnUnit.isActor().checkNoCtrlState()){
+          this.updateEnemyTurn();
+        }else{
+          this.updateAllyTurn();
+        }
+        return;
+      }
     }
-    
   };
   
   // 味方ターンの更新
@@ -8448,11 +8473,12 @@ Imported.TacticsBattleSys = true;
   //
   Scene_Title.prototype.createCommandWindow = function() {
     this._commandWindow = new Window_TitleCommand();
-    this._commandWindow.setHandler('versus',  this.commandVersusMode.bind(this));
+    this._commandWindow.setHandler('training',  this.commandTrainingMode.bind(this));
+    this._commandWindow.setHandler('online',  this.commandOnlineMode.bind(this));
     this.addWindow(this._commandWindow);
   };
   //VSモード(スタートから流用)
-  Scene_Title.prototype.commandVersusMode = function() {
+  Scene_Title.prototype.commandTrainingMode = function() {
     DataManager.setupNewGame();
     this._commandWindow.close();
     this.fadeOutAll();
@@ -8460,6 +8486,18 @@ Imported.TacticsBattleSys = true;
     $gamePlayer.setThrough(true); //すり抜け
     $gameSwitches.setValue(11, true); //キャラクター選択スイッチON(スイッチNoはいずれプラグインの変数設定から行えるようにする)
     $gameVariables.setValue(2, 0); //モード変数(変数Noはいずれプラグインの変数設定から行えるようにする)
+    SceneManager.goto(Scene_Map);
+  };
+  //オンラインモード(スタートから流用)
+  Scene_Title.prototype.commandOnlineMode = function() {
+    DataManager.setupNewGame();
+    this._commandWindow.close();
+    this.fadeOutAll();
+    $gamePlayer.setTransparent(true); //透明化
+    $gamePlayer.setThrough(true); //すり抜け
+    $gameSwitches.setValue(11, true); //キャラクター選択スイッチON(スイッチNoはいずれプラグインの変数設定から行えるようにする)
+    $gameVariables.setValue(2, 0); //モード変数(変数Noはいずれプラグインの変数設定から行えるようにする)
+    $gameSwitches.setValue(15, true); //オンラインフラグセット
     SceneManager.goto(Scene_Map);
   };
 
