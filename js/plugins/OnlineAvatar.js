@@ -453,7 +453,7 @@ function Game_Avatar() {
 		this.setImage(onlineData.charaName, onlineData.charaIndex);
 		this.setOnlineData(onlineData);
 		$gameMap._events.push(this);
-		alert($gameVariables.value(9));
+		console.log($gameVariables.value(9));
 		$gameVariables.setValue(8, $gameVariables.value(9));
 		$gameVariables.setValue(9, $gameVariables.value(9) + 1);
 
