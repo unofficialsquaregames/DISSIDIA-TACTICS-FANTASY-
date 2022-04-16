@@ -2745,7 +2745,7 @@ Imported.TacticsBattleSys = true;
     }
     
     //味方の配置
-    if (allyId || (enemyId && $gameSwitches.value(15))) {
+    if (allyId) {
       this.initTacticsUnitSetting();
       if($gameSystem.allyMembers()[parseInt(allyId)] <= 0){
         this._allyId = 0;
@@ -2781,31 +2781,57 @@ Imported.TacticsBattleSys = true;
       if(Utils.isOptionValid('test')) this._actor.gainTp(100);//テスト用
     }
     //敵の配置
-    else if (enemyId && !$gameSwitches.value(15)) {
+    else if (enemyId) {
       this.initTacticsUnitSetting();
-      if($gameSystem.enemyMembers()[parseInt(enemyId)] <= 0){
-        this._enemyId = 0;
-        do{
-          this._enemyId = parseInt(Math.floor( Math.random() * ($gameSystem.selectMembers().length - 2) + 1));
-        }while($gameSystem.enemyMembers().indexOf(this._enemyId) >= 0);
-        $gameSystem.enemyMembers()[parseInt(enemyId)] = this._enemyId;
+      if($gameSwitches.value(15)){
+        if($gameSystem.allyMembers()[parseInt(enemyId)] <= 0){
+          this._enemyId = 0;
+          do{
+            this._enemyId = parseInt(Math.floor( Math.random() * ($gameSystem.selectMembers().length - 2) + 1));
+          }while($gameSystem.allyMembers().indexOf(this._enemyId) >= 0);
+          $gameSystem.allyMembers()[parseInt(enemyId)] = this._enemyId;
+        }else{
+          this._enemyId = $gameSystem.allyMembers()[parseInt(enemyId)];
+        }
+        switch(parseInt(allyId)){
+        case 0:
+          $gameVariables.setValue(ally1Id,this._enemyId); //変数設定
+          break;
+        case 1:
+          $gameVariables.setValue(ally2Id,this._enemyId); //変数設定
+          break;
+        case 2:
+          $gameVariables.setValue(ally3Id,this._enemyId); //変数設定
+          break;
+        case 3:
+          $gameVariables.setValue(ally4Id,this._enemyId); //変数設定
+          break;
+        }
       }else{
-        this._enemyId = $gameSystem.enemyMembers()[parseInt(enemyId)];
-      }
+        if($gameSystem.enemyMembers()[parseInt(enemyId)] <= 0){
+          this._enemyId = 0;
+          do{
+            this._enemyId = parseInt(Math.floor( Math.random() * ($gameSystem.selectMembers().length - 2) + 1));
+          }while($gameSystem.enemyMembers().indexOf(this._enemyId) >= 0);
+          $gameSystem.enemyMembers()[parseInt(enemyId)] = this._enemyId;
+        }else{
+          this._enemyId = $gameSystem.enemyMembers()[parseInt(enemyId)];
+        }
       
-      switch(parseInt(enemyId)){
-      case 0:
-        $gameVariables.setValue(enemy1Id,this._enemyId); //変数設定
-        break;
-      case 1:
-        $gameVariables.setValue(enemy2Id,this._enemyId); //変数設定
-        break;
-      case 2:
-        $gameVariables.setValue(enemy3Id,this._enemyId); //変数設定
-        break;
-      case 3:
-        $gameVariables.setValue(enemy4Id,this._enemyId); //変数設定
-        break;
+        switch(parseInt(enemyId)){
+        case 0:
+          $gameVariables.setValue(enemy1Id,this._enemyId); //変数設定
+          break;
+        case 1:
+          $gameVariables.setValue(enemy2Id,this._enemyId); //変数設定
+          break;
+        case 2:
+          $gameVariables.setValue(enemy3Id,this._enemyId); //変数設定
+          break;
+        case 3:
+          $gameVariables.setValue(enemy4Id,this._enemyId); //変数設定
+          break;
+        }
       }
       this.setActor(new Game_Actor(this._enemyId));
         
@@ -8477,7 +8503,7 @@ Imported.TacticsBattleSys = true;
     this._commandWindow.setHandler('online',  this.commandOnlineMode.bind(this));
     this.addWindow(this._commandWindow);
   };
-  //VSモード(スタートから流用)
+  //トレーニングモード(スタートから流用)
   Scene_Title.prototype.commandTrainingMode = function() {
     DataManager.setupNewGame();
     this._commandWindow.close();
