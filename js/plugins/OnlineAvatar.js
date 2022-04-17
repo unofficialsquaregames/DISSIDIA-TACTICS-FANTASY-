@@ -225,10 +225,10 @@ function Game_Avatar() {
 		this.mapRef = firebase.database().ref('map' + $gameMap.mapId().padZero(3));
 		this.selfRef = this.mapRef.child(this.user.uid);
 		this.selfRef.onDisconnect().remove();	//切断時にキャラ座標をリムーブ
-		console.log(eventRef);
-		this.eventRef = this.mapRef.child(this.user.uid);
-		this.eventRef.onDisconnect().remove();	//切断時にキャラ座標をリムーブ
-		console.log(eventRef);
+		//console.log(eventRef);
+		//this.eventRef = this.mapRef.child(this.user.uid);
+		//this.eventRef.onDisconnect().remove();	//切断時にキャラ座標をリムーブ
+		//console.log(eventRef);
 
 		var avatarTemplate = this.avatarTemplate;
 		var avatarsInThisMap = this.avatarsInThisMap = {};
@@ -268,6 +268,7 @@ function Game_Avatar() {
 
 		//他ユニットが同マップに入場
 		this.eventRef.on('child_added', function (data) {
+			console.log("on");
 			$gameMap._events = data.val();
 		});
 
