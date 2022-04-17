@@ -108,7 +108,7 @@ function Game_Avatar() {
 	OnlineManager.selfRef = null;
 	OnlineManager.switchRef = null;
 	OnlineManager.variableRef = null;
-	OnlineManager.eventRef = null;
+	OnlineManager.unitRef = null;
 	OnlineManager.user = null;
 	OnlineManager.syncBusy = false;	//同期接続する瞬間、送信が受信を上書きするのを阻止
 
@@ -192,10 +192,10 @@ function Game_Avatar() {
 			this.variableRef.once('value', function(data) {
 				OnlineManager.syncBusy = false;
 			});
-			this.variableRef.on('child_added', function(data) {
+			this.variableRef.on('child_added', function (data) {
 				$gameVariables.setValue(data.key, data.val(), true);
 			});
-			this.variableRef.on('child_changed', function(data) {
+			this.variableRef.on('child_changed', function (data) {
 				$gameVariables.setValue(data.key, data.val(), true);
 			});
 		}
@@ -210,14 +210,14 @@ function Game_Avatar() {
 			this.mapRef.off();
 			this.selfRef.onDisconnect().cancel();
 			this.selfRef.remove();
-			this.eventRef.onDisconnect().cancel();
-			this.eventRef.remove();
+			this.unitRef.onDisconnect().cancel();
+			this.unitRef.remove();
 		}
 
 		if (!$dataMap.meta || $dataMap.meta.avatar_off) {
 			this.mapRef = null;
 			this.selfRef = null;
-			this.eventRef = null;
+			this.unitRef = null;
 			this.avatarsInThisMap = null;
 			return;
 		}
@@ -225,10 +225,8 @@ function Game_Avatar() {
 		this.mapRef = firebase.database().ref('map' + $gameMap.mapId().padZero(3));
 		this.selfRef = this.mapRef.child(this.user.uid);
 		this.selfRef.onDisconnect().remove();	//切断時にキャラ座標をリムーブ
-		console.log(eventRef);
-		this.eventRef = this.mapRef.child(this.user.uid);
-		this.eventRef.onDisconnect().remove();	//切断時にキャラ座標をリムーブ
-		console.log(eventRef);
+		this.unitRef = this.mapRef.child('units');
+
 
 		var avatarTemplate = this.avatarTemplate;
 		var avatarsInThisMap = this.avatarsInThisMap = {};
@@ -239,7 +237,7 @@ function Game_Avatar() {
 		//他プレイヤーが同マップに入場
 		this.mapRef.on('child_added', function(data) {
 			if (OnlineManager.shouldDisplay(data)) {
-				avatarsInThisMap[data.key] = new Game_Avatar(avatarTemplate, data.val());
+				//avatarsInThisMap[data.key] = new Game_Avatar(avatarTemplate, data.val());
 				$gameVariables.setValue(8, $gameVariables.value(9));
 				if ($gameVariables.value(8) == 1) $gameSystem.enemyMembers = $gameSystem.allyMembers;
 				$gameVariables.setValue(9, $gameVariables.value(9) + 1);
@@ -249,30 +247,36 @@ function Game_Avatar() {
 		//他プレイヤーが同マップで移動
 		this.mapRef.on('child_changed', function(data) {
 			if (OnlineManager.shouldDisplay(data)) {
+				/*
 				if (avatarsInThisMap[data.key]) {
 					avatarsInThisMap[data.key].setOnlineData(data.val());
 				} else {	//念の為
 					avatarsInThisMap[data.key] = new Game_Avatar(avatarTemplate, data.val());
 				}
+				*/
 			}
 		});
 
 		//他プレイヤーが同マップから退場
 		this.mapRef.on('child_removed', function(data) {
 			if (OnlineManager.shouldDisplay(data)) {
-				if (avatarsInThisMap[data.key]) avatarsInThisMap[data.key].erase();
-				delete avatarsInThisMap[data.key];
+				//if (avatarsInThisMap[data.key]) avatarsInThisMap[data.key].erase();
+				//delete avatarsInThisMap[data.key];
 				$gameVariables.setValue(9, $gameVariables.value(9) - 1);
 			}
 		});
 
 		//他ユニットが同マップに入場
-		this.eventRef.on('child_added', function (data) {
-			console.log("on");
-			$gameMap._events = data.val();
+		this.unitRef.on('child_added', function (data) {
+			console.log(data);
+			console.log(data.key);
+			console.log(data.val());
+			$gameMap._unitList = data.val();
 		});
 
+		this.removeUnitInfo();
 		this.sendPlayerInfo();
+		if ($gameMap.isBattleActivate()) this.sendUnitInfo();
 	};
 
 	//送信するプレイヤー情報
@@ -284,6 +288,26 @@ function Game_Avatar() {
 	//プレイヤー情報をオンライン上に送信
 	OnlineManager.sendPlayerInfo = function() {
 		if (this.selfRef) this.selfRef.update(this.playerInfo());
+	};
+
+	//ユニット情報を送信(普通にイベント丸ごとやると深度が32以上いきエラーになってしまうため情報に厳選する必要あり)
+	OnlineManager.sendUnitInfo = function () {
+		if (this.unitRef && !this.syncBusy) {
+			var send = {};
+			for (var i = 1; i < $gameMap.unitList().length; i++) {
+				//send[i] = $gameMap.unitList()[i];
+				
+				var $ = $gameMap.unitList()[i];
+				send[i] = {
+					x: $.x, y: $.y, direction: $.direction(), speed: $.realMoveSpeed(), charaName: $.characterName(), charaIndex: $.characterIndex(), useSkill: $.useSkill(), target: $.target(), actor: $.isActor()};
+			
+			}
+			this.unitRef.update(send);
+		}
+	};
+	//ユニット情報を削除
+	OnlineManager.removeUnitInfo = function () {
+		if (this.unitRef) this.unitRef.remove();
 	};
 
 	//プラグインコマンドで指定した情報とプレイヤー情報をオンライン上に送信
@@ -335,15 +359,6 @@ function Game_Avatar() {
 			this.variableRef.update(send);
 		}
 	};
-	
-    //イベント情報を送信
-	OnlineManager.sendEvent = function(events) {
-		if (this.eventRef && !this.syncBusy) {
-			var send = events;
-			this.eventRef.update(send);
-		}
-	};
-
 
 	//OnlineManagerを起動
 	var _SceneManager_initialize = SceneManager.initialize;
@@ -368,6 +383,7 @@ function Game_Avatar() {
 		//前回と位置か方向が違う時のみ送信する
 		if (this.isMovementSucceeded() || d !== prevD) {
 			OnlineManager.sendPlayerInfo();
+			OnlineManager.sendUnitInfo();
 		}
 	};
 
@@ -403,7 +419,6 @@ function Game_Avatar() {
 	var _Scene_Title_start = Scene_Title.prototype.start;
 	Scene_Title.prototype.start = function() {
 		OnlineManager.removePlayerInfo();
-		OnlineManager.removeBattlerInfo();
 		_Scene_Title_start.apply(this, arguments);
 	};
 
@@ -446,14 +461,24 @@ function Game_Avatar() {
 		_Game_Switches_initialize.apply(this, arguments);
 		OnlineManager.startSync();
 	};
+	//ユニット同期
+	var _Scene_Map_setStartBattle = Scene_Map.prototype.setStartBattle;
+	Scene_Map.prototype.setStartBattle = function (byOnline) {
+		_Scene_Map_setStartBattle.call();
+		if (!byOnline) {
+			OnlineManager.sendUnitInfo();
+		}
+	};
 	
 	//ユニット同期
 	var _Game_Map_setupTacticsUnits = Game_Event.prototype.setupTacticsUnits;
-	Game_Map.prototype.setupTacticsUnits = function(byOnline) {
+	Game_Map.prototype.setupTacticsUnits = function (byOnline) {
 		_Game_Map_setupTacticsUnits.call();
-		if (!byOnline) OnlineManager.sendEvent(this._events);
+		if (!byOnline) {
+			OnlineManager.sendUnitInfo();
+		}
 	};
-
+	
 	//オンライン経由でスイッチ・変数が変更された時、デバッグウィンドウ(F9)に反映
 	//やや重い処理だが、F9はスマホやブラウザで実行されることはないためこれで大丈夫
 	var _Window_DebugEdit_update = Window_DebugEdit.prototype.update;

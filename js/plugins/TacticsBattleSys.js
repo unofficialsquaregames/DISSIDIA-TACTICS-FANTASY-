@@ -1424,7 +1424,8 @@ Imported.TacticsBattleSys = true;
           //マップ上にいるユニットのステートをチェックする
           for(var i = 0; i < $gameMap.unitList().length; i++){
             var reunionUnit = $gameMap.unitList()[i];
-            var reunionActor = reunionUnit.isActor();
+              var reunionActor = reunionUnit.isActor();
+              //オンラインデータベースの都合上アクタークラスからキャラクラスにアクセスしないようにしたい
             if(this.isCharacter().targetRange(reunionUnit) <= parseInt(field)){
               value += Math.round((value + this.paramBase(paramId)) * 5 / 100);
             }
@@ -1437,6 +1438,7 @@ Imported.TacticsBattleSys = true;
       for(var i = 0; i < $gameMap.unitList().length; i++){
         var robbedUnit = $gameMap.unitList()[i];
         var robbedActor = robbedUnit.isActor();
+        //オンラインデータベースの都合上アクタークラスからキャラクラスにアクセスしないようにしたい
         if(robbedUnit == this.isCharacter()) continue;
         for(var id = 1; id < $dataStates.length; id++){
           if (robbedActor.isStateAffected(id)) {
@@ -1469,7 +1471,8 @@ Imported.TacticsBattleSys = true;
             //リユニオンバフ(領域内のユニットのステータスをダウン)
             var field = $dataStates[id].meta.field;
             var reunion = $dataStates[id].meta.reunion;
-            if(field && reunion){
+              if (field && reunion) {
+        //オンラインデータベースの都合上アクタークラスからキャラクラスにアクセスしないようにしたい
               if(robbedUnit.targetRange(this.isCharacter()) <= parseInt(field)){
                 value -= Math.round((value + this.paramBase(paramId)) * 5 / 100);
               }
