@@ -108,6 +108,7 @@ function Game_Avatar() {
 	OnlineManager.selfRef = null;
 	OnlineManager.switchRef = null;
 	OnlineManager.variableRef = null;
+	OnlineManager.eventRef = null;
 	OnlineManager.user = null;
 	OnlineManager.syncBusy = false;	//同期接続する瞬間、送信が受信を上書きするのを阻止
 
@@ -209,11 +210,14 @@ function Game_Avatar() {
 			this.mapRef.off();
 			this.selfRef.onDisconnect().cancel();
 			this.selfRef.remove();
+			this.eventRef.onDisconnect().cancel();
+			this.eventRef.remove();
 		}
 
 		if (!$dataMap.meta || $dataMap.meta.avatar_off) {
 			this.mapRef = null;
 			this.selfRef = null;
+			this.eventRef = null;
 			this.avatarsInThisMap = null;
 			return;
 		}
@@ -232,6 +236,9 @@ function Game_Avatar() {
 		this.mapRef.on('child_added', function(data) {
 			if (OnlineManager.shouldDisplay(data)) {
 				avatarsInThisMap[data.key] = new Game_Avatar(avatarTemplate, data.val());
+				$gameVariables.setValue(8, $gameVariables.value(9));
+				if ($gameVariables.value(8) == 1) $gameSystem.enemyMembers = $gameSystem.allyMembers;
+				$gameVariables.setValue(9, $gameVariables.value(9) + 1);
 			}
 		});
 
@@ -251,7 +258,13 @@ function Game_Avatar() {
 			if (OnlineManager.shouldDisplay(data)) {
 				if (avatarsInThisMap[data.key]) avatarsInThisMap[data.key].erase();
 				delete avatarsInThisMap[data.key];
+				$gameVariables.setValue(9, $gameVariables.value(9) - 1);
 			}
+		});
+
+		//他ユニットが同マップに入場
+		this.eventRef.on('child_added', function (data) {
+			$gameMap._events = data.val();
 		});
 
 		this.sendPlayerInfo();
@@ -317,7 +330,14 @@ function Game_Avatar() {
 			this.variableRef.update(send);
 		}
 	};
-
+	
+    //イベント情報を送信
+	OnlineManager.sendEvent = function(events) {
+		if (this.eventRef && !this.syncBusy) {
+			var send = events;
+			this.eventRef.update(send);
+		}
+	};
 
 
 	//OnlineManagerを起動
@@ -377,7 +397,8 @@ function Game_Avatar() {
 	//タイトルに戻った時にもキャラ座標をリムーブ
 	var _Scene_Title_start = Scene_Title.prototype.start;
 	Scene_Title.prototype.start = function() {
-		OnlineManager.removePlayerInfo();
+		OnlineManager.removePlayerInfo(); {
+		OnlineManager.removeBattlerInfo();
 		_Scene_Title_start.apply(this, arguments);
 	};
 
@@ -420,6 +441,13 @@ function Game_Avatar() {
 		_Game_Switches_initialize.apply(this, arguments);
 		OnlineManager.startSync();
 	};
+	
+	//ユニット同期
+	var _Game_Map_setupTacticsUnits = Game_Event.prototype.setupTacticsUnits;
+	Game_Map.prototype.setupTacticsUnits = function(byOnline) {
+		_Game_Map_setupTacticsUnits.call();
+		if (!byOnline) OnlineManager.sendEvent(this._events);
+	};
 
 	//オンライン経由でスイッチ・変数が変更された時、デバッグウィンドウ(F9)に反映
 	//やや重い処理だが、F9はスマホやブラウザで実行されることはないためこれで大丈夫
@@ -453,10 +481,7 @@ function Game_Avatar() {
 		this.setImage(onlineData.charaName, onlineData.charaIndex);
 		this.setOnlineData(onlineData);
 		$gameMap._events.push(this);
-		console.log($gameVariables.value(9));
-		$gameVariables.setValue(8, $gameVariables.value(9));
-		$gameVariables.setValue(9, $gameVariables.value(9) + 1);
-
+		
 		var scene = SceneManager._scene;
 		if (scene instanceof Scene_Map) {
 			var sprite = new Sprite_Character(this);
