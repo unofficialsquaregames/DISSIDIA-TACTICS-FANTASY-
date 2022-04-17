@@ -268,9 +268,6 @@ function Game_Avatar() {
 
 		//他ユニットが同マップに入場
 		this.unitRef.on('child_added', function (data) {
-			console.log(data);
-			console.log(data.key);
-			console.log(data.val());
 			$gameMap._unitList = data.val();
 		});
 
@@ -299,7 +296,11 @@ function Game_Avatar() {
 				
 				var $ = $gameMap.unitList()[i];
 				send[i] = {
-					x: $.x, y: $.y, direction: $.direction(), speed: $.realMoveSpeed(), charaName: $.characterName(), charaIndex: $.characterIndex(), useSkill: $.useSkill(), target: $.target(), actor: $.isActor()};
+					//x: $.x, y: $.y, direction: $.direction(), speed: $.realMoveSpeed(), charaName: $.characterName(), charaIndex: $.characterIndex(), useSkill: $.useSkill(), target: $.target(), actor: $.isActor()
+					//x: $.x, y: $.y, direction: $.direction(), speed: $.realMoveSpeed(), charaName: $.characterName(), charaIndex: $.characterIndex(), useSkill: $.useSkill(), target: $.target()
+					x: $.x
+				};
+				
 			
 			}
 			this.unitRef.update(send);

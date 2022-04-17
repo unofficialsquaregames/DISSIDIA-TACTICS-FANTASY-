@@ -507,8 +507,8 @@ Imported.TacticsBattleSys = true;
   // SRPG用の行動結果適用
   Game_Action.prototype.actionApply = function(target) {
     var result = target.result();
-    var turnUnit = this.subject().isCharacter();
-    var targetUnit = target.isCharacter();
+    var turnUnit = $gameMap.event(this.subject().eventId());
+    var targetUnit = $gameMap.event(target.eventId());
     this.subject().clearResult();
     result.clear();
     result.used = this.testApply(target);
@@ -813,17 +813,17 @@ Imported.TacticsBattleSys = true;
   Game_BattlerBase.prototype.initialize = function() {
     _Game_BattlerBase_initialize.call(this);
     this._wt = Math.floor(Math.random() * 50); //自身のウェイトターン到達でターンが回り、行動終了後リセットされるような
-    this._character = null; //バトラーと紐づいてるイベントをセットする
+      this._eventId = null; //バトラーと紐づいてるイベントをセットする
   }
   //紐づいてるイベントを返す
-  Game_BattlerBase.prototype.isCharacter = function() {
-    return this._character;
+  Game_BattlerBase.prototype.eventId = function () {
+      return this._eventId;
   }
   //イベントを紐づける
-  Game_BattlerBase.prototype.setCharacter = function(character) {
-    this._character = character;
+  Game_BattlerBase.prototype.setEventId = function (eventId) {
+      this._eventId = eventId;
   }
-  
+
   // 使用可能時の適合判定
   var _Game_BattlerBase_isOccasionOk = Game_BattlerBase.prototype.isOccasionOk;
   Game_BattlerBase.prototype.isOccasionOk = function(item) {
@@ -1426,7 +1426,7 @@ Imported.TacticsBattleSys = true;
             var reunionUnit = $gameMap.unitList()[i];
               var reunionActor = reunionUnit.isActor();
               //オンラインデータベースの都合上アクタークラスからキャラクラスにアクセスしないようにしたい
-            if(this.isCharacter().targetRange(reunionUnit) <= parseInt(field)){
+            if($gameMap.event(this.eventId()).targetRange(reunionUnit) <= parseInt(field)){
               value += Math.round((value + this.paramBase(paramId)) * 5 / 100);
             }
           }
@@ -1439,7 +1439,7 @@ Imported.TacticsBattleSys = true;
         var robbedUnit = $gameMap.unitList()[i];
         var robbedActor = robbedUnit.isActor();
         //オンラインデータベースの都合上アクタークラスからキャラクラスにアクセスしないようにしたい
-        if(robbedUnit == this.isCharacter()) continue;
+          if (robbedUnit == $gameMap.event(this.eventId())) continue;
         for(var id = 1; id < $dataStates.length; id++){
           if (robbedActor.isStateAffected(id)) {
             var stealGrantor = $dataStates[id].meta.stealGrantor;
@@ -1473,14 +1473,14 @@ Imported.TacticsBattleSys = true;
             var reunion = $dataStates[id].meta.reunion;
               if (field && reunion) {
         //オンラインデータベースの都合上アクタークラスからキャラクラスにアクセスしないようにしたい
-              if(robbedUnit.targetRange(this.isCharacter()) <= parseInt(field)){
+                  if (robbedUnit.targetRange($gameMap.event(this.eventId())) <= parseInt(field)){
                 value -= Math.round((value + this.paramBase(paramId)) * 5 / 100);
               }
             }
             //テラー(領域内のユニットのステータスをダウン)
             var teller = $dataStates[id].meta.teller;
-            if(field && teller && robbedUnit.isAttackTarget(this.isCharacter())){
-              if(robbedUnit.targetRange(this.isCharacter()) <= parseInt(field)){
+              if (field && teller && robbedUnit.isAttackTarget($gameMap.event(this.eventId()))){
+                if (robbedUnit.targetRange($gameMap.event(this.eventId())) <= parseInt(field)){
                 value -= Math.round((value + this.paramBase(paramId)) * 20 / 100);
               }
             }
@@ -2775,7 +2775,7 @@ Imported.TacticsBattleSys = true;
       }
       this.setActor(new Game_Actor(this._allyId));
         
-      this.isActor().setCharacter(this); //イベントと紐づける用
+      this.isActor().setEventId(this.eventId()); //イベントと紐づける用
       this._move = $dataClasses[this._actor._classId].meta.move; //移動力
       this.setImage(this._actor.characterName(), this._actor.characterIndex());
       //向きの設定
@@ -2838,7 +2838,7 @@ Imported.TacticsBattleSys = true;
       }
       this.setActor(new Game_Actor(this._enemyId));
         
-      this.isActor().setCharacter(this); //イベントと紐づける用
+      this.isActor().setEventId(this.eventId()); //イベントと紐づける用
       this._move = $dataClasses[this._actor._classId].meta.move; //移動力
       this.setImage(this._actor.characterName(), this._actor.characterIndex());
       //向きの設定
@@ -5079,7 +5079,7 @@ Imported.TacticsBattleSys = true;
 
   Sprite_WtTurnList.prototype.refresh = function() {
     this.bitmap.clear();
-    if(!$gameMap._wtTurnList) return;
+    if (!$gameMap._wtTurnList) return;
     var id = $gameMap._wtTurnList[this._number][0];
     var character = $gameMap._events[id];
     if(!character) return;
