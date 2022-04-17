@@ -225,10 +225,10 @@ function Game_Avatar() {
 		this.mapRef = firebase.database().ref('map' + $gameMap.mapId().padZero(3));
 		this.selfRef = this.mapRef.child(this.user.uid);
 		this.selfRef.onDisconnect().remove();	//切断時にキャラ座標をリムーブ
-		//console.log(eventRef);
-		//this.eventRef = this.mapRef.child(this.user.uid);
-		//this.eventRef.onDisconnect().remove();	//切断時にキャラ座標をリムーブ
-		//console.log(eventRef);
+		console.log(eventRef);
+		this.eventRef = this.mapRef.child(this.user.uid);
+		this.eventRef.onDisconnect().remove();	//切断時にキャラ座標をリムーブ
+		console.log(eventRef);
 
 		var avatarTemplate = this.avatarTemplate;
 		var avatarsInThisMap = this.avatarsInThisMap = {};
@@ -402,7 +402,7 @@ function Game_Avatar() {
 	//タイトルに戻った時にもキャラ座標をリムーブ
 	var _Scene_Title_start = Scene_Title.prototype.start;
 	Scene_Title.prototype.start = function() {
-		OnlineManager.removePlayerInfo(); {
+		OnlineManager.removePlayerInfo();
 		OnlineManager.removeBattlerInfo();
 		_Scene_Title_start.apply(this, arguments);
 	};
