@@ -301,8 +301,8 @@ function Game_Avatar() {
 	OnlineManager.sendUnitInfo = function () {
 		if (this.unitRef && !this.syncBusy) {
 			var send = {};
-			for (var i = 0; i < $gameMap.allyList().length; i++) {
-				send[i] = $gameMap.allyList()[i];
+			for (var i = 0; i < $gameMap.allyList().length; i++) { //iじゃなくて変数を使用
+				send[$gameVariables.value(10)] = $gameMap.allyList()[i];
 				/*
 				var $ = $gameMap.unitList()[i];
 				send[i] = {
@@ -310,6 +310,7 @@ function Game_Avatar() {
 					//x: $.x
 				};
 				*/
+				$gameVariables.setValue(10, $gameVariables.value(10) + 1);
 			}
 			this.unitRef.update(send);
 		}
