@@ -412,6 +412,8 @@ Imported.TacticsBattleSys = true;
     //以下オンライン時
     this._allyTeamID = 0; //味方チームのID
     this._enemyTeamID = 0; //敵チームのID
+    this._isAllyTeam = false; //味方チームか
+    this._isEnemyTeam = false; //敵チームか
   };
   // 多段ヒット時のカウントセット
   Game_Temp.prototype.setMultiHit = function(skill) {
@@ -1522,8 +1524,9 @@ Imported.TacticsBattleSys = true;
     //以下トラップやカウンター用の変数設定
     this._reservationActionList = []; //予約された戦闘
     
-    
+    //if ($gameSwitches.value(15)) return;
     $gameTemp._countWtTime = true; //WT計算中フラグ
+    //this.battleActivate();
     this.ActorTurn = false; //敵ターンに操作不能にするため
     this.initColorArea();
     this.setupTilePassableTable();        // 地形通行判定テーブルのセットアップ
@@ -5080,7 +5083,7 @@ Imported.TacticsBattleSys = true;
   Sprite_WtTurnList.prototype.refresh = function() {
     this.bitmap.clear();
     if (!$gameMap._wtTurnList) return;
-    var id = $gameMap._wtTurnList[this._number][0];
+    var id = $gameMap._wtTurnList[this._number][0]; //OnlineAvatar.jsと併用させるとエラーが発生する
     var character = $gameMap._events[id];
     if(!character) return;
     var image = ImageManager.loadCharacter(character.characterName());
@@ -7552,6 +7555,7 @@ Imported.TacticsBattleSys = true;
     }
     //戦闘開始準備
     if ($gameTemp._startBattleFlag) {
+      if ($gameSwitches.value(15) && $gameVariables.value(9) < 2) return;
       this.setStartBattle();
       return;
     }
@@ -7578,7 +7582,8 @@ Imported.TacticsBattleSys = true;
       return;
     }
     //オンライン対戦の場合
-    if($gameSwitches.value(15)){
+    if ($gameSwitches.value(15)) {
+        /*
       //敵のターン
       if ($gameMap.isEnemyTurn()) {
         if($gameMap._turnUnit.isActor().checkCtrlGrantor()){
@@ -7597,6 +7602,8 @@ Imported.TacticsBattleSys = true;
         }
         return;
       }
+      */
+          this.updateAllyTurn();
     }else{
       //敵のターン
       if ($gameMap.isEnemyTurn()) {

@@ -109,6 +109,7 @@ function Game_Avatar() {
 	OnlineManager.switchRef = null;
 	OnlineManager.variableRef = null;
 	OnlineManager.unitRef = null;
+	OnlineManager.tempRef = null;
 	OnlineManager.user = null;
 	OnlineManager.syncBusy = false;	//同期接続する瞬間、送信が受信を上書きするのを阻止
 
@@ -151,7 +152,8 @@ function Game_Avatar() {
 
 	//サインイン完了後
 	//オンライン接続のイベント登録に関する記述(xxxRef.on()とか)が書いてある関数はこのメソッドから呼び出すと良さげ
-	OnlineManager.start = function(user) {
+	OnlineManager.start = function (user) {
+		//if (!$gameSwitches.value(15)) return;
 		this.user = user;
 
 		//再接続時にonDisconnectを張り直す
@@ -159,6 +161,10 @@ function Game_Avatar() {
 		connectedRef.on('value', function(data) {
 			if (data.val() && OnlineManager.selfRef) OnlineManager.selfRef.onDisconnect().remove();
 		});
+
+		this.tempRef = firebase.database().ref('temps');
+		this.tempRef.onDisconnect().remove();
+		OnlineManager.sendTempInfo();
 
 		//接続が最初のマップ読み込みよりも遅延した時は、今いるマップのオンラインデータを購読
 		if (this.mapExists()) this.connectNewMap();
@@ -226,6 +232,8 @@ function Game_Avatar() {
 		this.selfRef = this.mapRef.child(this.user.uid);
 		this.selfRef.onDisconnect().remove();	//切断時にキャラ座標をリムーブ
 		this.unitRef = this.mapRef.child('units');
+		this.unitRef.onDisconnect().remove();
+		
 
 
 		var avatarTemplate = this.avatarTemplate;
@@ -239,7 +247,7 @@ function Game_Avatar() {
 			if (OnlineManager.shouldDisplay(data)) {
 				//avatarsInThisMap[data.key] = new Game_Avatar(avatarTemplate, data.val());
 				$gameVariables.setValue(8, $gameVariables.value(9));
-				if ($gameVariables.value(8) == 1) $gameSystem.enemyMembers = $gameSystem.allyMembers;
+				//if ($gameVariables.value(8) == 1) $gameSystem.enemyMembers = $gameSystem.allyMembers;
 				$gameVariables.setValue(9, $gameVariables.value(9) + 1);
 			}
 		});
@@ -265,15 +273,17 @@ function Game_Avatar() {
 				$gameVariables.setValue(9, $gameVariables.value(9) - 1);
 			}
 		});
-
-		//他ユニットが同マップに入場
+		
+		//他ユニットが同マップに入場(必要ないかも)
 		this.unitRef.on('child_added', function (data) {
-			$gameMap._unitList = data.val();
+			console.log(data.key);
+			console.log(data.val());
+			//$gameMap._unitList.push(data.val()); //data.val()は1つのユニットなのでユニットリストに代入すべきではない
 		});
+		
 
-		this.removeUnitInfo();
 		this.sendPlayerInfo();
-		if ($gameMap.isBattleActivate()) this.sendUnitInfo();
+		if ($gameMap.isBattleActivate()) OnlineManager.sendUnitInfo();
 	};
 
 	//送信するプレイヤー情報
@@ -287,28 +297,30 @@ function Game_Avatar() {
 		if (this.selfRef) this.selfRef.update(this.playerInfo());
 	};
 
-	//ユニット情報を送信(普通にイベント丸ごとやると深度が32以上いきエラーになってしまうため情報に厳選する必要あり)
+	//ユニット情報を送信(unitsはプレイヤーごとにわけて4体4体で編成させた方がいいか)
 	OnlineManager.sendUnitInfo = function () {
 		if (this.unitRef && !this.syncBusy) {
 			var send = {};
-			for (var i = 1; i < $gameMap.unitList().length; i++) {
-				//send[i] = $gameMap.unitList()[i];
-				
+			for (var i = 0; i < $gameMap.allyList().length; i++) {
+				send[i] = $gameMap.allyList()[i];
+				/*
 				var $ = $gameMap.unitList()[i];
 				send[i] = {
-					//x: $.x, y: $.y, direction: $.direction(), speed: $.realMoveSpeed(), charaName: $.characterName(), charaIndex: $.characterIndex(), useSkill: $.useSkill(), target: $.target(), actor: $.isActor()
-					//x: $.x, y: $.y, direction: $.direction(), speed: $.realMoveSpeed(), charaName: $.characterName(), charaIndex: $.characterIndex(), useSkill: $.useSkill(), target: $.target()
-					x: $.x
+					x: $.x, y: $.y, direction: $.direction(), speed: $.realMoveSpeed(), charaName: $.characterName(), charaIndex: $.characterIndex(), useSkill: $.useSkill(), target: $.target(), actor: $.isActor()
+					//x: $.x
 				};
-				
-			
+				*/
 			}
 			this.unitRef.update(send);
 		}
 	};
-	//ユニット情報を削除
-	OnlineManager.removeUnitInfo = function () {
-		if (this.unitRef) this.unitRef.remove();
+
+	//添付情報を送信
+	OnlineManager.sendTempInfo = function () {
+		if (this.tempRef && !this.syncBusy) {
+			var send = $gameTemp;
+			this.tempRef.update(send);
+		}
 	};
 
 	//プラグインコマンドで指定した情報とプレイヤー情報をオンライン上に送信
@@ -321,6 +333,10 @@ function Game_Avatar() {
 	//プレイヤー情報を削除
 	OnlineManager.removePlayerInfo = function() {
 		if (this.selfRef) this.selfRef.remove();
+	};
+	//ユニット情報を削除
+	OnlineManager.removeUnitInfo = function () {
+		if (this.unitRef) this.unitRef.remove();
 	};
 
 	//$gameMapや$dataMapがnullでないことを保証
@@ -384,7 +400,6 @@ function Game_Avatar() {
 		//前回と位置か方向が違う時のみ送信する
 		if (this.isMovementSucceeded() || d !== prevD) {
 			OnlineManager.sendPlayerInfo();
-			OnlineManager.sendUnitInfo();
 		}
 	};
 
@@ -420,6 +435,7 @@ function Game_Avatar() {
 	var _Scene_Title_start = Scene_Title.prototype.start;
 	Scene_Title.prototype.start = function() {
 		OnlineManager.removePlayerInfo();
+		OnlineManager.removeUnitInfo();
 		_Scene_Title_start.apply(this, arguments);
 	};
 
@@ -462,24 +478,22 @@ function Game_Avatar() {
 		_Game_Switches_initialize.apply(this, arguments);
 		OnlineManager.startSync();
 	};
+
+	//ここが通過すらしない問題
 	//ユニット同期
-	var _Scene_Map_setStartBattle = Scene_Map.prototype.setStartBattle;
-	Scene_Map.prototype.setStartBattle = function (byOnline) {
-		_Scene_Map_setStartBattle.call();
-		if (!byOnline) {
-			OnlineManager.sendUnitInfo();
-		}
+	var _Scene_Map_endTurn = Scene_Map.prototype.endTurn;
+	Scene_Map.prototype.endTurn = function () {
+		_Scene_Map_endTurn.call(this);
+		OnlineManager.sendUnitInfo();
+		OnlineManager.sendTempInfo();
 	};
-	
 	//ユニット同期
-	var _Game_Map_setupTacticsUnits = Game_Event.prototype.setupTacticsUnits;
-	Game_Map.prototype.setupTacticsUnits = function (byOnline) {
-		_Game_Map_setupTacticsUnits.call();
-		if (!byOnline) {
-			OnlineManager.sendUnitInfo();
-		}
+	var _Scene_Map_startBattle = Scene_Map.prototype.startBattle;
+	Scene_Map.prototype.startBattle = function () {
+		_Scene_Map_startBattle.call(this);
+		OnlineManager.sendUnitInfo();
+		OnlineManager.sendTempInfo();
 	};
-	
 	//オンライン経由でスイッチ・変数が変更された時、デバッグウィンドウ(F9)に反映
 	//やや重い処理だが、F9はスマホやブラウザで実行されることはないためこれで大丈夫
 	var _Window_DebugEdit_update = Window_DebugEdit.prototype.update;
@@ -487,8 +501,18 @@ function Game_Avatar() {
 		_Window_DebugEdit_update.apply(this, arguments);
 		this.refresh();
 	};
-
-
+	/*
+	//ユニット情報反映
+	var _Game_Map_setStartBattle = Game_Map.prototype.setStartBattle;
+	Game_Map.prototype.setStartBattle = function (byOnline) {
+		var prevD = this.direction();
+		_Game_Map_setStartBattle.call(this);
+		//前回と位置か方向が違う時のみ送信する
+		if (this.isMovementSucceeded() || d !== prevD) {
+			OnlineManager.sendPlayerInfo();
+		}
+	};
+	*/
 
 	//Game_Avatar
 	//アバターとして使用するマップイベントを定義
