@@ -412,8 +412,6 @@ Imported.TacticsBattleSys = true;
     //以下オンライン時
     this._allyTeamID = 0; //味方チームのID
     this._enemyTeamID = 0; //敵チームのID
-    this._isAllyTeam = false; //味方チームか
-    this._isEnemyTeam = false; //敵チームか
   };
   // 多段ヒット時のカウントセット
   Game_Temp.prototype.setMultiHit = function(skill) {
@@ -7583,27 +7581,24 @@ Imported.TacticsBattleSys = true;
     }
     //オンライン対戦の場合
     if ($gameSwitches.value(15)) {
-        /*
       //敵のターン
       if ($gameMap.isEnemyTurn()) {
         if($gameMap._turnUnit.isActor().checkCtrlGrantor()){
-          if($gameVariables.value(8) == $gameTemp._allyTeamID) this.updateAllyTurn();
+          if($gameVariables.value(8) == 0) this.updateAllyTurn();
         }else{
-          if($gameVariables.value(8) == $gameTemp._enemyTeamID) this.updateAllyTurn();       // 敵ターンの更新
+          if($gameVariables.value(8) == 1) this.updateAllyTurn();       // 敵ターンの更新
         }
         return;
       }
       //味方のターン
       if ($gameMap.isAllyTurn()) {
         if($gameMap._turnUnit.isActor().checkHateState() || $gameMap._turnUnit.isActor().checkHateGrantor() || $gameMap._turnUnit.isActor().checkCtrlGrantor() || $gameMap._turnUnit.isActor().checkNoCtrlState()){
-          if($gameVariables.value(8) == $gameTemp._enemyTeamID) this.updateAllyTurn();
+          if($gameVariables.value(8) == 1) this.updateAllyTurn();
         }else{
-          if($gameVariables.value(8) == $gameTemp._allyTeamID) this.updateAllyTurn();
+          if($gameVariables.value(8) == 0) this.updateAllyTurn();
         }
         return;
       }
-      */
-          this.updateAllyTurn();
     }else{
       //敵のターン
       if ($gameMap.isEnemyTurn()) {

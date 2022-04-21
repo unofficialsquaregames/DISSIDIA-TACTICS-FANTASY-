@@ -247,7 +247,6 @@ function Game_Avatar() {
 			if (OnlineManager.shouldDisplay(data)) {
 				//avatarsInThisMap[data.key] = new Game_Avatar(avatarTemplate, data.val());
 				$gameVariables.setValue(8, $gameVariables.value(9));
-				//if ($gameVariables.value(8) == 1) $gameSystem.enemyMembers = $gameSystem.allyMembers;
 				$gameVariables.setValue(9, $gameVariables.value(9) + 1);
 			}
 		});
@@ -298,11 +297,13 @@ function Game_Avatar() {
 	};
 
 	//ユニット情報を送信(unitsはプレイヤーごとにわけて4体4体で編成させた方がいいか)
+	//敵と味方どういう風にわけるか
 	OnlineManager.sendUnitInfo = function () {
 		if (this.unitRef && !this.syncBusy) {
 			var send = {};
 			for (var i = 0; i < $gameMap.allyList().length; i++) { //iじゃなくて変数を使用
-				send[$gameVariables.value(10)] = $gameMap.allyList()[i];
+				if ($gameVariables.value(8) == 0) send[i] = $gameMap.allyList()[i];
+				if ($gameVariables.value(8) == 1) send[i + 4] = $gameMap.allyList()[i];
 				/*
 				var $ = $gameMap.unitList()[i];
 				send[i] = {
@@ -310,7 +311,6 @@ function Game_Avatar() {
 					//x: $.x
 				};
 				*/
-				$gameVariables.setValue(10, $gameVariables.value(10) + 1);
 			}
 			this.unitRef.update(send);
 		}
