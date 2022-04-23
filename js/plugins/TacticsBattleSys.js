@@ -417,9 +417,6 @@ Imported.TacticsBattleSys = true;
         this._fromD = 0;
         this._toX = 0; //移動先X座標
         this._toY = 0; //移動先Y座標
-        //以下オンライン時
-        this._allyTeamID = 0; //味方チームのID
-        this._enemyTeamID = 0; //敵チームのID
     };
     // 多段ヒット時のカウントセット
     Game_Temp.prototype.setMultiHit = function (skill) {
@@ -548,6 +545,433 @@ Imported.TacticsBattleSys = true;
     Game_Temp.prototype.isReservationActionCount = function () {
         return this._reservationActionList.length;
     }
+
+
+    //-----------------------------------------------------------------------------
+    // Game_System
+    //
+
+    // 初期化処理
+    var _Game_System_initialize = Game_System.prototype.initialize;
+    Game_System.prototype.initialize = function () {
+        _Game_System_initialize.call(this);
+        this.helpShow = true;
+        //Game_Mapから
+        this._phaseState = 0; //戦闘中の段階
+        this._isAllyTurn = false;
+        this._isEnemyTurn = false;
+        this._unitList = []; //味方ユニットリスト
+        this._allyList = []; //敵ユニットリスト
+        this._enemyList = []; //ただのユニットリスト
+        this._wtTurnList = []; //行動順リスト
+        this._turnUnit = []; //ターンが回ったユニット
+        this.ActorTurn = false; //敵ターンに操作不能にするため(必要ない？)
+        //以下オンライン時
+        this._allyTeamID = 0; //味方チームのID
+        this._enemyTeamID = 0; //敵チームのID
+    }
+
+
+    // SRPG機能が有効になっているかどうかを返す
+    Game_System.prototype.isBattleActivate = function () {
+        return this._battleActive;
+    };
+
+    // SRPG機能を有効にします
+    Game_System.prototype.battleActivate = function () {
+        this._battleActive = true; //戦闘中
+
+        for (var i = 0; i < this.unitList().length; i++) {
+            var unit = this.unitList()[i];
+            unit.setStepAnime(true); //足踏みアニメoff
+        }
+        $gamePlayer.setTransparent(false); //透明化OFF
+        $gamePlayer.refresh(); //カーソル化
+    };
+
+    // SRPG機能を無効にします
+    Game_System.prototype.battleDeactivate = function () {
+        this.initColorArea();
+        this._battleActive = false;
+        $gameParty.reviveBattleMembers();
+        $gameParty.removeBattleStates();
+        $gameParty.members().forEach(function (actor) {
+            actor.recoverAll();
+            actor.clearTp();
+        });
+        for (var i = 0; i < this.unitList().length; i++) {
+            var unit = this.unitList()[i];
+            unit.setStepAnime(false); //足踏みアニメoff
+        }
+    };
+
+    //ユニットリストを返す
+    Game_System.prototype.unitList = function () {
+        return this._unitList;
+    };
+
+    //味方ユニットリストを返す
+    Game_System.prototype.allyList = function () {
+        return this._allyList;
+    };
+
+    //敵ユニットリストを返す
+    Game_System.prototype.enemyList = function () {
+        return this._enemyList;
+    };
+
+    // SRPGユニットを返す
+    Game_System.prototype.units = function (alive) {
+        return this.events().filter(function (event) {
+            return event.isUnit(alive);
+        });
+    };
+
+    /*
+    行動順系-----------------------------------------------------------------------------
+    */
+
+    // 味方ターンかどうかを返す(行動順が回ってきた際にtrueに処理する)
+    Game_System.prototype.isAllyTurn = function () {
+        return this._isAllyTurn;
+    };
+    // 敵ターンかどうかを返す(行動順が回ってきた際にtrueに処理する)
+    Game_System.prototype.isEnemyTurn = function () {
+        return this._isEnemyTurn;
+    };
+    //ターン開始前の処理
+    Game_System.prototype.startTurn = function (turnUnit) {
+        //マップ上にいるユニットのすり抜け設定
+        for (var i = 0; i < this.unitList().length; i++) {
+            var target = this.unitList()[i];
+            if (this.isAllyTurn() && target.isAlly() && !(target == turnUnit)) target.setThrough(true);
+            if (this.isEnemyTurn() && target.isEnemy() && !(target == turnUnit)) target.setThrough(true);
+        }
+    };
+    // ターンを終了する
+    Game_System.prototype.endTurn = function () {
+        this._isAllyTurn = false;
+        this._isEnemyTurn = false;
+
+        //マップ上にいるユニットのすり抜け設定
+        for (var i = 0; i < this.unitList().length; i++) {
+            var target = this.unitList()[i];
+            if (!target.isActor().isDead()) {
+                target.setThrough(false);
+                target.setThrough(false);
+            }
+        }
+    };
+
+    //ユニットリスト作成
+    Game_System.prototype.setUnitList = function (events) {
+        this._unitList = [];
+        this._allyList = [];
+        this._enemyList = [];
+        //戦闘外のイベントを除外する(ユニット追加ケースを考えてfor文の中を別の関数に移行する必要あり)
+        for (var i = 0; i < events.length; i++) {
+            if (!events[i]) continue;
+            var event = events[i];
+            var actor = event.isActor();
+            if (actor) {
+                if (!actor.isDead()) {
+                    this._unitList.push(event); //アクターかエネミーである場合イベントを配列にプッシュ
+                    event.unitId = this._unitList.length + 1;
+                }
+                if (event.isAlly()) {
+                    this._allyList.push(event);
+                } else {
+                    this._enemyList.push(event);
+                }
+            }
+        }
+    };
+    //行動順調整用スクリプト
+    Game_System.prototype.setWtTurnList = function () {
+        //以下の変数は初期化の時に定義するべきでは？
+        //行動順に並べるリスト
+        this._wtTurnList = [];
+
+        for (var i = 0; i < this.unitList().length; i++) {
+            var unit = this.unitList()[i];
+            var battler = unit.isActor();
+            var eventId = unit.event().id; //IDを取得
+            var wtTurnList = battler.wtTurnList(); //wtリストを取得
+
+            for (var j = 0; j < wtTurnList.length; j++) {
+                var list = [];
+                list.push(eventId, wtTurnList[j]);
+                this._wtTurnList.push(list);
+            }
+        }
+        this.wtTurnListSort();
+    };
+
+    //ターンリストを行動順にソート
+    Game_System.prototype.wtTurnListSort = function () {
+        //WTソート
+        this._wtTurnList.sort(function (a, b) {
+            if (a[1] < b[1]) return -1;
+            if (a[1] > b[1]) return 1;
+            return 0;
+        });
+
+        //ターンリストを10体に抑えるためのソース
+        while (this._wtTurnList.length > wtTurnListMax) {
+            this._wtTurnList.pop()//末尾を削除
+        }
+
+        //同じWT同士のユニットがいた場合若いID順にソートしたい
+        this._wtTurnList.sort(function (a, b) {
+            if (a[1] == b[1]) {
+                if (a[0] < b[0]) return -1;
+                if (a[0] > b[0]) return 1;
+                return 0;
+            }
+        });
+
+
+    };
+
+    //WTカウント
+    Game_System.prototype.countWt = function () {
+        //以下が平常時の動作
+        for (var i = 0; i < this.unitList().length; i++) {
+            var character = this.unitList()[i];
+            var battler = character.isActor();
+
+            if (battler.matchWt()) {
+                //同一WTのユニットがいて先にターンが回られてしまった場合、以降の処理は行わない
+                //if (!$gameTemp._countWtTime) break;//continue;
+                //敵のターンか味方のターンか
+                if (character.isAlly()) {
+                    this._isAllyTurn = true;
+                } else {
+                    this._isEnemyTurn = true;
+                }
+                //どういう風にデータをまとめようか
+                this._turnUnit = this.unitList()[i];
+                var target = this._turnUnit;
+                $gamePlayer.setCameraEvent(target); //カメラをターンが回ったキャラへ回す
+                $gameTemp._cameraWait = true;
+                $gameTemp._countWtTime = false;
+                return;
+                //}else{
+                //  battler.countWt(); //WT数を加算する
+            }
+        }
+
+        //以下が平常時の動作
+        for (var i = 0; i < this.unitList().length; i++) {
+            var character = this.unitList()[i];
+            var battler = character.isActor();
+
+            if (!battler.matchWt()) battler.countWt(); //WT数を加算する
+        }
+    };
+
+    /*
+    ステートチェック系-----------------------------------------------------------------------------
+    */
+    // マップ上にいるステート
+    Game_System.prototype.stateAction = function () {
+        //マップ上にいるユニットのステートをチェックする
+        for (var i = 0; i < this.unitList().length; i++) {
+            var target = this.unitList()[i];
+            var actor = target.isActor();
+            target._alreadyCover = false; //かばうフラグoff
+            target._allyCounterFlag = false; //カウンターフラグoff
+            var invalidTargetFlag = false;
+            for (var id = 1; id < $dataStates.length; id++) {
+                if (actor.isStateAffected(id)) {
+                    //瀕死時HP回復
+                    var dying = $dataStates[id].meta.dying;
+                    var compensation = $dataStates[id].meta.compensation;
+                    if (dying && compensation) {
+                        if (actor.isDying()) {
+                            if (compensation == "buffTurn") {
+                                //ダメージ受けた後瀕死状態であった場合
+                                actor.gainHp(Math.round((actor.mhp * parseInt(dying) / 100) - actor.hp));
+                                //actor.gainHp(Math.round(actor.mhp * isDyingHp / 100));
+                                //バフターン短縮
+                                actor.reduceStateTurns(id);
+                                target.reserveDamagePopup(0);
+                            } else if (compensation == "buff") {
+                                //ダメージ受けた後瀕死状態であった場合
+                                actor.gainHp(Math.round((actor.mhp * parseInt(dying) / 100) - actor.hp));
+                                //actor.gainHp(Math.round(actor.mhp * isDyingHp / 100));
+                                //バフ消去
+                                actor.removeState(id);
+                                target.reserveDamagePopup(0);
+                            } else if (compensation == "mpCost" && actor.mp >= 1) {
+                                //actor.gainMp(Math.round(-actor.mmp * 20 / 100));
+                                actor.gainMp(Math.round(-actor.mp));
+                                actor.gainHp(Math.round((actor.mhp * isDyingHp / 100) - actor.hp));
+                                target.reserveDamagePopup(0);
+                            }
+                        }
+                    }
+
+                    //トラッパーがいない状態でのトラップデバフの扱い
+                    var trapGrantor = $dataStates[id].meta.trapGrantor;
+                    if (trapGrantor) {
+                        if (trapGrantor == "self") { //トラップを付与されたキャラのステータス依存のトラップ(味方全体に効果が及ぶようにするとエラーが起こる)
+                            trapGrantorIsArea = true;
+                        } else {
+                            //マップ上にいるユニットのステートをチェックする
+                            for (var j = 0; j < this.unitList().length; j++) {
+                                var trapGrantorUnit = this.unitList()[j];
+                                var trapGrantorActor = trapGrantorUnit.isActor();
+                                var trapGrantorIsArea = false;
+                                if ((trapGrantorActor._classId == parseInt(trapGrantor)) && trapGrantorUnit.isHostileUnit(target)) {
+                                    trapGrantorIsArea = true;
+                                    break;
+                                }
+                            }
+                        }
+                        //トラッパーがいない場合トラップデバフは剥がれる
+                        if (!trapGrantorIsArea) actor.removeState(id);
+                    }
+
+                    //スリップデバフの扱い
+                    var slipGrantor = $dataStates[id].meta.slipGrantor;
+                    if (slipGrantor) {
+                        //マップ上にいるユニットのステートをチェックする
+                        for (var j = 0; j < this.unitList().length; j++) {
+                            var slipUnit = this.unitList()[j];
+                            var slipActor = slipUnit.isActor();
+                            var slipIsArea = false;
+                            if ((slipActor._classId == parseInt(slipGrantor)) && slipUnit.isHostileUnit(target)) {
+                                slipIsArea = true;
+                                break;
+                            }
+                        }
+                        //付与者がいない場合スリップデバフは剥がれる
+                        if (!slipIsArea) actor.removeState(id);
+                    }
+
+                    //チェンジバフの扱い
+                    var coverGrantor = $dataStates[id].meta.coverGrantor;
+                    if (coverGrantor) {
+                        //マップ上にいるユニットのステートをチェックする
+                        for (var j = 0; j < this.unitList().length; j++) {
+                            var coverUnit = this.unitList()[j];
+                            var coverActor = coverUnit.isActor();
+                            var coverIsArea = false;
+                            if ((coverActor._classId == parseInt(coverGrantor)) && !coverUnit.isHostileUnit(target)) {
+                                coverIsArea = true;
+                                break;
+                            }
+                        }
+                        //付与者がいない場合スリップデバフは剥がれる
+                        if (!coverIsArea) actor.removeState(id);
+                    }
+                    //アクティベートバフの扱い
+                    var changeGrantor = $dataStates[id].meta.changeGrantor;
+                    if (changeGrantor) {
+                        //マップ上にいるユニットのステートをチェックする
+                        for (var j = 0; j < this.unitList().length; j++) {
+                            var changeUnit = this.unitList()[j];
+                            var changeActor = changeUnit.isActor();
+                            var changeIsArea = false;
+                            if ((changeActor._classId == parseInt(changeGrantor)) && !changeUnit.isHostileUnit(target)) {
+                                changeIsArea = true;
+                                break;
+                            }
+                        }
+                        //付与者がいない場合スリップデバフは剥がれる
+                        if (!changeIsArea) actor.removeState(id);
+                    }
+                    //ヘイト系バフの扱い
+                    if ($dataStates[id].meta.hateGrantor || $dataStates[id].meta.hateState) {
+                        //マップ上にいるユニットのステートをチェックする
+                        for (var j = 0; j < this.unitList().length; j++) {
+                            var hateUnit = this.unitList()[j];
+                            var hateActor = hateUnit.isActor();
+                            var hateIsArea = false;
+                            if (!hateUnit.isHostileUnit(target)) continue;
+                            if ($dataStates[id].meta.hateGrantor) {
+                                var hateGrantor = $dataStates[id].meta.hateGrantor;
+                                if (hateActor._classId == parseInt(hateGrantor)) {
+                                    hateIsArea = true;
+                                    break;
+                                }
+                            } else if ($dataStates[id].meta.hateState) {
+                                var hateState = $dataStates[id].meta.hateState;
+                                if (hateActor.isStateAffected(parseInt(hateState))) {
+                                    hateIsArea = true;
+                                    break;
+                                }
+                            }
+                        }
+                        //付与者がいない場合スリップデバフは剥がれる
+                        if (!hateIsArea) actor.removeState(id);
+                    }
+                    //コントロール系バフの扱い
+                    var ctrlGrantor = $dataStates[id].meta.ctrlGrantor;
+                    if (ctrlGrantor) {
+                        //マップ上にいるユニットのステートをチェックする
+                        for (var j = 0; j < this.unitList().length; j++) {
+                            var ctrlUnit = this.unitList()[j];
+                            var ctrlActor = ctrlUnit.isActor();
+                            var ctrlIsArea = false;
+                            if (ctrlActor._classId == parseInt(ctrlGrantor) && !target.isHostileUnit(ctrlUnit)) {
+                                ctrlIsArea = true;
+                                break;
+                            }
+                        }
+                        //付与者がいない場合スリップデバフは剥がれる
+                        if (!ctrlIsArea) actor.removeState(id);
+                    }
+                    //アクション系バフの扱い
+                    var shiftGrantor = $dataStates[id].meta.shiftGrantor;
+                    if (shiftGrantor) {
+                        //マップ上にいるユニットのステートをチェックする
+                        for (var j = 0; j < this.unitList().length; j++) {
+                            var shiftUnit = this.unitList()[j];
+                            var shiftActor = shiftUnit.isActor();
+                            var shiftIsArea = false;
+                            if (shiftActor._classId == parseInt(shiftGrantor) && !target.isHostileUnit(shiftUnit)) {
+                                shiftIsArea = true;
+                                break;
+                            }
+                        }
+                        //付与者がいない場合スリップデバフは剥がれる
+                        if (!shiftIsArea) actor.removeState(id);
+                    }
+                    //追跡系デバフの扱い
+                    var traceGrantor = $dataStates[id].meta.traceGrantor;
+                    if (traceGrantor) {
+                        //マップ上にいるユニットのステートをチェックする
+                        for (var j = 0; j < this.unitList().length; j++) {
+                            var traceUnit = this.unitList()[j];
+                            var traceActor = traceUnit.isActor();
+                            var traceIsArea = false;
+                            if (traceActor._classId == parseInt(traceGrantor) && target.isHostileUnit(traceUnit)) {
+                                traceIsArea = true;
+                                break;
+                            }
+                        }
+                        //付与者がいない場合スリップデバフは剥がれる
+                        if (!traceIsArea) actor.removeState(id);
+                    }
+                    //タゲ無効時透過
+                    var invalid = $dataStates[id].meta.invalid;
+                    if (invalid) {
+                        if (invalid == "target") {
+                            invalidTargetFlag = true;
+                        }
+                    }
+                }
+            }
+            if (invalidTargetFlag) {
+                target.setOpacity(128);
+            } else {
+                target.setOpacity(255);
+            }
+        }
+    };
+
     //-----------------------------------------------------------------------------
     // Game_Action
     //
@@ -1557,428 +1981,6 @@ Imported.TacticsBattleSys = true;
         return value;
     };
 
-
-    //-----------------------------------------------------------------------------
-    // Game_System
-    //
-
-    // 初期化処理
-    var _Game_System_initialize = Game_System.prototype.initialize;
-    Game_System.prototype.initialize = function () {
-        _Game_System_initialize.call(this);
-        this.helpShow = true;
-        //Game_Mapから
-        this._phaseState = 0; //戦闘中の段階
-        this._isAllyTurn = false;
-        this._isEnemyTurn = false;
-        this._unitList = []; //味方ユニットリスト
-        this._allyList = []; //敵ユニットリスト
-        this._enemyList = []; //ただのユニットリスト
-        this._wtTurnList = []; //行動順リスト
-        this._turnUnit = []; //ターンが回ったユニット
-        this.ActorTurn = false; //敵ターンに操作不能にするため(必要ない？)
-    }
-
-
-    // SRPG機能が有効になっているかどうかを返す
-    Game_System.prototype.isBattleActivate = function () {
-        return this._battleActive;
-    };
-
-    // SRPG機能を有効にします
-    Game_System.prototype.battleActivate = function () {
-        this._battleActive = true; //戦闘中
-
-        for (var i = 0; i < this.unitList().length; i++) {
-            var unit = this.unitList()[i];
-            unit.setStepAnime(true); //足踏みアニメoff
-        }
-        $gamePlayer.setTransparent(false); //透明化OFF
-        $gamePlayer.refresh(); //カーソル化
-    };
-
-    // SRPG機能を無効にします
-    Game_System.prototype.battleDeactivate = function () {
-        this.initColorArea();
-        this._battleActive = false;
-        $gameParty.reviveBattleMembers();
-        $gameParty.removeBattleStates();
-        $gameParty.members().forEach(function (actor) {
-            actor.recoverAll();
-            actor.clearTp();
-        });
-        for (var i = 0; i < this.unitList().length; i++) {
-            var unit = this.unitList()[i];
-            unit.setStepAnime(false); //足踏みアニメoff
-        }
-    };
-
-    //ユニットリストを返す
-    Game_System.prototype.unitList = function () {
-        return this._unitList;
-    };
-
-    //味方ユニットリストを返す
-    Game_System.prototype.allyList = function () {
-        return this._allyList;
-    };
-
-    //敵ユニットリストを返す
-    Game_System.prototype.enemyList = function () {
-        return this._enemyList;
-    };
-
-    // SRPGユニットを返す
-    Game_System.prototype.units = function (alive) {
-        return this.events().filter(function (event) {
-            return event.isUnit(alive);
-        });
-    };
-
-    /*
-    行動順系-----------------------------------------------------------------------------
-    */
-
-    // 味方ターンかどうかを返す(行動順が回ってきた際にtrueに処理する)
-    Game_System.prototype.isAllyTurn = function () {
-        return this._isAllyTurn;
-    };
-    // 敵ターンかどうかを返す(行動順が回ってきた際にtrueに処理する)
-    Game_System.prototype.isEnemyTurn = function () {
-        return this._isEnemyTurn;
-    };
-    //ターン開始前の処理
-    Game_System.prototype.startTurn = function (turnUnit) {
-        //マップ上にいるユニットのすり抜け設定
-        for (var i = 0; i < this.unitList().length; i++) {
-            var target = this.unitList()[i];
-            if (this.isAllyTurn() && target.isAlly() && !(target == turnUnit)) target.setThrough(true);
-            if (this.isEnemyTurn() && target.isEnemy() && !(target == turnUnit)) target.setThrough(true);
-        }
-    };
-    // ターンを終了する
-    Game_System.prototype.endTurn = function () {
-        this._isAllyTurn = false;
-        this._isEnemyTurn = false;
-
-        //マップ上にいるユニットのすり抜け設定
-        for (var i = 0; i < this.unitList().length; i++) {
-            var target = this.unitList()[i];
-            if (!target.isActor().isDead()) {
-                target.setThrough(false);
-                target.setThrough(false);
-            }
-        }
-    };
-
-    //ユニットリスト作成
-    Game_System.prototype.setUnitList = function (events) {
-        this._unitList = [];
-        this._allyList = [];
-        this._enemyList = [];
-        //戦闘外のイベントを除外する(ユニット追加ケースを考えてfor文の中を別の関数に移行する必要あり)
-        for (var i = 0; i < events.length; i++) {
-            if (!events[i]) continue;
-            var event = events[i];
-            var actor = event.isActor();
-            if (actor) {
-                if (!actor.isDead()) {
-                    this._unitList.push(event); //アクターかエネミーである場合イベントを配列にプッシュ
-                    event.unitId = this._unitList.length + 1;
-                }
-                if (event.isAlly()) {
-                    this._allyList.push(event);
-                } else {
-                    this._enemyList.push(event);
-                }
-            }
-        }
-    };
-    //行動順調整用スクリプト
-    Game_System.prototype.setWtTurnList = function () {
-        //以下の変数は初期化の時に定義するべきでは？
-        //行動順に並べるリスト
-        this._wtTurnList = [];
-
-        for (var i = 0; i < this.unitList().length; i++) {
-            var unit = this.unitList()[i];
-            var battler = unit.isActor();
-            var eventId = unit.event().id; //IDを取得
-            var wtTurnList = battler.wtTurnList(); //wtリストを取得
-
-            for (var j = 0; j < wtTurnList.length; j++) {
-                var list = [];
-                list.push(eventId, wtTurnList[j]);
-                this._wtTurnList.push(list);
-            }
-        }
-        this.wtTurnListSort();
-    };
-
-    //ターンリストを行動順にソート
-    Game_System.prototype.wtTurnListSort = function () {
-        //WTソート
-        this._wtTurnList.sort(function (a, b) {
-            if (a[1] < b[1]) return -1;
-            if (a[1] > b[1]) return 1;
-            return 0;
-        });
-
-        //ターンリストを10体に抑えるためのソース
-        while (this._wtTurnList.length > wtTurnListMax) {
-            this._wtTurnList.pop()//末尾を削除
-        }
-
-        //同じWT同士のユニットがいた場合若いID順にソートしたい
-        this._wtTurnList.sort(function (a, b) {
-            if (a[1] == b[1]) {
-                if (a[0] < b[0]) return -1;
-                if (a[0] > b[0]) return 1;
-                return 0;
-            }
-        });
-
-
-    };
-
-    //WTカウント
-    Game_System.prototype.countWt = function () {
-        //以下が平常時の動作
-        for (var i = 0; i < this.unitList().length; i++) {
-            var character = this.unitList()[i];
-            var battler = character.isActor();
-
-            if (battler.matchWt()) {
-                //同一WTのユニットがいて先にターンが回られてしまった場合、以降の処理は行わない
-                //if (!$gameTemp._countWtTime) break;//continue;
-                //敵のターンか味方のターンか
-                if (character.isAlly()) {
-                    this._isAllyTurn = true;
-                } else {
-                    this._isEnemyTurn = true;
-                }
-                //どういう風にデータをまとめようか
-                this._turnUnit = this.unitList()[i];
-                var target = this._turnUnit;
-                $gamePlayer.setCameraEvent(target); //カメラをターンが回ったキャラへ回す
-                $gameTemp._cameraWait = true;
-                $gameTemp._countWtTime = false;
-                return;
-                //}else{
-                //  battler.countWt(); //WT数を加算する
-            }
-        }
-
-        //以下が平常時の動作
-        for (var i = 0; i < this.unitList().length; i++) {
-            var character = this.unitList()[i];
-            var battler = character.isActor();
-
-            if (!battler.matchWt()) battler.countWt(); //WT数を加算する
-        }
-    };
-
-    /*
-    ステートチェック系-----------------------------------------------------------------------------
-    */
-    // マップ上にいるステート
-    Game_System.prototype.stateAction = function () {
-        //マップ上にいるユニットのステートをチェックする
-        for (var i = 0; i < this.unitList().length; i++) {
-            var target = this.unitList()[i];
-            var actor = target.isActor();
-            target._alreadyCover = false; //かばうフラグoff
-            target._allyCounterFlag = false; //カウンターフラグoff
-            var invalidTargetFlag = false;
-            for (var id = 1; id < $dataStates.length; id++) {
-                if (actor.isStateAffected(id)) {
-                    //瀕死時HP回復
-                    var dying = $dataStates[id].meta.dying;
-                    var compensation = $dataStates[id].meta.compensation;
-                    if (dying && compensation) {
-                        if (actor.isDying()) {
-                            if (compensation == "buffTurn") {
-                                //ダメージ受けた後瀕死状態であった場合
-                                actor.gainHp(Math.round((actor.mhp * parseInt(dying) / 100) - actor.hp));
-                                //actor.gainHp(Math.round(actor.mhp * isDyingHp / 100));
-                                //バフターン短縮
-                                actor.reduceStateTurns(id);
-                                target.reserveDamagePopup(0);
-                            } else if (compensation == "buff") {
-                                //ダメージ受けた後瀕死状態であった場合
-                                actor.gainHp(Math.round((actor.mhp * parseInt(dying) / 100) - actor.hp));
-                                //actor.gainHp(Math.round(actor.mhp * isDyingHp / 100));
-                                //バフ消去
-                                actor.removeState(id);
-                                target.reserveDamagePopup(0);
-                            } else if (compensation == "mpCost" && actor.mp >= 1) {
-                                //actor.gainMp(Math.round(-actor.mmp * 20 / 100));
-                                actor.gainMp(Math.round(-actor.mp));
-                                actor.gainHp(Math.round((actor.mhp * isDyingHp / 100) - actor.hp));
-                                target.reserveDamagePopup(0);
-                            }
-                        }
-                    }
-
-                    //トラッパーがいない状態でのトラップデバフの扱い
-                    var trapGrantor = $dataStates[id].meta.trapGrantor;
-                    if (trapGrantor) {
-                        if (trapGrantor == "self") { //トラップを付与されたキャラのステータス依存のトラップ(味方全体に効果が及ぶようにするとエラーが起こる)
-                            trapGrantorIsArea = true;
-                        } else {
-                            //マップ上にいるユニットのステートをチェックする
-                            for (var j = 0; j < this.unitList().length; j++) {
-                                var trapGrantorUnit = this.unitList()[j];
-                                var trapGrantorActor = trapGrantorUnit.isActor();
-                                var trapGrantorIsArea = false;
-                                if ((trapGrantorActor._classId == parseInt(trapGrantor)) && trapGrantorUnit.isHostileUnit(target)) {
-                                    trapGrantorIsArea = true;
-                                    break;
-                                }
-                            }
-                        }
-                        //トラッパーがいない場合トラップデバフは剥がれる
-                        if (!trapGrantorIsArea) actor.removeState(id);
-                    }
-
-                    //スリップデバフの扱い
-                    var slipGrantor = $dataStates[id].meta.slipGrantor;
-                    if (slipGrantor) {
-                        //マップ上にいるユニットのステートをチェックする
-                        for (var j = 0; j < this.unitList().length; j++) {
-                            var slipUnit = this.unitList()[j];
-                            var slipActor = slipUnit.isActor();
-                            var slipIsArea = false;
-                            if ((slipActor._classId == parseInt(slipGrantor)) && slipUnit.isHostileUnit(target)) {
-                                slipIsArea = true;
-                                break;
-                            }
-                        }
-                        //付与者がいない場合スリップデバフは剥がれる
-                        if (!slipIsArea) actor.removeState(id);
-                    }
-
-                    //チェンジバフの扱い
-                    var coverGrantor = $dataStates[id].meta.coverGrantor;
-                    if (coverGrantor) {
-                        //マップ上にいるユニットのステートをチェックする
-                        for (var j = 0; j < this.unitList().length; j++) {
-                            var coverUnit = this.unitList()[j];
-                            var coverActor = coverUnit.isActor();
-                            var coverIsArea = false;
-                            if ((coverActor._classId == parseInt(coverGrantor)) && !coverUnit.isHostileUnit(target)) {
-                                coverIsArea = true;
-                                break;
-                            }
-                        }
-                        //付与者がいない場合スリップデバフは剥がれる
-                        if (!coverIsArea) actor.removeState(id);
-                    }
-                    //アクティベートバフの扱い
-                    var changeGrantor = $dataStates[id].meta.changeGrantor;
-                    if (changeGrantor) {
-                        //マップ上にいるユニットのステートをチェックする
-                        for (var j = 0; j < this.unitList().length; j++) {
-                            var changeUnit = this.unitList()[j];
-                            var changeActor = changeUnit.isActor();
-                            var changeIsArea = false;
-                            if ((changeActor._classId == parseInt(changeGrantor)) && !changeUnit.isHostileUnit(target)) {
-                                changeIsArea = true;
-                                break;
-                            }
-                        }
-                        //付与者がいない場合スリップデバフは剥がれる
-                        if (!changeIsArea) actor.removeState(id);
-                    }
-                    //ヘイト系バフの扱い
-                    if ($dataStates[id].meta.hateGrantor || $dataStates[id].meta.hateState) {
-                        //マップ上にいるユニットのステートをチェックする
-                        for (var j = 0; j < this.unitList().length; j++) {
-                            var hateUnit = this.unitList()[j];
-                            var hateActor = hateUnit.isActor();
-                            var hateIsArea = false;
-                            if (!hateUnit.isHostileUnit(target)) continue;
-                            if ($dataStates[id].meta.hateGrantor) {
-                                var hateGrantor = $dataStates[id].meta.hateGrantor;
-                                if (hateActor._classId == parseInt(hateGrantor)) {
-                                    hateIsArea = true;
-                                    break;
-                                }
-                            } else if ($dataStates[id].meta.hateState) {
-                                var hateState = $dataStates[id].meta.hateState;
-                                if (hateActor.isStateAffected(parseInt(hateState))) {
-                                    hateIsArea = true;
-                                    break;
-                                }
-                            }
-                        }
-                        //付与者がいない場合スリップデバフは剥がれる
-                        if (!hateIsArea) actor.removeState(id);
-                    }
-                    //コントロール系バフの扱い
-                    var ctrlGrantor = $dataStates[id].meta.ctrlGrantor;
-                    if (ctrlGrantor) {
-                        //マップ上にいるユニットのステートをチェックする
-                        for (var j = 0; j < this.unitList().length; j++) {
-                            var ctrlUnit = this.unitList()[j];
-                            var ctrlActor = ctrlUnit.isActor();
-                            var ctrlIsArea = false;
-                            if (ctrlActor._classId == parseInt(ctrlGrantor) && !target.isHostileUnit(ctrlUnit)) {
-                                ctrlIsArea = true;
-                                break;
-                            }
-                        }
-                        //付与者がいない場合スリップデバフは剥がれる
-                        if (!ctrlIsArea) actor.removeState(id);
-                    }
-                    //アクション系バフの扱い
-                    var shiftGrantor = $dataStates[id].meta.shiftGrantor;
-                    if (shiftGrantor) {
-                        //マップ上にいるユニットのステートをチェックする
-                        for (var j = 0; j < this.unitList().length; j++) {
-                            var shiftUnit = this.unitList()[j];
-                            var shiftActor = shiftUnit.isActor();
-                            var shiftIsArea = false;
-                            if (shiftActor._classId == parseInt(shiftGrantor) && !target.isHostileUnit(shiftUnit)) {
-                                shiftIsArea = true;
-                                break;
-                            }
-                        }
-                        //付与者がいない場合スリップデバフは剥がれる
-                        if (!shiftIsArea) actor.removeState(id);
-                    }
-                    //追跡系デバフの扱い
-                    var traceGrantor = $dataStates[id].meta.traceGrantor;
-                    if (traceGrantor) {
-                        //マップ上にいるユニットのステートをチェックする
-                        for (var j = 0; j < this.unitList().length; j++) {
-                            var traceUnit = this.unitList()[j];
-                            var traceActor = traceUnit.isActor();
-                            var traceIsArea = false;
-                            if (traceActor._classId == parseInt(traceGrantor) && target.isHostileUnit(traceUnit)) {
-                                traceIsArea = true;
-                                break;
-                            }
-                        }
-                        //付与者がいない場合スリップデバフは剥がれる
-                        if (!traceIsArea) actor.removeState(id);
-                    }
-                    //タゲ無効時透過
-                    var invalid = $dataStates[id].meta.invalid;
-                    if (invalid) {
-                        if (invalid == "target") {
-                            invalidTargetFlag = true;
-                        }
-                    }
-                }
-            }
-            if (invalidTargetFlag) {
-                target.setOpacity(128);
-            } else {
-                target.setOpacity(255);
-            }
-        }
-    };
     //-----------------------------------------------------------------------------
     // Game_Map
     //
@@ -2689,7 +2691,7 @@ Imported.TacticsBattleSys = true;
         }
     };
 
-    
+
 
     //-----------------------------------------------------------------------------
     // Game_Event
@@ -2808,7 +2810,6 @@ Imported.TacticsBattleSys = true;
         }
         else {
         }
-
     };
     // ユニット蘇生
     Game_Event.prototype.resurrectionUnit = function () {

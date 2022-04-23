@@ -102,13 +102,14 @@ function Game_Avatar() {
 	'use strict';
 	OnlineManager.parameters = PluginManager.parameters('OnlineAvatar');
 	OnlineManager.url = 'https://www.gstatic.com/firebasejs/live/3.0/firebase.js';
-	OnlineManager.avatarTemplate = {"id":0,"meta":{},"name":"","note":"","pages":[{"conditions":{"actorId":1,"actorValid":false,"itemId":1,"itemValid":false,"selfSwitchCh":"A","selfSwitchValid":false,"switch1Id":1,"switch1Valid":false,"switch2Id":1,"switch2Valid":false,"variableId":1,"variableValid":false,"variableValue":0},"directionFix":false,"image":{"tileId":0,"characterName":"","direction":2,"pattern":1,"characterIndex":0},"list":null,"moveFrequency":5,"moveRoute":{"list":[{"code":45,"parameters":["this.moveOnlineXy()"],"indent":null},{"code":0,"parameters":[]}],"repeat":true,"skippable":false,"wait":false},"moveSpeed":5,"moveType":3,"priorityType":1,"stepAnime":false,"through":true,"trigger":4,"walkAnime":true}],"x":0,"y":0};
-	OnlineManager.avatarsInThisMap = null;
+	//OnlineManager.avatarTemplate = {"id":0,"meta":{},"name":"","note":"","pages":[{"conditions":{"actorId":1,"actorValid":false,"itemId":1,"itemValid":false,"selfSwitchCh":"A","selfSwitchValid":false,"switch1Id":1,"switch1Valid":false,"switch2Id":1,"switch2Valid":false,"variableId":1,"variableValid":false,"variableValue":0},"directionFix":false,"image":{"tileId":0,"characterName":"","direction":2,"pattern":1,"characterIndex":0},"list":null,"moveFrequency":5,"moveRoute":{"list":[{"code":45,"parameters":["this.moveOnlineXy()"],"indent":null},{"code":0,"parameters":[]}],"repeat":true,"skippable":false,"wait":false},"moveSpeed":5,"moveType":3,"priorityType":1,"stepAnime":false,"through":true,"trigger":4,"walkAnime":true}],"x":0,"y":0};
+	//OnlineManager.avatarsInThisMap = null;
 	OnlineManager.mapRef = null;
 	OnlineManager.selfRef = null;
 	OnlineManager.switchRef = null;
 	OnlineManager.variableRef = null;
 	OnlineManager.unitRef = null;
+	OnlineManager.opponents = null;
 	//OnlineManager.tempRef = null;
 	OnlineManager.user = null;
 	OnlineManager.syncBusy = false;	//同期接続する瞬間、送信が受信を上書きするのを阻止
@@ -224,7 +225,8 @@ function Game_Avatar() {
 			this.mapRef = null;
 			this.selfRef = null;
 			this.unitRef = null;
-			this.avatarsInThisMap = null;
+			//this.avatarsInThisMap = null;
+			this.opponents = null;
 			return;
 		}
 
@@ -236,21 +238,80 @@ function Game_Avatar() {
 		this.unitRef.onDisconnect().remove();
 		
 
-
+		/*
 		var avatarTemplate = this.avatarTemplate;
 		var avatarsInThisMap = this.avatarsInThisMap = {};
+		var opponents = this.opponents = {};
 		if (!avatarTemplate.pages[0].list) {
 			avatarTemplate.pages[0].list = $dataCommonEvents[this.parameters['avatarEvent']].list;
 		}
+		*/
 		//他プレイヤーが同マップに入場
 		this.mapRef.on('child_added', function(data) {
 			if (OnlineManager.shouldDisplay(data) && $gameSwitches.value(16)) {
 				//avatarsInThisMap[data.key] = new Game_Avatar(avatarTemplate, data.val());
 				//$gameVariables.setValue(8, $gameVariables.value(9));　//キャラクターセレクトの時点で多重に呼び出されて合わなくなっている(戦闘開始時のフラグに合わせて呼び出した方が良い？)
 				//$gameVariables.setValue(9, $gameVariables.value(9) + 1);
-				$gameSwitches.setValue(17, true);
+
+				//以下、対戦者の情報を拾って同期したい
+				//opponents[data.key] = new Game_Avatar(avatarTemplate, data.val());
+				if (data.key == 0) {
+					$gameSystem._allyTeamID = this.user.uid;
+					$gameSystem.setBattlerOnline(data.key);
+					$gameSwitches.setValue(18, true);
+				} else if (data.key == 1) {
+					$gameSystem._enemyTeamID = this.user.uid;
+					$gameSystem.setBattlerOnline(data.key);
+					$gameSwitches.setValue(19, true);
+				}
+				if ($gameSwitches.value(18) && $gameSwitches.value(19)) $gameSwitches.setValue(17, true);
 			}
 		});
+
+		// SRPGバトラーを個別にセットアップ
+		Game_System.prototype.setBattlerOnline = function (key) {
+			var id1;
+			var id2;
+			var id3;
+			var id4;
+			if (key == 0) {
+				id1 = ally1Id;
+				id2 = ally2Id;
+				id3 = ally3Id;
+				id4 = ally4Id;
+			} else {
+				id1 = enemy1Id;
+				id2 = enemy2Id;
+				id3 = enemy3Id;
+				id4 = enemy4Id;
+            }
+			for (var allyId = 0; allyId < this.allyMembers().length; allyId++) {
+				$gameMap.event(allyId).initTacticsUnitSetting();
+				if (this.allyMembers()[parseInt(allyId)] <= 0) {
+					var id = 0;
+					do {
+						id = parseInt(Math.floor(Math.random() * (this.selectMembers().length - 2) + 1));
+					} while (this.allyMembers().indexOf(id) >= 0);
+					this.allyMembers()[parseInt(allyId)] = id;
+				} else {
+					id = this.allyMembers()[parseInt(allyId)];
+				}
+				switch (parseInt(allyId)) {
+					case 0:
+						$gameVariables.setValue(id1, id); //変数設定
+						break;
+					case 1:
+						$gameVariables.setValue(id2, id); //変数設定
+						break;
+					case 2:
+						$gameVariables.setValue(id3, id); //変数設定
+						break;
+					case 3:
+						$gameVariables.setValue(id4, id); //変数設定
+						break;
+				}
+			}
+		};
 
 		//他プレイヤーが同マップで移動
 		this.mapRef.on('child_changed', function(data) {
@@ -263,6 +324,9 @@ function Game_Avatar() {
 			if (OnlineManager.shouldDisplay(data)) {
 				//if (avatarsInThisMap[data.key]) avatarsInThisMap[data.key].erase();
 				//delete avatarsInThisMap[data.key];
+				//if (opponents[data.key]) opponents[data.key].erase();
+				//delete opponents[data.key];
+
 				$gameVariables.setValue(9, $gameVariables.value(9) - 1);
 			}
 		});
@@ -279,7 +343,7 @@ function Game_Avatar() {
 		if ($gameSystem.isBattleActivate()) OnlineManager.sendUnitInfo();
 	};
 
-	//送信するプレイヤー情報
+	//送信するプレイヤー情報(ユニットの情報もここで送信するか？)
 	OnlineManager.playerInfo = function() {
 		var $ = $gamePlayer;
 		return {x: $.x, y: $.y, direction: $.direction(), speed: $.realMoveSpeed(), charaName: $.characterName(), charaIndex: $.characterIndex()};
@@ -296,8 +360,7 @@ function Game_Avatar() {
 		if (this.unitRef && !this.syncBusy) {
 			var send = {};
 			for (var i = 0; i < $gameSystem.allyList().length; i++) { //iじゃなくて変数を使用
-				if ($gameVariables.value(8) == 0) send[i] = $gameSystem.allyList()[i];
-				if ($gameVariables.value(8) == 1) send[i + 4] = $gameSystem.allyList()[i];
+				send[i] = $gameSystem.allyList()[i];
 				/*
 				var $ = $gameSystem.unitList()[i];
 				send[i] = {
@@ -310,6 +373,13 @@ function Game_Avatar() {
 		}
 	};
 	/*
+	//システム情報を送信
+	OnlineManager.sendSystemInfo = function () {
+		if (this.systemRef && !this.syncBusy) {
+			var send = $gameSystem;
+			this.systemRef.update(send);
+		}
+	};
 	//添付情報を送信
 	OnlineManager.sendTempInfo = function () {
 		if (this.tempRef && !this.syncBusy) {
