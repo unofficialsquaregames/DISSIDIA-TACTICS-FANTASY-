@@ -231,7 +231,8 @@ function Game_Avatar() {
 		this.mapRef = firebase.database().ref('map' + $gameMap.mapId().padZero(3));
 		this.selfRef = this.mapRef.child(this.user.uid);
 		this.selfRef.onDisconnect().remove();	//切断時にキャラ座標をリムーブ
-		this.unitRef = this.mapRef.child('units');
+		//this.unitRef = this.mapRef.child('units');
+		this.unitRef = firebase.database().ref('units');
 		this.unitRef.onDisconnect().remove();
 		
 
@@ -246,7 +247,7 @@ function Game_Avatar() {
 		this.mapRef.on('child_added', function(data) {
 			if (OnlineManager.shouldDisplay(data)) {
 				//avatarsInThisMap[data.key] = new Game_Avatar(avatarTemplate, data.val());
-				$gameVariables.setValue(8, $gameVariables.value(9));
+				$gameVariables.setValue(8, $gameVariables.value(9));　//キャラクターセレクトの時点で多重に呼び出されて合わなくなっている(戦闘開始時のフラグに合わせて呼び出した方が良い？)
 				$gameVariables.setValue(9, $gameVariables.value(9) + 1);
 			}
 		});

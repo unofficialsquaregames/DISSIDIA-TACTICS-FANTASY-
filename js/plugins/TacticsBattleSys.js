@@ -8528,7 +8528,7 @@ Imported.TacticsBattleSys = true;
     $gamePlayer.setThrough(true); //すり抜け
     $gameSwitches.setValue(11, true); //キャラクター選択スイッチON(スイッチNoはいずれプラグインの変数設定から行えるようにする)
     $gameVariables.setValue(2, 0); //モード変数(変数Noはいずれプラグインの変数設定から行えるようにする)
-    $gameSwitches.setValue(15, true); //オンラインフラグセット
+    $gameSwitches.setValue(15, true); //オンラインフラグセット  これをONにするとエラーが起こる
     SceneManager.goto(Scene_Map);
   };
 
