@@ -248,8 +248,11 @@ function Game_Avatar() {
 		*/
 		//他プレイヤーが同マップに入場
 		this.mapRef.on('child_added', function(data) {
-			if (OnlineManager.shouldDisplay(data) && $gameSwitches.value(16)) {//子要素にいれてからキャラ選択のため順番が違う
+			if (OnlineManager.shouldDisplay(data)) {//子要素にいれてからキャラ選択のため順番が違う
 				//avatarsInThisMap[data.key] = new Game_Avatar(avatarTemplate, data.val());
+				console.log(this.mapRef);
+				console.log(this.mapRef[0]);
+				console.log(data.key);
 				$gameVariables.setValue(8,data.key);　//キャラクターセレクトの時点で多重に呼び出されて合わなくなっている(戦闘開始時のフラグに合わせて呼び出した方が良い？)
 				
 			}
@@ -267,8 +270,6 @@ function Game_Avatar() {
 			if (OnlineManager.shouldDisplay(data)) {
 				//if (avatarsInThisMap[data.key]) avatarsInThisMap[data.key].erase();
 				//delete avatarsInThisMap[data.key];
-				//if (opponents[data.key]) opponents[data.key].erase();
-				//delete opponents[data.key];
 				/* ここに書いても意味がない
 				if ($gameVariables.value(8) == 0) {
 					$gameVariables.setValue(ally1Id, 0);
@@ -282,7 +283,6 @@ function Game_Avatar() {
 					$gameVariables.setValue(enemy3Id, 0);
 					$gameVariables.setValue(enemy4Id, 0);
 					$gameSwitches.setValue(18, false);
-
                 }
 				*/
 			}
