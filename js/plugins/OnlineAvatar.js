@@ -231,7 +231,8 @@ function Game_Avatar() {
 		this.mapRef = firebase.database().ref('map' + $gameMap.mapId().padZero(3));
 		this.selfRef = this.mapRef.child(this.user.uid);
 		this.selfRef.onDisconnect().remove();	//切断時にキャラ座標をリムーブ
-		this.unitRef = this.mapRef.child('units');
+		this.unitRef = this.selfRef.child('units');
+		//this.unitRef = this.mapRef.child('units');
 		this.unitRef.onDisconnect().remove();
 		
 
@@ -241,30 +242,13 @@ function Game_Avatar() {
 		if (!avatarTemplate.pages[0].list) {
 			avatarTemplate.pages[0].list = $dataCommonEvents[this.parameters['avatarEvent']].list;
 		}
-		/*
-		//他プレイヤーが同マップに入場
-		this.selfRef.on('child_added', function (data) {
-			if (OnlineManager.shouldDisplay(data) && $gameTemp._startBattleFlag) {
-				$gameVariables.setValue(8, $gameVariables.value(9));　//キャラクターセレクトの時点で多重に呼び出されて合わなくなっている(戦闘開始時のフラグに合わせて呼び出した方が良い？)
-				$gameVariables.setValue(9, $gameVariables.value(9) + 1);
-			}
-		});
-
-		//他プレイヤーが同マップから退場
-		this.selfRef.on('child_removed', function (data) {
-			if (OnlineManager.shouldDisplay(data)) {
-				//if (avatarsInThisMap[data.key]) avatarsInThisMap[data.key].erase();
-				//delete avatarsInThisMap[data.key];
-				$gameVariables.setValue(9, $gameVariables.value(9) - 1);
-			}
-		});
-		*/
 		//他プレイヤーが同マップに入場
 		this.mapRef.on('child_added', function(data) {
-			if (OnlineManager.shouldDisplay(data) && $gameSwitches.value(2)) {
+			if (OnlineManager.shouldDisplay(data) && $gameSwitches.value(16)) {
 				//avatarsInThisMap[data.key] = new Game_Avatar(avatarTemplate, data.val());
-				$gameVariables.setValue(8, $gameVariables.value(9));　//キャラクターセレクトの時点で多重に呼び出されて合わなくなっている(戦闘開始時のフラグに合わせて呼び出した方が良い？)
-				$gameVariables.setValue(9, $gameVariables.value(9) + 1);
+				//$gameVariables.setValue(8, $gameVariables.value(9));　//キャラクターセレクトの時点で多重に呼び出されて合わなくなっている(戦闘開始時のフラグに合わせて呼び出した方が良い？)
+				//$gameVariables.setValue(9, $gameVariables.value(9) + 1);
+				$gameSwitches.setValue(17, true);
 			}
 		});
 
@@ -292,7 +276,7 @@ function Game_Avatar() {
 		
 
 		this.sendPlayerInfo();
-		if ($gameMap.isBattleActivate()) OnlineManager.sendUnitInfo();
+		if ($gameSystem.isBattleActivate()) OnlineManager.sendUnitInfo();
 	};
 
 	//送信するプレイヤー情報
@@ -311,11 +295,11 @@ function Game_Avatar() {
 	OnlineManager.sendUnitInfo = function () {
 		if (this.unitRef && !this.syncBusy) {
 			var send = {};
-			for (var i = 0; i < $gameMap.allyList().length; i++) { //iじゃなくて変数を使用
-				if ($gameVariables.value(8) == 0) send[i] = $gameMap.allyList()[i];
-				if ($gameVariables.value(8) == 1) send[i + 4] = $gameMap.allyList()[i];
+			for (var i = 0; i < $gameSystem.allyList().length; i++) { //iじゃなくて変数を使用
+				if ($gameVariables.value(8) == 0) send[i] = $gameSystem.allyList()[i];
+				if ($gameVariables.value(8) == 1) send[i + 4] = $gameSystem.allyList()[i];
 				/*
-				var $ = $gameMap.unitList()[i];
+				var $ = $gameSystem.unitList()[i];
 				send[i] = {
 					x: $.x, y: $.y, direction: $.direction(), speed: $.realMoveSpeed(), charaName: $.characterName(), charaIndex: $.characterIndex(), useSkill: $.useSkill(), target: $.target(), actor: $.isActor()
 					//x: $.x
