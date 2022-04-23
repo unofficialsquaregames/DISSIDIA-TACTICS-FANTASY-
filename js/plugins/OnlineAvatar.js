@@ -248,71 +248,14 @@ function Game_Avatar() {
 		*/
 		//他プレイヤーが同マップに入場
 		this.mapRef.on('child_added', function(data) {
-			if (OnlineManager.shouldDisplay(data) && $gameSwitches.value(16)) {
+			if (OnlineManager.shouldDisplay(data) && $gameSwitches.value(16)) {//子要素にいれてからキャラ選択のため順番が違う
 				//avatarsInThisMap[data.key] = new Game_Avatar(avatarTemplate, data.val());
-				//$gameVariables.setValue(8, $gameVariables.value(9));　//キャラクターセレクトの時点で多重に呼び出されて合わなくなっている(戦闘開始時のフラグに合わせて呼び出した方が良い？)
-				//$gameVariables.setValue(9, $gameVariables.value(9) + 1);
-
-				//以下、対戦者の情報を拾って同期したい
-				//opponents[data.key] = new Game_Avatar(avatarTemplate, data.val());
-				if (data.key == 0) {
-					$gameSystem._allyTeamID = this.user.uid;
-					$gameSystem.setBattlerOnline(data.key);
-					$gameSwitches.setValue(18, true);
-				} else if (data.key == 1) {
-					$gameSystem._enemyTeamID = this.user.uid;
-					$gameSystem.setBattlerOnline(data.key);
-					$gameSwitches.setValue(19, true);
-				}
-				if ($gameSwitches.value(18) && $gameSwitches.value(19)) $gameSwitches.setValue(17, true);
+				$gameVariables.setValue(8,data.key);　//キャラクターセレクトの時点で多重に呼び出されて合わなくなっている(戦闘開始時のフラグに合わせて呼び出した方が良い？)
+				
 			}
 		});
 
-		// SRPGバトラーを個別にセットアップ
-		Game_System.prototype.setBattlerOnline = function (key) {
-			var id1;
-			var id2;
-			var id3;
-			var id4;
-			if (key == 0) {
-				id1 = ally1Id;
-				id2 = ally2Id;
-				id3 = ally3Id;
-				id4 = ally4Id;
-			} else {
-				id1 = enemy1Id;
-				id2 = enemy2Id;
-				id3 = enemy3Id;
-				id4 = enemy4Id;
-            }
-			for (var allyId = 0; allyId < this.allyMembers().length; allyId++) {
-				$gameMap.event(allyId).initTacticsUnitSetting();
-				if (this.allyMembers()[parseInt(allyId)] <= 0) {
-					var id = 0;
-					do {
-						id = parseInt(Math.floor(Math.random() * (this.selectMembers().length - 2) + 1));
-					} while (this.allyMembers().indexOf(id) >= 0);
-					this.allyMembers()[parseInt(allyId)] = id;
-				} else {
-					id = this.allyMembers()[parseInt(allyId)];
-				}
-				switch (parseInt(allyId)) {
-					case 0:
-						$gameVariables.setValue(id1, id); //変数設定
-						break;
-					case 1:
-						$gameVariables.setValue(id2, id); //変数設定
-						break;
-					case 2:
-						$gameVariables.setValue(id3, id); //変数設定
-						break;
-					case 3:
-						$gameVariables.setValue(id4, id); //変数設定
-						break;
-				}
-			}
-		};
-
+		
 		//他プレイヤーが同マップで移動
 		this.mapRef.on('child_changed', function(data) {
 			if (OnlineManager.shouldDisplay(data)) {
@@ -326,8 +269,22 @@ function Game_Avatar() {
 				//delete avatarsInThisMap[data.key];
 				//if (opponents[data.key]) opponents[data.key].erase();
 				//delete opponents[data.key];
+				/* ここに書いても意味がない
+				if ($gameVariables.value(8) == 0) {
+					$gameVariables.setValue(ally1Id, 0);
+					$gameVariables.setValue(ally2Id, 0);
+					$gameVariables.setValue(ally3Id, 0);
+					$gameVariables.setValue(ally4Id, 0);
+					$gameSwitches.setValue(17, false);
+				} else if ($gameVariables.value(8) == 1) {
+					$gameVariables.setValue(enemy1Id, 0);
+					$gameVariables.setValue(enemy2Id, 0);
+					$gameVariables.setValue(enemy3Id, 0);
+					$gameVariables.setValue(enemy4Id, 0);
+					$gameSwitches.setValue(18, false);
 
-				$gameVariables.setValue(9, $gameVariables.value(9) - 1);
+                }
+				*/
 			}
 		});
 
