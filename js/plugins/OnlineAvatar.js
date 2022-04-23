@@ -109,7 +109,7 @@ function Game_Avatar() {
 	OnlineManager.switchRef = null;
 	OnlineManager.variableRef = null;
 	OnlineManager.unitRef = null;
-	OnlineManager.tempRef = null;
+	//OnlineManager.tempRef = null;
 	OnlineManager.user = null;
 	OnlineManager.syncBusy = false;	//同期接続する瞬間、送信が受信を上書きするのを阻止
 
@@ -162,9 +162,9 @@ function Game_Avatar() {
 			if (data.val() && OnlineManager.selfRef) OnlineManager.selfRef.onDisconnect().remove();
 		});
 
-		this.tempRef = firebase.database().ref('temps');
-		this.tempRef.onDisconnect().remove();
-		OnlineManager.sendTempInfo();
+		//this.tempRef = firebase.database().ref('temps');
+		//this.tempRef.onDisconnect().remove();
+		//OnlineManager.sendTempInfo();
 
 		//接続が最初のマップ読み込みよりも遅延した時は、今いるマップのオンラインデータを購読
 		if (this.mapExists()) this.connectNewMap();
@@ -231,8 +231,7 @@ function Game_Avatar() {
 		this.mapRef = firebase.database().ref('map' + $gameMap.mapId().padZero(3));
 		this.selfRef = this.mapRef.child(this.user.uid);
 		this.selfRef.onDisconnect().remove();	//切断時にキャラ座標をリムーブ
-		//this.unitRef = this.mapRef.child('units');
-		this.unitRef = firebase.database().ref('units');
+		this.unitRef = this.mapRef.child('units');
 		this.unitRef.onDisconnect().remove();
 		
 
@@ -242,10 +241,27 @@ function Game_Avatar() {
 		if (!avatarTemplate.pages[0].list) {
 			avatarTemplate.pages[0].list = $dataCommonEvents[this.parameters['avatarEvent']].list;
 		}
+		/*
+		//他プレイヤーが同マップに入場
+		this.selfRef.on('child_added', function (data) {
+			if (OnlineManager.shouldDisplay(data) && $gameTemp._startBattleFlag) {
+				$gameVariables.setValue(8, $gameVariables.value(9));　//キャラクターセレクトの時点で多重に呼び出されて合わなくなっている(戦闘開始時のフラグに合わせて呼び出した方が良い？)
+				$gameVariables.setValue(9, $gameVariables.value(9) + 1);
+			}
+		});
 
+		//他プレイヤーが同マップから退場
+		this.selfRef.on('child_removed', function (data) {
+			if (OnlineManager.shouldDisplay(data)) {
+				//if (avatarsInThisMap[data.key]) avatarsInThisMap[data.key].erase();
+				//delete avatarsInThisMap[data.key];
+				$gameVariables.setValue(9, $gameVariables.value(9) - 1);
+			}
+		});
+		*/
 		//他プレイヤーが同マップに入場
 		this.mapRef.on('child_added', function(data) {
-			if (OnlineManager.shouldDisplay(data)) {
+			if (OnlineManager.shouldDisplay(data) && $gameSwitches.value(2)) {
 				//avatarsInThisMap[data.key] = new Game_Avatar(avatarTemplate, data.val());
 				$gameVariables.setValue(8, $gameVariables.value(9));　//キャラクターセレクトの時点で多重に呼び出されて合わなくなっている(戦闘開始時のフラグに合わせて呼び出した方が良い？)
 				$gameVariables.setValue(9, $gameVariables.value(9) + 1);
@@ -255,13 +271,6 @@ function Game_Avatar() {
 		//他プレイヤーが同マップで移動
 		this.mapRef.on('child_changed', function(data) {
 			if (OnlineManager.shouldDisplay(data)) {
-				/*
-				if (avatarsInThisMap[data.key]) {
-					avatarsInThisMap[data.key].setOnlineData(data.val());
-				} else {	//念の為
-					avatarsInThisMap[data.key] = new Game_Avatar(avatarTemplate, data.val());
-				}
-				*/
 			}
 		});
 
@@ -273,7 +282,7 @@ function Game_Avatar() {
 				$gameVariables.setValue(9, $gameVariables.value(9) - 1);
 			}
 		});
-		
+
 		//他ユニットが同マップに入場(必要ないかも)
 		this.unitRef.on('child_added', function (data) {
 			console.log(data.key);
@@ -316,7 +325,7 @@ function Game_Avatar() {
 			this.unitRef.update(send);
 		}
 	};
-
+	/*
 	//添付情報を送信
 	OnlineManager.sendTempInfo = function () {
 		if (this.tempRef && !this.syncBusy) {
@@ -324,7 +333,7 @@ function Game_Avatar() {
 			this.tempRef.update(send);
 		}
 	};
-
+	*/
 	//プラグインコマンドで指定した情報とプレイヤー情報をオンライン上に送信
 	OnlineManager.sendCustomInfo = function(key, value) {
 		var info = this.playerInfo();
@@ -487,14 +496,14 @@ function Game_Avatar() {
 	Scene_Map.prototype.endTurn = function () {
 		_Scene_Map_endTurn.call(this);
 		OnlineManager.sendUnitInfo();
-		OnlineManager.sendTempInfo();
+		//OnlineManager.sendTempInfo();
 	};
 	//ユニット同期
 	var _Scene_Map_startBattle = Scene_Map.prototype.startBattle;
 	Scene_Map.prototype.startBattle = function () {
 		_Scene_Map_startBattle.call(this);
 		OnlineManager.sendUnitInfo();
-		OnlineManager.sendTempInfo();
+		//OnlineManager.sendTempInfo();
 	};
 	//オンライン経由でスイッチ・変数が変更された時、デバッグウィンドウ(F9)に反映
 	//やや重い処理だが、F9はスマホやブラウザで実行されることはないためこれで大丈夫
