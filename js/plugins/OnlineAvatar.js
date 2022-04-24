@@ -256,11 +256,13 @@ function Game_Avatar() {
 				//avatarsInThisMap[data.key] = new Game_Avatar(avatarTemplate, data.val());
 				//$gameVariables.setValue(8, data.key);　//キャラクターセレクトの時点で多重に呼び出されて合わなくなっている(戦闘開始時のフラグに合わせて呼び出した方が良い？)
 				//if ($gameSystem._allyTeamID == "") {
-				if (this.sysRef._allyTeamID == "") {
+				if ($gameSystem._allyTeamID == "") { //データベースからの情報取得がおかしい？
 					$gameSystem._allyTeamID = data.key;
+					this.sendSysInfo();
 				//} else if ($gameSystem._enemyTeamID == "") {
-				} else if (this.sysRef._enemyTeamID == "") {
+				} else if ($gameSystem.sysRef._enemyTeamID == "") {
 					$gameSystem._enemyTeamID = data.key;
+					this.sendSysInfo();
                 }
 				
 			}
@@ -305,7 +307,7 @@ function Game_Avatar() {
 		
 
 		this.sendPlayerInfo();
-		this.sendSysInfo();
+		//this.sendSysInfo();
 		if ($gameSystem.isBattleActivate()) OnlineManager.sendUnitInfo();
 	};
 
