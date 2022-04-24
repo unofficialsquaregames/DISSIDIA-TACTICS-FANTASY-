@@ -260,7 +260,7 @@ function Game_Avatar() {
 					$gameSystem._allyTeamID = data.key;
 					this.sendSysInfo();
 				//} else if ($gameSystem._enemyTeamID == "") {
-				} else if ($gameSystem.sysRef._enemyTeamID == "") {
+				} else if ($gameSystem._enemyTeamID == "") {
 					$gameSystem._enemyTeamID = data.key;
 					this.sendSysInfo();
                 }
