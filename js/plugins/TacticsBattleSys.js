@@ -632,54 +632,6 @@ Imported.TacticsBattleSys = true;
 
     // SRPGバトラー設定（オンライン用）
     Game_System.prototype.setBattlerOnline = function () {
-        var id1;
-        var id2;
-        var id3;
-        var id4;
-        if ($gameVariables.value(8) == 0) {
-            id1 = ally1Id;
-            id2 = ally2Id;
-            id3 = ally3Id;
-            id4 = ally4Id;
-            $gameSystem._allyTeamID = OnlineManager.user.uid;
-            $gameSwitches.setValue(17, true);
-        } else if ($gameVariables.value(8) == 1) {
-            id1 = enemy1Id;
-            id2 = enemy2Id;
-            id3 = enemy3Id;
-            id4 = enemy4Id;
-            $gameSystem._enemyTeamID = OnlineManager.user.uid;
-            $gameSwitches.setValue(18, true);
-        } else {
-            return;
-        }
-
-        for (var allyId = 0; allyId < this.allyMembers().length; allyId++) {
-            //$gameMap.event(allyId).initTacticsUnitSetting();
-            if (this.allyMembers()[parseInt(allyId)] <= 0) {
-                var id = 0;
-                do {
-                    id = parseInt(Math.floor(Math.random() * (this.selectMembers().length - 2) + 1));
-                } while (this.allyMembers().indexOf(id) >= 0);
-                this.allyMembers()[parseInt(allyId)] = id;
-            } else {
-                id = this.allyMembers()[parseInt(allyId)];
-            }
-            switch (parseInt(allyId)) {
-                case 0:
-                    $gameVariables.setValue(id1, id); //変数設定
-                    break;
-                case 1:
-                    $gameVariables.setValue(id2, id); //変数設定
-                    break;
-                case 2:
-                    $gameVariables.setValue(id3, id); //変数設定
-                    break;
-                case 3:
-                    $gameVariables.setValue(id4, id); //変数設定
-                    break;
-            }
-        }
     };
 
     /*

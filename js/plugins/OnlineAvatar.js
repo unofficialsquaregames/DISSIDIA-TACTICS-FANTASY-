@@ -109,8 +109,8 @@ function Game_Avatar() {
 	OnlineManager.switchRef = null;
 	OnlineManager.variableRef = null;
 	OnlineManager.unitRef = null;
-	OnlineManager.opponents = null;
 	//OnlineManager.tempRef = null;
+	OnlineManager.sysRef = null;
 	OnlineManager.user = null;
 	OnlineManager.syncBusy = false;	//同期接続する瞬間、送信が受信を上書きするのを阻止
 
@@ -219,6 +219,8 @@ function Game_Avatar() {
 			this.selfRef.remove();
 			this.unitRef.onDisconnect().cancel();
 			this.unitRef.remove();
+			this.sysRef.onDisconnect().cancel();
+			this.sysRef.remove();
 		}
 
 		if (!$dataMap.meta || $dataMap.meta.avatar_off) {
@@ -226,7 +228,7 @@ function Game_Avatar() {
 			this.selfRef = null;
 			this.unitRef = null;
 			//this.avatarsInThisMap = null;
-			this.opponents = null;
+			this.sysRef = null;
 			return;
 		}
 
@@ -236,7 +238,9 @@ function Game_Avatar() {
 		this.unitRef = this.selfRef.child('units');
 		//this.unitRef = this.mapRef.child('units');
 		this.unitRef.onDisconnect().remove();
-		
+		this.sysRef = firebase.database().ref('system');
+		/this.unitRef.onDisconnect().remove();
+
 
 		/*
 		var avatarTemplate = this.avatarTemplate;
@@ -246,14 +250,18 @@ function Game_Avatar() {
 			avatarTemplate.pages[0].list = $dataCommonEvents[this.parameters['avatarEvent']].list;
 		}
 		*/
-		//他プレイヤーが同マップに入場
-		this.mapRef.on('child_added', function(data) {
+		//他プレイヤーが同マップに入場(gameSystem._allyTeamIDに直接割り振った方がいい？、プレイヤー自体をマップから独立させて)
+		this.mapRef.on('child_added', function (data) {
 			if (OnlineManager.shouldDisplay(data)) {//子要素にいれてからキャラ選択のため順番が違う
 				//avatarsInThisMap[data.key] = new Game_Avatar(avatarTemplate, data.val());
-				console.log(this.mapRef);
-				console.log(this.mapRef[0]);
-				console.log(data.key);
-				$gameVariables.setValue(8,data.key);　//キャラクターセレクトの時点で多重に呼び出されて合わなくなっている(戦闘開始時のフラグに合わせて呼び出した方が良い？)
+				//$gameVariables.setValue(8, data.key);　//キャラクターセレクトの時点で多重に呼び出されて合わなくなっている(戦闘開始時のフラグに合わせて呼び出した方が良い？)
+				//if ($gameSystem._allyTeamID == "") {
+				if (this.sysRef._allyTeamID == "") {
+					$gameSystem._allyTeamID = data.key;
+				//} else if ($gameSystem._enemyTeamID == "") {
+				} else if (this.sysRef._enemyTeamID == "") {
+					$gameSystem._enemyTeamID = data.key;
+                }
 				
 			}
 		});
@@ -297,6 +305,7 @@ function Game_Avatar() {
 		
 
 		this.sendPlayerInfo();
+		this.sendSysInfo();
 		if ($gameSystem.isBattleActivate()) OnlineManager.sendUnitInfo();
 	};
 
@@ -329,14 +338,14 @@ function Game_Avatar() {
 			this.unitRef.update(send);
 		}
 	};
-	/*
 	//システム情報を送信
-	OnlineManager.sendSystemInfo = function () {
-		if (this.systemRef && !this.syncBusy) {
+	OnlineManager.sendSysInfo = function () {
+		if (this.sysRef && !this.syncBusy) {
 			var send = $gameSystem;
 			this.systemRef.update(send);
 		}
 	};
+	/*
 	//添付情報を送信
 	OnlineManager.sendTempInfo = function () {
 		if (this.tempRef && !this.syncBusy) {
@@ -507,6 +516,7 @@ function Game_Avatar() {
 	Scene_Map.prototype.endTurn = function () {
 		_Scene_Map_endTurn.call(this);
 		OnlineManager.sendUnitInfo();
+		OnlineManager.sendSysInfo();
 		//OnlineManager.sendTempInfo();
 	};
 	//ユニット同期
@@ -514,6 +524,7 @@ function Game_Avatar() {
 	Scene_Map.prototype.startBattle = function () {
 		_Scene_Map_startBattle.call(this);
 		OnlineManager.sendUnitInfo();
+		OnlineManager.sendSysInfo();
 		//OnlineManager.sendTempInfo();
 	};
 	//オンライン経由でスイッチ・変数が変更された時、デバッグウィンドウ(F9)に反映
