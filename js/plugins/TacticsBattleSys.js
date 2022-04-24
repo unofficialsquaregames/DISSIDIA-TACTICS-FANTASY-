@@ -570,8 +570,8 @@ Imported.TacticsBattleSys = true;
         this._turnUnit = []; //ターンが回ったユニット
         this.ActorTurn = false; //敵ターンに操作不能にするため(必要ない？)
         //以下オンライン時
-        this._allyTeamID = 0; //味方チームのID
-        this._enemyTeamID = 0; //敵チームのID
+        this._allyTeamID = ""; //味方チームのID
+        this._enemyTeamID = ""; //敵チームのID
     }
 
 
