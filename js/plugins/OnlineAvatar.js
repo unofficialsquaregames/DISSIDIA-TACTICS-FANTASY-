@@ -262,12 +262,19 @@ function Game_Avatar() {
 				//avatarsInThisMap[data.key] = new Game_Avatar(avatarTemplate, data.val());
 				//$gameVariables.setValue(8, data.key);　//キャラクターセレクトの時点で多重に呼び出されて合わなくなっている(戦闘開始時のフラグに合わせて呼び出した方が良い？)
 				//if ($gameSystem._allyTeamID == "") {
-				if (this.sysRef.child("_allyTeamID").val() == "") { //データベースからの情報取得がおかしい？
+				var allyTeamID = "";
+				var enemyTeamID = "";
+
+				this.sysRef.once("value").then(function (data) {
+					allyTeamID = data.child("_allyTeamID").val();
+					enemyTeamID = data.child("_enemyTeamID").val();
+				});
+				if (allyTeamID == "") { //データベースからの情報取得がおかしい？
 					$gameSystem._allyTeamID = data.key;
 					console.log(this.sysRef.child("_allyTeamID").val());
 					this.sendSysInfo();
 				//} else if ($gameSystem._enemyTeamID == "") {
-				} else if (this.sysRef.child("_enemyTeamID").val() == "") {
+				} else if (enemyTeamID == "") {
 					$gameSystem._enemyTeamID = data.key;
 					console.log(this.sysRef.child("_enemyTeamID").val());
 					this.sendSysInfo();
@@ -312,10 +319,9 @@ function Game_Avatar() {
 			console.log(data.val());
 			//$gameMap._unitList.push(data.val()); //data.val()は1つのユニットなのでユニットリストに代入すべきではない
 		});
-		
 
-		this.sendPlayerInfo();
 		this.sendSysInfo();
+		this.sendPlayerInfo();
 		if ($gameSystem.isBattleActivate()) OnlineManager.sendUnitInfo();
 	};
 
