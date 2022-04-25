@@ -265,7 +265,7 @@ function Game_Avatar() {
 				var allyTeamID = "";
 				var enemyTeamID = "";
 
-				this.sysRef.once("value").then(function (data) {
+				OnlineManager.sysRef.once("value").then(function (data) {
 					allyTeamID = data.child("_allyTeamID").val();
 					enemyTeamID = data.child("_enemyTeamID").val();
 				});
