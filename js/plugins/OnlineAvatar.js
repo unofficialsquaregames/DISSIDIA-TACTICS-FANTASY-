@@ -260,39 +260,30 @@ function Game_Avatar() {
 		this.mapRef.on('child_added', function (data) {
 			if (OnlineManager.shouldDisplay(data)) {//子要素にいれてからキャラ選択のため順番が違う
 				//avatarsInThisMap[data.key] = new Game_Avatar(avatarTemplate, data.val());
-				//$gameVariables.setValue(8, data.key);　//キャラクターセレクトの時点で多重に呼び出されて合わなくなっている(戦闘開始時のフラグに合わせて呼び出した方が良い？)
-				//if ($gameSystem._allyTeamID == "") {
 				var allyTeamID = "";
 				var enemyTeamID = "";
-
+				alert("通ってる");
 				OnlineManager.sysRef.once("value").then(function (data) {
 					allyTeamID = data.child("_allyTeamID").val();
 					enemyTeamID = data.child("_enemyTeamID").val();
 				});
-				if (allyTeamID == "") { //データベースからの情報取得がおかしい？
+				if (allyTeamID == "") { //1人目呼び出しの際に通らない
 					$gameSystem._allyTeamID = data.key;
 					console.log(allyTeamID);
-					OnlineManager.sendSysInfo();
-				//} else if ($gameSystem._enemyTeamID == "") {
+					//OnlineManager.sendSysInfo();
 				} else if (enemyTeamID == "") {
 					$gameSystem._enemyTeamID = data.key;
 					console.log(enemyTeamID);
-					OnlineManager.sendSysInfo();
+					//OnlineManager.sendSysInfo();
                 }
 				
 			}
 		});
 
 		
-		//他プレイヤーが同マップで移動
-		this.mapRef.on('child_changed', function(data) {
-			if (OnlineManager.shouldDisplay(data)) {
-			}
-		});
-
 		//他プレイヤーが同マップから退場
 		this.mapRef.on('child_removed', function(data) {
-			if (OnlineManager.shouldDisplay(data)) {
+			if (data.key !== this.mapExists()) {
 				//if (avatarsInThisMap[data.key]) avatarsInThisMap[data.key].erase();
 				//delete avatarsInThisMap[data.key];
 				/* ここに書いても意味がない
@@ -312,7 +303,6 @@ function Game_Avatar() {
 				*/
 			}
 		});
-
 		//他ユニットが同マップに入場(必要ないかも)
 		this.unitRef.on('child_added', function (data) {
 			console.log(data.key);
