@@ -271,13 +271,13 @@ function Game_Avatar() {
 				});
 				if (allyTeamID == "") { //データベースからの情報取得がおかしい？
 					$gameSystem._allyTeamID = data.key;
-					console.log(this.sysRef.child("_allyTeamID").val());
-					this.sendSysInfo();
+					console.log(allyTeamID);
+					OnlineManager.sendSysInfo();
 				//} else if ($gameSystem._enemyTeamID == "") {
 				} else if (enemyTeamID == "") {
 					$gameSystem._enemyTeamID = data.key;
-					console.log(this.sysRef.child("_enemyTeamID").val());
-					this.sendSysInfo();
+					console.log(enemyTeamID);
+					OnlineManager.sendSysInfo();
                 }
 				
 			}
