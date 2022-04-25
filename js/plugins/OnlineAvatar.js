@@ -262,7 +262,6 @@ function Game_Avatar() {
 				//avatarsInThisMap[data.key] = new Game_Avatar(avatarTemplate, data.val());
 				var allyTeamID = "";
 				var enemyTeamID = "";
-				alert("通ってる");
 				OnlineManager.sysRef.once("value").then(function (data) {
 					allyTeamID = data.child("_allyTeamID").val();
 					enemyTeamID = data.child("_enemyTeamID").val();
@@ -271,7 +270,7 @@ function Game_Avatar() {
 					$gameSystem._allyTeamID = data.key;
 					console.log(allyTeamID);
 					//OnlineManager.sendSysInfo();
-				} else if (enemyTeamID == "") {
+				} else if (enemyTeamID == "" && allyTeamID != data.key) {
 					$gameSystem._enemyTeamID = data.key;
 					console.log(enemyTeamID);
 					//OnlineManager.sendSysInfo();
