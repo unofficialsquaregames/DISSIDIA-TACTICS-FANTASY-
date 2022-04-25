@@ -109,6 +109,7 @@ function Game_Avatar() {
 	OnlineManager.switchRef = null;
 	OnlineManager.variableRef = null;
 	OnlineManager.unitRef = null;
+	//OnlineManager.userRef = null;
 	//OnlineManager.tempRef = null;
 	OnlineManager.sysRef = null;
 	OnlineManager.user = null;
@@ -219,6 +220,8 @@ function Game_Avatar() {
 			this.selfRef.remove();
 			this.unitRef.onDisconnect().cancel();
 			this.unitRef.remove();
+			//this.userRef.onDisconnect().cancel();
+			//this.userRef.remove();
 			this.sysRef.onDisconnect().cancel();
 			this.sysRef.remove();
 		}
@@ -227,11 +230,13 @@ function Game_Avatar() {
 			this.mapRef = null;
 			this.selfRef = null;
 			this.unitRef = null;
+			//this.userRef = null;
 			//this.avatarsInThisMap = null;
 			this.sysRef = null;
 			return;
 		}
 
+		//this.userRef = firebase.database().ref('users');
 		this.mapRef = firebase.database().ref('map' + $gameMap.mapId().padZero(3));
 		this.selfRef = this.mapRef.child(this.user.uid);
 		this.selfRef.onDisconnect().remove();	//切断時にキャラ座標をリムーブ
@@ -241,6 +246,7 @@ function Game_Avatar() {
 		this.sysRef = firebase.database().ref('system');
 		this.sysRef.onDisconnect().remove();
 
+		//this.mapRef.once('value', parent => alert('Count: ' + parent.numChildren())); //要素数を取得
 
 		/*
 		var avatarTemplate = this.avatarTemplate;
@@ -256,12 +262,14 @@ function Game_Avatar() {
 				//avatarsInThisMap[data.key] = new Game_Avatar(avatarTemplate, data.val());
 				//$gameVariables.setValue(8, data.key);　//キャラクターセレクトの時点で多重に呼び出されて合わなくなっている(戦闘開始時のフラグに合わせて呼び出した方が良い？)
 				//if ($gameSystem._allyTeamID == "") {
-				if ($gameSystem._allyTeamID == "") { //データベースからの情報取得がおかしい？
+				if (this.sysRef.child("_allyTeamID").val() == "") { //データベースからの情報取得がおかしい？
 					$gameSystem._allyTeamID = data.key;
+					console.log(this.sysRef.child("_allyTeamID").val());
 					this.sendSysInfo();
 				//} else if ($gameSystem._enemyTeamID == "") {
-				} else if ($gameSystem._enemyTeamID == "") {
+				} else if (this.sysRef.child("_enemyTeamID").val() == "") {
 					$gameSystem._enemyTeamID = data.key;
+					console.log(this.sysRef.child("_enemyTeamID").val());
 					this.sendSysInfo();
                 }
 				
@@ -307,7 +315,7 @@ function Game_Avatar() {
 		
 
 		this.sendPlayerInfo();
-		//this.sendSysInfo();
+		this.sendSysInfo();
 		if ($gameSystem.isBattleActivate()) OnlineManager.sendUnitInfo();
 	};
 
