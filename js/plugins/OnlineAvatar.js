@@ -258,7 +258,7 @@ function Game_Avatar() {
 		*/
 		//他プレイヤーが同マップに入場(gameSystem._allyTeamIDに直接割り振った方がいい？、プレイヤー自体をマップから独立させて)
 		this.mapRef.on('child_added', function (data) {
-			if (OnlineManager.shouldDisplay(data)) {//子要素にいれてからキャラ選択のため順番が違う
+			if (data.key !== this.mapExists()) {//子要素にいれてからキャラ選択のため順番が違う
 				//avatarsInThisMap[data.key] = new Game_Avatar(avatarTemplate, data.val());
 				var allyTeamID = "";
 				var enemyTeamID = "";
