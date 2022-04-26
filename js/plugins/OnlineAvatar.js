@@ -612,16 +612,16 @@ function Game_Avatar() {
         var id3;
         var id4;
         if ($gameSystem._allyTeamID == OnlineManager.user.uid) {
-            id1 = ally1Id;
-            id2 = ally2Id;
-            id3 = ally3Id;
-            id4 = ally4Id;
+			id1 = 11;//ally1Id;
+			id2 = 12;//ally2Id;
+			id3 = 13;//ally3Id;
+			id4 = 14;//ally4Id;
             $gameSwitches.setValue(17, true);
         } else if ($gameSystem._enemyTeamID == OnlineManager.user.uid) {
-            id1 = enemy1Id;
-            id2 = enemy2Id;
-            id3 = enemy3Id;
-            id4 = enemy4Id;
+			id1 = 16;//enemy1Id;
+			id2 = 17;//enemy2Id;
+			id3 = 18;//enemy3Id;
+			id4 = 19;//enemy4Id;
             $gameSwitches.setValue(18, true);
         } else {
             return;
