@@ -258,7 +258,7 @@ function Game_Avatar() {
 		*/
 		//他プレイヤーが同マップに入場(gameSystem._allyTeamIDに直接割り振った方がいい？、プレイヤー自体をマップから独立させて)
 		this.mapRef.on('child_added', function (data) {
-			if (data.key !== OnlineManager.mapExists()) {//子要素にいれてからキャラ選択のため順番が違う
+			//if (data.key !== OnlineManager.mapExists()) {//子要素にいれてからキャラ選択のため順番が違う
 				//avatarsInThisMap[data.key] = new Game_Avatar(avatarTemplate, data.val());
 				var allyTeamID = "";
 				var enemyTeamID = "";
@@ -266,7 +266,7 @@ function Game_Avatar() {
 					allyTeamID = data.child("_allyTeamID").val();
 					enemyTeamID = data.child("_enemyTeamID").val();
 				});
-				if (allyTeamID == "") { //1人目呼び出しの際に通らない
+				if (allyTeamID == "") { //1人目呼び出しの際にこのスレッドには通るがデータベースに反映されない
 					$gameSystem._allyTeamID = data.key;
 					console.log(allyTeamID);
 					//OnlineManager.sendSysInfo();
@@ -276,7 +276,7 @@ function Game_Avatar() {
 					//OnlineManager.sendSysInfo();
                 }
 				
-			}
+			//}
 		});
 
 		
