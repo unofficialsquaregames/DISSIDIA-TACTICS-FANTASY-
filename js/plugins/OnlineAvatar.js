@@ -674,7 +674,7 @@ function Game_Avatar() {
         if ($gameSystem._enemyTeamID == OnlineManager.user.uid) {
             OnlineManager.sysRef.once("value").then(function (data) {
                 $gameSystem._wtTurnList = data.child("_wtTurnList").val();
-            }
+            });
         }
     };
 })();
