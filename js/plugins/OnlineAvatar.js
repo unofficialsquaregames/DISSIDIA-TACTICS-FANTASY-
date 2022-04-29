@@ -259,7 +259,7 @@ function Game_Avatar() {
         //他プレイヤーが同マップに入場(gameSystem._allyTeamIDに直接割り振った方がいい？、プレイヤー自体をマップから独立させて)
         this.mapRef.on('child_added', function (data) {
             //avatarsInThisMap[data.key] = new Game_Avatar(avatarTemplate, data.val());
-            
+
 
         });
 
@@ -306,18 +306,18 @@ function Game_Avatar() {
     //敵と味方どういう風にわけるか
     OnlineManager.sendUnitInfo = function () {
         //if (this.unitRef && !this.syncBusy) {
-            //var send = {};
-            //for (var i = 0; i < $gameSystem.allyList().length; i++) { //iじゃなくて変数を使用
-                //send[i] = $gameSystem.allyList()[i];
-                /*
-                var $ = $gameSystem.unitList()[i];
-                send[i] = {
-                    x: $.x, y: $.y, direction: $.direction(), speed: $.realMoveSpeed(), charaName: $.characterName(), charaIndex: $.characterIndex(), useSkill: $.useSkill(), target: $.target(), actor: $.isActor()
-                    //x: $.x
-                };
-                */
-            //}
-            //this.unitRef.update(send);
+        //var send = {};
+        //for (var i = 0; i < $gameSystem.allyList().length; i++) { //iじゃなくて変数を使用
+        //send[i] = $gameSystem.allyList()[i];
+        /*
+        var $ = $gameSystem.unitList()[i];
+        send[i] = {
+            x: $.x, y: $.y, direction: $.direction(), speed: $.realMoveSpeed(), charaName: $.characterName(), charaIndex: $.characterIndex(), useSkill: $.useSkill(), target: $.target(), actor: $.isActor()
+            //x: $.x
+        };
+        */
+        //}
+        //this.unitRef.update(send);
         //}
     };
     //システム情報を送信
@@ -646,80 +646,24 @@ function Game_Avatar() {
             }
         }
     };
-    var _Scene_Map_updateMain = Scene_Map.prototype.updateMain;
-    Scene_Map.prototype.updateMain = function () {
-        _Scene_Map_updateMain.call(this);
-        //戦闘不能者がいる場合
-        if ($gameTemp.isDeadUnit()) {//ここでこの関数使うのはNG
-            this.updateDeadUnit();
-            return;
-        }
-        //戦闘開始準備
-        if ($gameTemp._startBattleFlag) {
-            this.setStartBattle();
-            return;
-        }
-        if ($gameMap.isUnitAnimationPlaying() || !$gameSystem.isBattleActivate() || $gameMap.isEventRunning()) return; //戦闘中以外、イベント実行中は処理をしない
-        // 3択
-        //ゲームオーバー判定
-        if ($gameMap.updateAllyUnitNums() == 0) {
-            this.gameOver();
-            return;
-        }
-        //戦闘終了判定
-        if ($gameMap.updateEnemyUnitNums() == 0) {
-            this.endBattle();
-            return;
-        }
-        //予約ターン
-        if ($gameTemp.isReservationAction() && !$gameSystem.isAllyTurn() && !$gameSystem.isEnemyTurn()) {
-            this.updateReservationTurn(); //予約ターンの更新
-            return;
-        }
-        //WTカウント中状態であった場合
-        if ($gameTemp._countWtTime) {
-            $gameSystem.countWt();
-            return;
-        }
-        //オンライン対戦の場合
-        if ($gameSwitches.value(15)) {
-            //敵のターン
-            if ($gameSystem.isEnemyTurn()) {
-                if ($gameSystem._turnUnit.isActor().checkCtrlGrantor()) {
-                    if ($gameSystem._allyTeamID == OnlineManager.user.uid) this.updateAllyTurn();
-                } else {
-                    if ($gameSystem._enemyTeamID == OnlineManager.user.uid) this.updateAllyTurn();       // 敵ターンの更新
-                }
-                return;
+    Scene_Map.prototype.updateOnline = function () {
+        //敵のターン
+        if ($gameSystem.isEnemyTurn()) {
+            if ($gameSystem._turnUnit.isActor().checkCtrlGrantor()) {
+                if ($gameSystem._allyTeamID == OnlineManager.user.uid) this.updateAllyTurn();
+            } else {
+                if ($gameSystem._enemyTeamID == OnlineManager.user.uid) this.updateAllyTurn();       // 敵ターンの更新
             }
-            //味方のターン
-            if ($gameSystem.isAllyTurn()) {
-                if ($gameSystem._turnUnit.isActor().checkHateState() || $gameSystem._turnUnit.isActor().checkHateGrantor() || $gameSystem._turnUnit.isActor().checkCtrlGrantor() || $gameSystem._turnUnit.isActor().checkNoCtrlState()) {
-                    if ($gameSystem._enemyTeamID == OnlineManager.user.uid) this.updateAllyTurn();
-                } else {
-                    if ($gameSystem._allyTeamID == OnlineManager.user.uid) this.updateAllyTurn();
-                }
-                return;
+            return;
+        }
+        //味方のターン
+        if ($gameSystem.isAllyTurn()) {
+            if ($gameSystem._turnUnit.isActor().checkHateState() || $gameSystem._turnUnit.isActor().checkHateGrantor() || $gameSystem._turnUnit.isActor().checkCtrlGrantor() || $gameSystem._turnUnit.isActor().checkNoCtrlState()) {
+                if ($gameSystem._enemyTeamID == OnlineManager.user.uid) this.updateAllyTurn();
+            } else {
+                if ($gameSystem._allyTeamID == OnlineManager.user.uid) this.updateAllyTurn();
             }
-        } else {
-            //敵のターン
-            if ($gameSystem.isEnemyTurn()) {
-                if ($gameSystem._turnUnit.isActor().checkCtrlGrantor()) {
-                    this.updateAllyTurn();
-                } else {
-                    this.updateEnemyTurn();       // 敵ターンの更新
-                }
-                return;
-            }
-            //味方のターン
-            if ($gameSystem.isAllyTurn()) {
-                if ($gameSystem._turnUnit.isActor().checkHateState() || $gameSystem._turnUnit.isActor().checkHateGrantor() || $gameSystem._turnUnit.isActor().checkCtrlGrantor() || $gameSystem._turnUnit.isActor().checkNoCtrlState()) {
-                    this.updateEnemyTurn();
-                } else {
-                    this.updateAllyTurn();
-                }
-                return;
-            }
+            return;
         }
     };
 })();

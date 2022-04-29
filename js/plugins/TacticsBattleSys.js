@@ -7550,24 +7550,28 @@ Imported.TacticsBattleSys = true;
             $gameSystem.countWt();
             return;
         }
-
-        //敵のターン
-        if ($gameSystem.isEnemyTurn()) {
-            if ($gameSystem._turnUnit.isActor().checkCtrlGrantor()) {
-                this.updateAllyTurn();
-            } else {
-                this.updateEnemyTurn();       // 敵ターンの更新
+        //オンライン対戦の場合
+        if ($gameSwitches.value(15)) {
+            this.updateOnline();
+        } else {
+            //敵のターン
+            if ($gameSystem.isEnemyTurn()) {
+                if ($gameSystem._turnUnit.isActor().checkCtrlGrantor()) {
+                    this.updateAllyTurn();
+                } else {
+                    this.updateEnemyTurn();       // 敵ターンの更新
+                }
+                return;
             }
-            return;
-        }
-        //味方のターン
-        if ($gameSystem.isAllyTurn()) {
-            if ($gameSystem._turnUnit.isActor().checkHateState() || $gameSystem._turnUnit.isActor().checkHateGrantor() || $gameSystem._turnUnit.isActor().checkCtrlGrantor() || $gameSystem._turnUnit.isActor().checkNoCtrlState()) {
-                this.updateEnemyTurn();
-            } else {
-                this.updateAllyTurn();
+            //味方のターン
+            if ($gameSystem.isAllyTurn()) {
+                if ($gameSystem._turnUnit.isActor().checkHateState() || $gameSystem._turnUnit.isActor().checkHateGrantor() || $gameSystem._turnUnit.isActor().checkCtrlGrantor() || $gameSystem._turnUnit.isActor().checkNoCtrlState()) {
+                    this.updateEnemyTurn();
+                } else {
+                    this.updateAllyTurn();
+                }
+                return;
             }
-            return;
         }
     };
 
