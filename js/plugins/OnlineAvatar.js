@@ -259,19 +259,26 @@ function Game_Avatar() {
         //他プレイヤーが同マップに入場(gameSystem._allyTeamIDに直接割り振った方がいい？、プレイヤー自体をマップから独立させて)
         this.mapRef.on('child_added', function (data) {
             //avatarsInThisMap[data.key] = new Game_Avatar(avatarTemplate, data.val());
-            var allyTeamID = "";
-            var enemyTeamID = "";
+            //var allyTeamID = "";
+            //var enemyTeamID = "";
+            var uids = [];
             OnlineManager.sysRef.once("value").then(function (data) {
-                allyTeamID = data.child("_allyTeamID").val();
-                enemyTeamID = data.child("_enemyTeamID").val();
+                //allyTeamID = data.child("_allyTeamID").val();
+                //enemyTeamID = data.child("_enemyTeamID").val();
+                $gameSystem._uids = data.child("_uids").val();
+                $gameSystem._uids.push(OnlineManager.user.uid);
+                OnlineManager.sendSysInfo();
+                /*
+                if (allyTeamID == "") {
+                    $gameSystem._allyTeamID = OnlineManager.user.uid;
+                    OnlineManager.sendSysInfo();
+                } else if (enemyTeamID == "") {
+                    $gameSystem._allyTeamID = allyTeamID;
+                    $gameSystem._enemyTeamID = OnlineManager.user.uid;
+                    OnlineManager.sendSysInfo();
+                }
+                */
             });
-            if (allyTeamID == "") {
-                $gameSystem._allyTeamID = OnlineManager.user.uid;
-                OnlineManager.sendSysInfo();
-            } else if (enemyTeamID == "" && allyTeamID != OnlineManager.user.uid) {
-                $gameSystem._enemyTeamID = OnlineManager.user.uid;
-                OnlineManager.sendSysInfo();
-            }
 
         });
 
