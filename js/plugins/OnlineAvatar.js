@@ -318,7 +318,7 @@ function Game_Avatar() {
     OnlineManager.sendSysInfo = function () {
         if (this.sysRef && !this.syncBusy) {
             var $ = $gameSystem;
-            send = {
+            var send = {
                 _allyTeamID: $._allyTeamID, _enemyTeamID: $._enemyTeamID, _isAllyTurn: $._isAllyTurn, _isEnemyTurn: $._isEnemyTurn, _unitList: $._unitList, _wtTurnList: $._wtTurnList
             }
             this.sysRef.update(send);
