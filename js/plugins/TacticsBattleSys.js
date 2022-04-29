@@ -379,9 +379,6 @@ Imported.TacticsBattleSys = true;
                 case 'start':
                     $gameTemp._startBattleFlag = true;
                     break;
-                case 'unitSet':
-                    $gameSystem.setBattlerOnline();
-                    break;
                 case 'matching':
                     $gameSystem.setMatchingOnline();
                     break;
@@ -2794,7 +2791,6 @@ Imported.TacticsBattleSys = true;
                 if (d) this.setDirection(d);
                 if (Utils.isOptionValid('test')) this._actor.gainTp(100);//テスト用
             }
-            console.log("通ってる");
         } else {
             //味方の配置
             if (allyId) {

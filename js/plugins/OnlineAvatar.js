@@ -602,6 +602,7 @@ function Game_Avatar() {
                 $gameSwitches.setValue(18, true);
                 OnlineManager.sendSysInfo();
             }
+            if ($gameSwitches.value(17) && $gameSwitches.value(18)) this.setBattlerOnline();
         });
     };
 
