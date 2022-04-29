@@ -261,12 +261,11 @@ function Game_Avatar() {
             //avatarsInThisMap[data.key] = new Game_Avatar(avatarTemplate, data.val());
             //var allyTeamID = "";
             //var enemyTeamID = "";
-            var uids = [];
             OnlineManager.sysRef.once("value").then(function (data) {
                 //allyTeamID = data.child("_allyTeamID").val();
                 //enemyTeamID = data.child("_enemyTeamID").val();
                 if (data.child("_uids").val()) $gameSystem._uids = data.child("_uids").val();
-                $gameSystem._uids.push(OnlineManager.user.uid);
+                if (!$gameSystem._uids.includes(OnlineManager.user.uid)) $gameSystem._uids.push(OnlineManager.user.uid);
                 OnlineManager.sendSysInfo();
                 /*
                 if (allyTeamID == "") {
