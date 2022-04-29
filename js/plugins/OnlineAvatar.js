@@ -176,6 +176,25 @@ function Game_Avatar() {
         //this.tempRef.onDisconnect().remove();
         //OnlineManager.sendTempInfo();
 
+        //他プレイヤーが同マップから退場
+        this.userRef.on('child_removed', function (data) {
+            //if (avatarsInThisMap[data.key]) avatarsInThisMap[data.key].erase();
+            //delete avatarsInThisMap[data.key];
+            if ($gameSystem._allyTeamID == OnlineManager.user.uid) {
+                $gameVariables.setValue(ally1Id, 0);
+                $gameVariables.setValue(ally2Id, 0);
+                $gameVariables.setValue(ally3Id, 0);
+                $gameVariables.setValue(ally4Id, 0);
+                $gameSwitches.setValue(17, false);
+            } else if ($gameSystem._enemyTeamID == OnlineManager.user.uid) {
+                $gameVariables.setValue(enemy1Id, 0);
+                $gameVariables.setValue(enemy2Id, 0);
+                $gameVariables.setValue(enemy3Id, 0);
+                $gameVariables.setValue(enemy4Id, 0);
+                $gameSwitches.setValue(18, false);
+            }
+        });
+
         //接続が最初のマップ読み込みよりも遅延した時は、今いるマップのオンラインデータを購読
         if (this.mapExists()) this.connectNewMap();
 
@@ -251,7 +270,6 @@ function Game_Avatar() {
         /*
         var avatarTemplate = this.avatarTemplate;
         var avatarsInThisMap = this.avatarsInThisMap = {};
-        var opponents = this.opponents = {};
         if (!avatarTemplate.pages[0].list) {
             avatarTemplate.pages[0].list = $dataCommonEvents[this.parameters['avatarEvent']].list;
         }
@@ -261,30 +279,6 @@ function Game_Avatar() {
             //avatarsInThisMap[data.key] = new Game_Avatar(avatarTemplate, data.val());
 
 
-        });
-
-
-        //他プレイヤーが同マップから退場
-        this.mapRef.on('child_removed', function (data) {
-            if (OnlineManager.shouldDisplay(data)) {
-                //if (avatarsInThisMap[data.key]) avatarsInThisMap[data.key].erase();
-                //delete avatarsInThisMap[data.key];
-                /* ここに書いても意味がない
-                if ($gameVariables.value(8) == 0) {
-                    $gameVariables.setValue(ally1Id, 0);
-                    $gameVariables.setValue(ally2Id, 0);
-                    $gameVariables.setValue(ally3Id, 0);
-                    $gameVariables.setValue(ally4Id, 0);
-                    $gameSwitches.setValue(17, false);
-                } else if ($gameVariables.value(8) == 1) {
-                    $gameVariables.setValue(enemy1Id, 0);
-                    $gameVariables.setValue(enemy2Id, 0);
-                    $gameVariables.setValue(enemy3Id, 0);
-                    $gameVariables.setValue(enemy4Id, 0);
-                    $gameSwitches.setValue(18, false);
-                }
-                */
-            }
         });
 
         this.sendPlayerInfo();

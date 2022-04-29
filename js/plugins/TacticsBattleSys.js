@@ -2723,6 +2723,8 @@ Imported.TacticsBattleSys = true;
         var unitId;
         var allyId = this.event().meta.Ally;
         var enemyId = this.event().meta.Enemy;
+
+        this._damagePopupDelay = null; //オンライン対策用
         //this.setStepAnime(true); //足踏みアニメon
         this.setMoveSpeed(4);//移動速度を通常に設定
 
