@@ -712,7 +712,7 @@ Imported.TacticsBattleSys = true;
             }
         }
         this.wtTurnListSort();
-        if (!$gameSwitches.value(15)) setWtTurnListOnline();
+        if ($gameSwitches.value(15)) this.setWtTurnListOnline();
 
     };
 
@@ -4445,14 +4445,15 @@ Imported.TacticsBattleSys = true;
 
     // ダメージポップアップの予約
     Game_Event.prototype.reserveDamagePopup = function (delay) {
-        this._damagePopupDelay = delay;
+        //this._damagePopupDelay = delay;
         var battler = this.isActor();
         this._damagePopupResult = JSON.parse(JSON.stringify(battler.result()));
     };
 
     // ダメージポップアップが予約されているかを返す
     Game_Event.prototype.isDamagePopupReserved = function () {
-        return this._damagePopupDelay !== undefined;
+        //return this._damagePopupDelay !== undefined;
+        return 0;
     };
 
     // フレーム更新
@@ -4465,8 +4466,8 @@ Imported.TacticsBattleSys = true;
     // ダメージポップアップの更新
     Game_Event.prototype.updateDamagePopup = function () {
         if (this.isDamagePopupReserved()) {
-            this._damagePopupDelay--;
-            if (this._damagePopupDelay <= 0) {
+            //this._damagePopupDelay--;
+            //if (this._damagePopupDelay <= 0) {
                 this.pasteDamagePopupResult();
                 var battler = this.isActor();
                 battler.startDamagePopup(); //ダメージポップ表示(表示されない(↓の方にあるSprite_Character参照))
@@ -4493,8 +4494,8 @@ Imported.TacticsBattleSys = true;
                         SoundManager.playRecovery();//回復の音
                     }
                 }
-                this._damagePopupDelay = undefined;
-            }
+            //    this._damagePopupDelay = undefined;
+            //}
         }
     };
 

@@ -181,16 +181,16 @@ function Game_Avatar() {
             //if (avatarsInThisMap[data.key]) avatarsInThisMap[data.key].erase();
             //delete avatarsInThisMap[data.key];
             if ($gameSystem._allyTeamID == OnlineManager.user.uid) {
-                $gameVariables.setValue(ally1Id, 0);
-                $gameVariables.setValue(ally2Id, 0);
-                $gameVariables.setValue(ally3Id, 0);
-                $gameVariables.setValue(ally4Id, 0);
+                $gameVariables.setValue(11, 0);
+                $gameVariables.setValue(12, 0);
+                $gameVariables.setValue(13, 0);
+                $gameVariables.setValue(14, 0);
                 $gameSwitches.setValue(17, false);
             } else if ($gameSystem._enemyTeamID == OnlineManager.user.uid) {
-                $gameVariables.setValue(enemy1Id, 0);
-                $gameVariables.setValue(enemy2Id, 0);
-                $gameVariables.setValue(enemy3Id, 0);
-                $gameVariables.setValue(enemy4Id, 0);
+                $gameVariables.setValue(16, 0);
+                $gameVariables.setValue(17, 0);
+                $gameVariables.setValue(18, 0);
+                $gameVariables.setValue(19, 0);
                 $gameSwitches.setValue(18, false);
             }
         });
@@ -317,10 +317,13 @@ function Game_Avatar() {
     //システム情報を送信
     OnlineManager.sendSysInfo = function () {
         if (this.sysRef && !this.syncBusy) {
+            //var send = $gameSystem;
+            
             var $ = $gameSystem;
             var send = {
                 _allyTeamID: $._allyTeamID, _enemyTeamID: $._enemyTeamID, _isAllyTurn: $._isAllyTurn, _isEnemyTurn: $._isEnemyTurn, _unitList: $._unitList, _wtTurnList: $._wtTurnList
             }
+            
             this.sysRef.update(send);
         }
     };
