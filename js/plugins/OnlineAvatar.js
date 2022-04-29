@@ -265,7 +265,7 @@ function Game_Avatar() {
             OnlineManager.sysRef.once("value").then(function (data) {
                 //allyTeamID = data.child("_allyTeamID").val();
                 //enemyTeamID = data.child("_enemyTeamID").val();
-                $gameSystem._uids = data.child("_uids").val();
+                if (data.child("_uids").val()) $gameSystem._uids = data.child("_uids").val();
                 $gameSystem._uids.push(OnlineManager.user.uid);
                 OnlineManager.sendSysInfo();
                 /*
