@@ -109,7 +109,7 @@ function Game_Avatar() {
     OnlineManager.switchRef = null;
     OnlineManager.variableRef = null;
     OnlineManager.unitRef = null;
-    //OnlineManager.userRef = null;
+    OnlineManager.userRef = null;
     //OnlineManager.tempRef = null;
     OnlineManager.sysRef = null;
     OnlineManager.user = null;
@@ -164,6 +164,16 @@ function Game_Avatar() {
             if (data.val() && OnlineManager.selfRef) OnlineManager.selfRef.onDisconnect().remove();
         });
 
+        this.userRef = firebase.database().ref('users');
+        this.selfRef = this.userRef.child(this.user.uid);
+        this.selfRef.onDisconnect().remove();	//切断時にキャラ座標をリムーブ
+        this.unitRef = this.selfRef.child('units');
+        this.sendPlayerInfo();
+        //this.sysRef.onDisconnect().remove();
+
+
+        //this.tempRef.onDisconnect().remove();
+        //OnlineManager.sendTempInfo();
         //this.tempRef = firebase.database().ref('temps');
         //this.tempRef.onDisconnect().remove();
         //OnlineManager.sendTempInfo();
@@ -207,6 +217,18 @@ function Game_Avatar() {
                 $gameVariables.setValue(data.key, data.val(), true);
             });
         }
+        if (this.sysRef) this.sysRef.off();
+        else this.sysRef = firebase.database().ref('system');
+        OnlineManager.syncBusy = true;
+        this.sysRef.once('value', function (data) {
+            OnlineManager.syncBusy = false;
+        });
+        this.sysRef.on('child_added', function (data) {
+            //$gameVariables.setValue(data.key, data.val(), true);
+        });
+        this.sysRef.on('child_changed', function (data) {
+            //$gameVariables.setValue(data.key, data.val(), true);
+        });
     };
 
     //新しいマップのオンラインデータを購読してアバターの情報を受け取る
@@ -216,35 +238,20 @@ function Game_Avatar() {
         //前のマップのコールバックはデタッチして、座標情報をリムーブ
         if (this.mapRef) {
             this.mapRef.off();
-            this.selfRef.onDisconnect().cancel();
-            this.selfRef.remove();
             this.unitRef.onDisconnect().cancel();
             this.unitRef.remove();
-            //this.userRef.onDisconnect().cancel();
-            //this.userRef.remove();
-            this.sysRef.onDisconnect().cancel();
-            this.sysRef.remove();
         }
 
         if (!$dataMap.meta || $dataMap.meta.avatar_off) {
             this.mapRef = null;
-            this.selfRef = null;
             this.unitRef = null;
             //this.userRef = null;
             //this.avatarsInThisMap = null;
-            this.sysRef = null;
             return;
         }
 
         //this.userRef = firebase.database().ref('users');
         this.mapRef = firebase.database().ref('map' + $gameMap.mapId().padZero(3));
-        this.selfRef = this.mapRef.child(this.user.uid);
-        this.selfRef.onDisconnect().remove();	//切断時にキャラ座標をリムーブ
-        this.unitRef = this.selfRef.child('units');
-        //this.unitRef = this.mapRef.child('units');
-        this.unitRef.onDisconnect().remove();
-        this.sysRef = firebase.database().ref('system');
-        this.sysRef.onDisconnect().remove();
 
         //this.mapRef.once('value', parent => alert('Count: ' + parent.numChildren())); //要素数を取得
 
@@ -259,26 +266,7 @@ function Game_Avatar() {
         //他プレイヤーが同マップに入場(gameSystem._allyTeamIDに直接割り振った方がいい？、プレイヤー自体をマップから独立させて)
         this.mapRef.on('child_added', function (data) {
             //avatarsInThisMap[data.key] = new Game_Avatar(avatarTemplate, data.val());
-            //var allyTeamID = "";
-            //var enemyTeamID = "";
-            OnlineManager.sysRef.once("value").then(function (data) {
-                //allyTeamID = data.child("_allyTeamID").val();
-                //enemyTeamID = data.child("_enemyTeamID").val();
-                //if (data.child("_uids").val()) $gameSystem._uids = data.child("_uids").val();
-                if (!$gameSystem._uids.includes(data.child("_uids").val())) $gameSystem._uids.push(data.child("_uids").val());
-                if (!$gameSystem._uids.includes(OnlineManager.user.uid)) $gameSystem._uids.push(OnlineManager.user.uid);
-                OnlineManager.sendSysInfo();
-                /*
-                if (allyTeamID == "") {
-                    $gameSystem._allyTeamID = OnlineManager.user.uid;
-                    OnlineManager.sendSysInfo();
-                } else if (enemyTeamID == "") {
-                    $gameSystem._allyTeamID = allyTeamID;
-                    $gameSystem._enemyTeamID = OnlineManager.user.uid;
-                    OnlineManager.sendSysInfo();
-                }
-                */
-            });
+            
 
         });
 
@@ -305,16 +293,9 @@ function Game_Avatar() {
                 */
             }
         });
-        //他ユニットが同マップに入場(必要ないかも)
-        this.unitRef.on('child_added', function (data) {
-            console.log(data.key);
-            console.log(data.val());
-            //$gameMap._unitList.push(data.val()); //data.val()は1つのユニットなのでユニットリストに代入すべきではない
-        });
 
-        this.sendSysInfo();
         this.sendPlayerInfo();
-        if ($gameSystem.isBattleActivate()) OnlineManager.sendUnitInfo();
+        //if ($gameSystem.isBattleActivate()) OnlineManager.sendUnitInfo();
     };
 
     //送信するプレイヤー情報(ユニットの情報もここで送信するか？)
@@ -609,7 +590,25 @@ function Game_Avatar() {
         }
     };
     // SRPGバトラー設定（オンライン用）
+    Game_System.prototype.setMatchingOnline = function () {
+        OnlineManager.sysRef.once("value").then(function (data) {
+            //if (allyTeamID == "") {
+            if (!$gameSwitches.value(17)) {
+                $gameSystem._allyTeamID = OnlineManager.user.uid;
+                $gameSwitches.setValue(17, true);
+                OnlineManager.sendSysInfo();
+                //} else if (enemyTeamID == "" && allyTeamID != OnlineManager.user.uid) {
+            } else if (!$gameSwitches.value(18) && $gameSystem._allyTeamID != OnlineManager.user.uid) {
+                $gameSystem._allyTeamID = data.child("_allyTeamID").val();
+                $gameSystem._enemyTeamID = OnlineManager.user.uid;
+                $gameSwitches.setValue(18, true);
+                OnlineManager.sendSysInfo();
+            }
+        });
+        
+    }
     Game_System.prototype.setBattlerOnline = function () {
+
         var id1;
         var id2;
         var id3;
@@ -619,13 +618,11 @@ function Game_Avatar() {
             id2 = 12;//ally2Id;
             id3 = 13;//ally3Id;
             id4 = 14;//ally4Id;
-            $gameSwitches.setValue(17, true);
         } else if ($gameSystem._enemyTeamID == OnlineManager.user.uid) {
             id1 = 16;//enemy1Id;
             id2 = 17;//enemy2Id;
             id3 = 18;//enemy3Id;
             id4 = 19;//enemy4Id;
-            $gameSwitches.setValue(18, true);
         } else {
             return;
         }
