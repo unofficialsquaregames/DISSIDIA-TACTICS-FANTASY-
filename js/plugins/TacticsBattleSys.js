@@ -712,6 +712,8 @@ Imported.TacticsBattleSys = true;
             }
         }
         this.wtTurnListSort();
+        if (!$gameSwitches.value(15)) setWtTurnListOnline();
+
     };
 
     //ターンリストを行動順にソート
