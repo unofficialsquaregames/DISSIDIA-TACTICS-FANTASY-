@@ -598,7 +598,7 @@ function Game_Avatar() {
             //if ($gameSwitches.value(17) && $gameSwitches.value(18)) $gameSystem.setBattlerOnline();
         });
     };
-
+    //バトラーセット用
     Game_System.prototype.setBattlerOnline = function () {
 
         var id1;
@@ -646,6 +646,7 @@ function Game_Avatar() {
             }
         }
     };
+
     Scene_Map.prototype.updateOnline = function () {
         //敵のターン
         if ($gameSystem.isEnemyTurn()) {
@@ -664,6 +665,16 @@ function Game_Avatar() {
                 if ($gameSystem._allyTeamID == OnlineManager.user.uid) this.updateAllyTurn();
             }
             return;
+        }
+    };
+
+    //行動順調整用スクリプトの同期
+    Game_System.prototype.setWtTurnListOnline = function () {
+        if ($gameSystem._allyTeamID == OnlineManager.user.uid) OnlineManager.sendSysInfo();
+        if ($gameSystem._enemyTeamID == OnlineManager.user.uid) {
+            OnlineManager.sysRef.once("value").then(function (data) {
+                $gameSystem._wtTurnList = data.child("_wtTurnList").val();
+            }
         }
     };
 })();
