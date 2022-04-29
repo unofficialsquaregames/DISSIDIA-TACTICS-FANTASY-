@@ -634,10 +634,6 @@ Imported.TacticsBattleSys = true;
         });
     };
 
-    // SRPGバトラー設定（オンライン用）
-    Game_System.prototype.setBattlerOnline = function () {
-    };
-
     /*
     行動順系-----------------------------------------------------------------------------
     */
@@ -2745,81 +2741,133 @@ Imported.TacticsBattleSys = true;
                 }
             }
         }
+        if ($gameSwitches.value(15)) {
+            if (allyId) {
+                this.initTacticsUnitSetting();
+                switch (parseInt(allyId)) {
+                    case 0:
+                        this._allyId = $gameVariables.value(ally1Id); //変数設定
+                        break;
+                    case 1:
+                        this._allyId = $gameVariables.value(ally2Id); //変数設定
+                        break;
+                    case 2:
+                        this._allyId = $gameVariables.value(ally3Id); //変数設定
+                        break;
+                    case 3:
+                        this._allyId = $gameVariables.value(ally4Id); //変数設定
+                        break;
+                }
+                this.setActor(new Game_Actor(this._allyId));
 
-        //味方の配置
-        if (allyId) {
-            this.initTacticsUnitSetting();
-            if ($gameSystem.allyMembers()[parseInt(allyId)] <= 0) {
-                this._allyId = 0;
-                do {
-                    this._allyId = parseInt(Math.floor(Math.random() * ($gameSystem.selectMembers().length - 2) + 1));
-                } while ($gameSystem.allyMembers().indexOf(this._allyId) >= 0);
-                $gameSystem.allyMembers()[parseInt(allyId)] = this._allyId;
-            } else {
-                this._allyId = $gameSystem.allyMembers()[parseInt(allyId)];
+                this.isActor().setEventId(this.eventId()); //イベントと紐づける用
+                this._move = $dataClasses[this._actor._classId].meta.move; //移動力
+                this.setImage(this._actor.characterName(), this._actor.characterIndex());
+                //向きの設定
+                var d = this.event().meta.Direction;
+                if (d) this.setDirection(d);
+                if (Utils.isOptionValid('test')) this._actor.gainTp(100);//テスト用
             }
-            switch (parseInt(allyId)) {
-                case 0:
-                    $gameVariables.setValue(ally1Id, this._allyId); //変数設定
-                    break;
-                case 1:
-                    $gameVariables.setValue(ally2Id, this._allyId); //変数設定
-                    break;
-                case 2:
-                    $gameVariables.setValue(ally3Id, this._allyId); //変数設定
-                    break;
-                case 3:
-                    $gameVariables.setValue(ally4Id, this._allyId); //変数設定
-                    break;
-            }
-            this.setActor(new Game_Actor(this._allyId));
+            else if (enemyId) {
+                this.initTacticsUnitSetting();
+                switch (parseInt(enemyId)) {
+                    case 0:
+                        this._enemyId = $gameVariables.value(enemy1Id); //変数設定
+                        break;
+                    case 1:
+                        this._enemyId = $gameVariables.value(enemy2Id); //変数設定
+                        break;
+                    case 2:
+                        this._enemyId = $gameVariables.value(enemy3Id); //変数設定
+                        break;
+                    case 3:
+                        this._enemyId = $gameVariables.value(enemy4Id); //変数設定
+                        break;
+                }
+                this.setActor(new Game_Actor(this._enemyId));
 
-            this.isActor().setEventId(this.eventId()); //イベントと紐づける用
-            this._move = $dataClasses[this._actor._classId].meta.move; //移動力
-            this.setImage(this._actor.characterName(), this._actor.characterIndex());
-            //向きの設定
-            var d = this.event().meta.Direction;
-            if (d) this.setDirection(d);
-            if (Utils.isOptionValid('test')) this._actor.gainTp(100);//テスト用
-        }
-        //敵の配置
-        else if (enemyId) {
-            this.initTacticsUnitSetting();
-            if ($gameSystem.enemyMembers()[parseInt(enemyId)] <= 0) {
-                this._enemyId = 0;
-                do {
-                    this._enemyId = parseInt(Math.floor(Math.random() * ($gameSystem.selectMembers().length - 2) + 1));
-                } while ($gameSystem.enemyMembers().indexOf(this._enemyId) >= 0);
-                $gameSystem.enemyMembers()[parseInt(enemyId)] = this._enemyId;
-            } else {
-                this._enemyId = $gameSystem.enemyMembers()[parseInt(enemyId)];
+                this.isActor().setEventId(this.eventId()); //イベントと紐づける用
+                this._move = $dataClasses[this._actor._classId].meta.move; //移動力
+                this.setImage(this._actor.characterName(), this._actor.characterIndex());
+                //向きの設定
+                var d = this.event().meta.Direction;
+                if (d) this.setDirection(d);
+                if (Utils.isOptionValid('test')) this._actor.gainTp(100);//テスト用
             }
+        } else {
+            //味方の配置
+            if (allyId) {
+                this.initTacticsUnitSetting();
+                if ($gameSystem.allyMembers()[parseInt(allyId)] <= 0) {
+                    this._allyId = 0;
+                    do {
+                        this._allyId = parseInt(Math.floor(Math.random() * ($gameSystem.selectMembers().length - 2) + 1));
+                    } while ($gameSystem.allyMembers().indexOf(this._allyId) >= 0);
+                    $gameSystem.allyMembers()[parseInt(allyId)] = this._allyId;
+                } else {
+                    this._allyId = $gameSystem.allyMembers()[parseInt(allyId)];
+                }
+                switch (parseInt(allyId)) {
+                    case 0:
+                        $gameVariables.setValue(ally1Id, this._allyId); //変数設定
+                        break;
+                    case 1:
+                        $gameVariables.setValue(ally2Id, this._allyId); //変数設定
+                        break;
+                    case 2:
+                        $gameVariables.setValue(ally3Id, this._allyId); //変数設定
+                        break;
+                    case 3:
+                        $gameVariables.setValue(ally4Id, this._allyId); //変数設定
+                        break;
+                }
+                this.setActor(new Game_Actor(this._allyId));
 
-            switch (parseInt(enemyId)) {
-                case 0:
-                    $gameVariables.setValue(enemy1Id, this._enemyId); //変数設定
-                    break;
-                case 1:
-                    $gameVariables.setValue(enemy2Id, this._enemyId); //変数設定
-                    break;
-                case 2:
-                    $gameVariables.setValue(enemy3Id, this._enemyId); //変数設定
-                    break;
-                case 3:
-                    $gameVariables.setValue(enemy4Id, this._enemyId); //変数設定
-                    break;
+                this.isActor().setEventId(this.eventId()); //イベントと紐づける用
+                this._move = $dataClasses[this._actor._classId].meta.move; //移動力
+                this.setImage(this._actor.characterName(), this._actor.characterIndex());
+                //向きの設定
+                var d = this.event().meta.Direction;
+                if (d) this.setDirection(d);
+                if (Utils.isOptionValid('test')) this._actor.gainTp(100);//テスト用
             }
-            this.setActor(new Game_Actor(this._enemyId));
+            //敵の配置
+            else if (enemyId) {
+                this.initTacticsUnitSetting();
+                if ($gameSystem.enemyMembers()[parseInt(enemyId)] <= 0) {
+                    this._enemyId = 0;
+                    do {
+                        this._enemyId = parseInt(Math.floor(Math.random() * ($gameSystem.selectMembers().length - 2) + 1));
+                    } while ($gameSystem.enemyMembers().indexOf(this._enemyId) >= 0);
+                    $gameSystem.enemyMembers()[parseInt(enemyId)] = this._enemyId;
+                } else {
+                    this._enemyId = $gameSystem.enemyMembers()[parseInt(enemyId)];
+                }
 
-            this.isActor().setEventId(this.eventId()); //イベントと紐づける用
-            this._move = $dataClasses[this._actor._classId].meta.move; //移動力
-            this.setImage(this._actor.characterName(), this._actor.characterIndex());
-            //向きの設定
-            var d = this.event().meta.Direction;
-            if (d) this.setDirection(d);
-            if (Utils.isOptionValid('test')) this._actor.gainTp(100);//テスト用
-        }
-        else {
+                switch (parseInt(enemyId)) {
+                    case 0:
+                        $gameVariables.setValue(enemy1Id, this._enemyId); //変数設定
+                        break;
+                    case 1:
+                        $gameVariables.setValue(enemy2Id, this._enemyId); //変数設定
+                        break;
+                    case 2:
+                        $gameVariables.setValue(enemy3Id, this._enemyId); //変数設定
+                        break;
+                    case 3:
+                        $gameVariables.setValue(enemy4Id, this._enemyId); //変数設定
+                        break;
+                }
+                this.setActor(new Game_Actor(this._enemyId));
+
+                this.isActor().setEventId(this.eventId()); //イベントと紐づける用
+                this._move = $dataClasses[this._actor._classId].meta.move; //移動力
+                this.setImage(this._actor.characterName(), this._actor.characterIndex());
+                //向きの設定
+                var d = this.event().meta.Direction;
+                if (d) this.setDirection(d);
+                if (Utils.isOptionValid('test')) this._actor.gainTp(100);//テスト用
+            }
         }
     };
     // ユニット蘇生
@@ -7477,7 +7525,6 @@ Imported.TacticsBattleSys = true;
         }
         //戦闘開始準備
         if ($gameTemp._startBattleFlag) {
-            if ($gameSwitches.value(15) && $gameVariables.value(9) < 2) return;
             this.setStartBattle();
             return;
         }
@@ -7503,45 +7550,24 @@ Imported.TacticsBattleSys = true;
             $gameSystem.countWt();
             return;
         }
-        //オンライン対戦の場合
-        if ($gameSwitches.value(15)) {
-            //敵のターン
-            if ($gameSystem.isEnemyTurn()) {
-                if ($gameSystem._turnUnit.isActor().checkCtrlGrantor()) {
-                    if ($gameVariables.value(8) == 0) this.updateAllyTurn();
-                } else {
-                    if ($gameVariables.value(8) == 1) this.updateAllyTurn();       // 敵ターンの更新
-                }
-                return;
+
+        //敵のターン
+        if ($gameSystem.isEnemyTurn()) {
+            if ($gameSystem._turnUnit.isActor().checkCtrlGrantor()) {
+                this.updateAllyTurn();
+            } else {
+                this.updateEnemyTurn();       // 敵ターンの更新
             }
-            //味方のターン
-            if ($gameSystem.isAllyTurn()) {
-                if ($gameSystem._turnUnit.isActor().checkHateState() || $gameSystem._turnUnit.isActor().checkHateGrantor() || $gameSystem._turnUnit.isActor().checkCtrlGrantor() || $gameSystem._turnUnit.isActor().checkNoCtrlState()) {
-                    if ($gameVariables.value(8) == 1) this.updateAllyTurn();
-                } else {
-                    if ($gameVariables.value(8) == 0) this.updateAllyTurn();
-                }
-                return;
+            return;
+        }
+        //味方のターン
+        if ($gameSystem.isAllyTurn()) {
+            if ($gameSystem._turnUnit.isActor().checkHateState() || $gameSystem._turnUnit.isActor().checkHateGrantor() || $gameSystem._turnUnit.isActor().checkCtrlGrantor() || $gameSystem._turnUnit.isActor().checkNoCtrlState()) {
+                this.updateEnemyTurn();
+            } else {
+                this.updateAllyTurn();
             }
-        } else {
-            //敵のターン
-            if ($gameSystem.isEnemyTurn()) {
-                if ($gameSystem._turnUnit.isActor().checkCtrlGrantor()) {
-                    this.updateAllyTurn();
-                } else {
-                    this.updateEnemyTurn();       // 敵ターンの更新
-                }
-                return;
-            }
-            //味方のターン
-            if ($gameSystem.isAllyTurn()) {
-                if ($gameSystem._turnUnit.isActor().checkHateState() || $gameSystem._turnUnit.isActor().checkHateGrantor() || $gameSystem._turnUnit.isActor().checkCtrlGrantor() || $gameSystem._turnUnit.isActor().checkNoCtrlState()) {
-                    this.updateEnemyTurn();
-                } else {
-                    this.updateAllyTurn();
-                }
-                return;
-            }
+            return;
         }
     };
 
