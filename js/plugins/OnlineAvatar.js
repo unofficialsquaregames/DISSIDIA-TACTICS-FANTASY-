@@ -108,7 +108,6 @@ function Game_Avatar() {
     OnlineManager.selfRef = null;
     OnlineManager.switchRef = null;
     OnlineManager.variableRef = null;
-    OnlineManager.unitRef = null;
     OnlineManager.userRef = null;
     //OnlineManager.tempRef = null;
     OnlineManager.sysRef = null;
@@ -167,7 +166,6 @@ function Game_Avatar() {
         this.userRef = firebase.database().ref('users');
         this.selfRef = this.userRef.child(this.user.uid);
         this.selfRef.onDisconnect().remove();	//切断時にキャラ座標をリムーブ
-        this.unitRef = this.selfRef.child('units');
         this.sendPlayerInfo();
         //this.sysRef.onDisconnect().remove();
 
@@ -238,19 +236,14 @@ function Game_Avatar() {
         //前のマップのコールバックはデタッチして、座標情報をリムーブ
         if (this.mapRef) {
             this.mapRef.off();
-            this.unitRef.onDisconnect().cancel();
-            this.unitRef.remove();
         }
 
         if (!$dataMap.meta || $dataMap.meta.avatar_off) {
             this.mapRef = null;
-            this.unitRef = null;
-            //this.userRef = null;
             //this.avatarsInThisMap = null;
             return;
         }
 
-        //this.userRef = firebase.database().ref('users');
         this.mapRef = firebase.database().ref('map' + $gameMap.mapId().padZero(3));
 
         //this.mapRef.once('value', parent => alert('Count: ' + parent.numChildren())); //要素数を取得
@@ -312,10 +305,10 @@ function Game_Avatar() {
     //ユニット情報を送信(unitsはプレイヤーごとにわけて4体4体で編成させた方がいいか)
     //敵と味方どういう風にわけるか
     OnlineManager.sendUnitInfo = function () {
-        if (this.unitRef && !this.syncBusy) {
-            var send = {};
-            for (var i = 0; i < $gameSystem.allyList().length; i++) { //iじゃなくて変数を使用
-                send[i] = $gameSystem.allyList()[i];
+        //if (this.unitRef && !this.syncBusy) {
+            //var send = {};
+            //for (var i = 0; i < $gameSystem.allyList().length; i++) { //iじゃなくて変数を使用
+                //send[i] = $gameSystem.allyList()[i];
                 /*
                 var $ = $gameSystem.unitList()[i];
                 send[i] = {
@@ -323,9 +316,9 @@ function Game_Avatar() {
                     //x: $.x
                 };
                 */
-            }
-            this.unitRef.update(send);
-        }
+            //}
+            //this.unitRef.update(send);
+        //}
     };
     //システム情報を送信
     OnlineManager.sendSysInfo = function () {
@@ -504,7 +497,7 @@ function Game_Avatar() {
     var _Scene_Map_endTurn = Scene_Map.prototype.endTurn;
     Scene_Map.prototype.endTurn = function () {
         _Scene_Map_endTurn.call(this);
-        OnlineManager.sendUnitInfo();
+        //OnlineManager.sendUnitInfo();
         OnlineManager.sendSysInfo();
         //OnlineManager.sendTempInfo();
     };
@@ -512,7 +505,7 @@ function Game_Avatar() {
     var _Scene_Map_startBattle = Scene_Map.prototype.startBattle;
     Scene_Map.prototype.startBattle = function () {
         _Scene_Map_startBattle.call(this);
-        OnlineManager.sendUnitInfo();
+        //OnlineManager.sendUnitInfo();
         OnlineManager.sendSysInfo();
         //OnlineManager.sendTempInfo();
     };
