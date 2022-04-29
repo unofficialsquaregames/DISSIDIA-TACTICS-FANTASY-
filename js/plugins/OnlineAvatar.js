@@ -267,7 +267,7 @@ function Game_Avatar() {
                 //if (data.child("_uids").val()) $gameSystem._uids = data.child("_uids").val();
                 if (!$gameSystem._uids.includes(data.child("_uids").val())) $gameSystem._uids.push(data.child("_uids").val());
                 if (!$gameSystem._uids.includes(OnlineManager.user.uid)) $gameSystem._uids.push(OnlineManager.user.uid);
-                //OnlineManager.sendSysInfo();
+                OnlineManager.sendSysInfo();
                 /*
                 if (allyTeamID == "") {
                     $gameSystem._allyTeamID = OnlineManager.user.uid;
