@@ -379,6 +379,9 @@ Imported.TacticsBattleSys = true;
                 case 'start':
                     $gameTemp._startBattleFlag = true;
                     break;
+                case 'unitSet':
+                    $gameSystem.setBattlerOnline();
+                    break;
                 case 'matching':
                     $gameSystem.setMatchingOnline();
                     break;
