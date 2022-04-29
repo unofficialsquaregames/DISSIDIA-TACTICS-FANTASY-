@@ -2794,6 +2794,7 @@ Imported.TacticsBattleSys = true;
                 if (d) this.setDirection(d);
                 if (Utils.isOptionValid('test')) this._actor.gainTp(100);//テスト用
             }
+            console.log("通ってる");
         } else {
             //味方の配置
             if (allyId) {
