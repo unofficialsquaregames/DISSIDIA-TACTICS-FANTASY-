@@ -698,22 +698,22 @@ Imported.TacticsBattleSys = true;
         //以下の変数は初期化の時に定義するべきでは？
         //行動順に並べるリスト
         this._wtTurnList = [];
-
-        for (var i = 0; i < this.unitList().length; i++) {
-            var unit = this.unitList()[i];
-            var battler = unit.isActor();
-            var eventId = unit.event().id; //IDを取得
-            var wtTurnList = battler.wtTurnList(); //wtリストを取得
-
-            for (var j = 0; j < wtTurnList.length; j++) {
-                var list = [];
-                list.push(eventId, wtTurnList[j]);
-                this._wtTurnList.push(list);
-            }
-        }
-        this.wtTurnListSort();
         if ($gameSwitches.value(15)) this.setWtTurnListOnline();
+        else {
+            for (var i = 0; i < this.unitList().length; i++) {
+                var unit = this.unitList()[i];
+                var battler = unit.isActor();
+                var eventId = unit.event().id; //IDを取得
+                var wtTurnList = battler.wtTurnList(); //wtリストを取得
 
+                for (var j = 0; j < wtTurnList.length; j++) {
+                    var list = [];
+                    list.push(eventId, wtTurnList[j]);
+                    this._wtTurnList.push(list);
+                }
+            }
+            this.wtTurnListSort();
+        }
     };
 
     //ターンリストを行動順にソート
