@@ -176,23 +176,11 @@ function Game_Avatar() {
         //this.tempRef.onDisconnect().remove();
         //OnlineManager.sendTempInfo();
 
-        //他プレイヤーが同マップから退場
+        //ユーザーが退場
         this.userRef.on('child_removed', function (data) {
             //if (avatarsInThisMap[data.key]) avatarsInThisMap[data.key].erase();
             //delete avatarsInThisMap[data.key];
-            if ($gameSystem._allyTeamID == OnlineManager.user.uid) {
-                $gameVariables.setValue(11, 0);
-                $gameVariables.setValue(12, 0);
-                $gameVariables.setValue(13, 0);
-                $gameVariables.setValue(14, 0);
-                $gameSwitches.setValue(17, false);
-            } else if ($gameSystem._enemyTeamID == OnlineManager.user.uid) {
-                $gameVariables.setValue(16, 0);
-                $gameVariables.setValue(17, 0);
-                $gameVariables.setValue(18, 0);
-                $gameVariables.setValue(19, 0);
-                $gameSwitches.setValue(18, false);
-            }
+            OnlineManager.removeUserInfo();
         });
 
         //接続が最初のマップ読み込みよりも遅延した時は、今いるマップのオンラインデータを購読
@@ -351,6 +339,25 @@ function Game_Avatar() {
     OnlineManager.removeUnitInfo = function () {
         if (this.unitRef) this.unitRef.remove();
     };
+    //ユーザー情報を削除
+    OnlineManager.removeUserInfo = function () {
+        if (this.userRef) {
+            this.userRef.remove();
+            if ($gameSystem._allyTeamID == OnlineManager.user.uid) {
+                $gameVariables.setValue(11, 0);
+                $gameVariables.setValue(12, 0);
+                $gameVariables.setValue(13, 0);
+                $gameVariables.setValue(14, 0);
+                $gameSwitches.setValue(17, false);
+            } else if ($gameSystem._enemyTeamID == OnlineManager.user.uid) {
+                $gameVariables.setValue(16, 0);
+                $gameVariables.setValue(17, 0);
+                $gameVariables.setValue(18, 0);
+                $gameVariables.setValue(19, 0);
+                $gameSwitches.setValue(18, false);
+            }
+        }
+    };
 
     //$gameMapや$dataMapがnullでないことを保証
     OnlineManager.mapExists = function () {
@@ -449,6 +456,7 @@ function Game_Avatar() {
     Scene_Title.prototype.start = function () {
         OnlineManager.removePlayerInfo();
         OnlineManager.removeUnitInfo();
+        OnlineManager.removeUserInfo();
         _Scene_Title_start.apply(this, arguments);
     };
 
@@ -492,22 +500,25 @@ function Game_Avatar() {
         OnlineManager.startSync();
     };
 
-    //ここが通過すらしない問題
     //ユニット同期
     var _Scene_Map_endTurn = Scene_Map.prototype.endTurn;
     Scene_Map.prototype.endTurn = function () {
         _Scene_Map_endTurn.call(this);
-        //OnlineManager.sendUnitInfo();
-        OnlineManager.sendSysInfo();
-        //OnlineManager.sendTempInfo();
+        if ($gameSwitches.value(15)) {
+            //OnlineManager.sendUnitInfo();
+            OnlineManager.sendSysInfo();
+            //OnlineManager.sendTempInfo();
+        }
     };
     //ユニット同期
     var _Scene_Map_startBattle = Scene_Map.prototype.startBattle;
     Scene_Map.prototype.startBattle = function () {
         _Scene_Map_startBattle.call(this);
-        //OnlineManager.sendUnitInfo();
-        OnlineManager.sendSysInfo();
-        //OnlineManager.sendTempInfo();
+        if ($gameSwitches.value(15)) {
+            //OnlineManager.sendUnitInfo();
+            OnlineManager.sendSysInfo();
+            //OnlineManager.sendTempInfo();
+        }
     };
     //オンライン経由でスイッチ・変数が変更された時、デバッグウィンドウ(F9)に反映
     //やや重い処理だが、F9はスマホやブラウザで実行されることはないためこれで大丈夫
@@ -670,11 +681,29 @@ function Game_Avatar() {
 
     //行動順調整用スクリプトの同期
     Game_System.prototype.setWtTurnListOnline = function () {
-        if ($gameSystem._allyTeamID == OnlineManager.user.uid) OnlineManager.sendSysInfo();
-        else if ($gameSystem._enemyTeamID == OnlineManager.user.uid) {
+        //if ($gameSystem._allyTeamID == OnlineManager.user.uid) {
+        if (!$gameSwitches.value(19)) {
+            for (var i = 0; i < this.unitList().length; i++) {
+                var unit = this.unitList()[i];
+                var battler = unit.isActor();
+                var eventId = unit.event().id; //IDを取得
+                var wtTurnList = battler.wtTurnList(); //wtリストを取得
+
+                for (var j = 0; j < wtTurnList.length; j++) {
+                    var list = [];
+                    list.push(eventId, wtTurnList[j]);
+                    this._wtTurnList.push(list);
+                }
+            }
+            this.wtTurnListSort();
+            OnlineManager.sendSysInfo();
+            $gameSwitches.setValue(19, true);
+        //} else if ($gameSystem._enemyTeamID == OnlineManager.user.uid) {
+        } else {
             OnlineManager.sysRef.once("value").then(function (data) {
                 $gameSystem._wtTurnList = data.child("_wtTurnList").val();
             });
+            $gameSwitches.setValue(19, false);
         }
     };
 })();
