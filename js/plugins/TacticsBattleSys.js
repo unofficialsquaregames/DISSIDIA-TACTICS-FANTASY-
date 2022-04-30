@@ -987,12 +987,14 @@ Imported.TacticsBattleSys = true;
 
     // 行動主体のセット(Game_Objectから再定義)
     Game_Action.prototype.setSubject = function (subject) {
-        this._subject = subject;
+        //this._subject = subject;
+        this._subject = subject.eventId();
     };
 
     // 行動主体を返す(Game_Objectから再定義)
     Game_Action.prototype.subject = function () {
-        return this._subject;
+        //return this._subject;
+        return $gameMap.event(this._subject).isActor();
     };
 
     Game_Action.prototype.itemHit = function (target) {
@@ -2708,6 +2710,7 @@ Imported.TacticsBattleSys = true;
 
     // SRPGバトラーを個別にセットアップ
     Game_Event.prototype.setBattler = function () {
+        this._damagePopupDelay = null;
         this._useSkill = null; //これから使用するスキル
         this._myAbility = [];
         this._myAbility[0] = null; //ファーストアビリティ(MP消費)
@@ -2884,7 +2887,9 @@ Imported.TacticsBattleSys = true;
     };
     // ターゲットを返す
     Game_Event.prototype.target = function () {
-        return this._target;
+        //return this._target;
+        if (this._target) return $gameMap.event(this._target);
+        else return null;
     };
     // 使用スキルを返す
     Game_Event.prototype.useSkill = function () {
@@ -2892,7 +2897,9 @@ Imported.TacticsBattleSys = true;
     };
     // ターゲットをセットする
     Game_Event.prototype.setTarget = function (target) {
-        this._target = target;
+        //this._target = target;
+        if (target) this._target = target.event().id
+        else this._target = null;
     };
     // 使用スキルをセットする
     Game_Event.prototype.setUseSkill = function (skill) {
@@ -4445,15 +4452,14 @@ Imported.TacticsBattleSys = true;
 
     // ダメージポップアップの予約
     Game_Event.prototype.reserveDamagePopup = function (delay) {
-        //this._damagePopupDelay = delay;
+        this._damagePopupDelay = delay;
         var battler = this.isActor();
         this._damagePopupResult = JSON.parse(JSON.stringify(battler.result()));
     };
 
     // ダメージポップアップが予約されているかを返す
     Game_Event.prototype.isDamagePopupReserved = function () {
-        //return this._damagePopupDelay !== undefined;
-        return 0;
+        return this._damagePopupDelay !== null;
     };
 
     // フレーム更新
@@ -4466,8 +4472,8 @@ Imported.TacticsBattleSys = true;
     // ダメージポップアップの更新
     Game_Event.prototype.updateDamagePopup = function () {
         if (this.isDamagePopupReserved()) {
-            //this._damagePopupDelay--;
-            //if (this._damagePopupDelay <= 0) {
+            this._damagePopupDelay--;
+            if (this._damagePopupDelay <= 0) {
                 this.pasteDamagePopupResult();
                 var battler = this.isActor();
                 battler.startDamagePopup(); //ダメージポップ表示(表示されない(↓の方にあるSprite_Character参照))
@@ -4494,8 +4500,8 @@ Imported.TacticsBattleSys = true;
                         SoundManager.playRecovery();//回復の音
                     }
                 }
-            //    this._damagePopupDelay = undefined;
-            //}
+                this._damagePopupDelay = null;
+            }
         }
     };
 

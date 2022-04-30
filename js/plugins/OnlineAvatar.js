@@ -671,7 +671,7 @@ function Game_Avatar() {
     //行動順調整用スクリプトの同期
     Game_System.prototype.setWtTurnListOnline = function () {
         if ($gameSystem._allyTeamID == OnlineManager.user.uid) OnlineManager.sendSysInfo();
-        if ($gameSystem._enemyTeamID == OnlineManager.user.uid) {
+        else if ($gameSystem._enemyTeamID == OnlineManager.user.uid) {
             OnlineManager.sysRef.once("value").then(function (data) {
                 $gameSystem._wtTurnList = data.child("_wtTurnList").val();
             });
