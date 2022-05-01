@@ -698,11 +698,11 @@ function Game_Avatar() {
 
     //行動順調整用スクリプトの同期
     Game_System.prototype.setWtTurnListOnline = function () {
+        OnlineManager.sendUnitInfo();
         if (this._allyTeamID == OnlineManager.user.uid && $gameSwitches.value(19)) {
             //if (!$gameSwitches.value(19)) {
             $gameSwitches.setValue(19, false);
             //$gameSwitches.setValue(19, true);
-            OnlineManager.sendUnitInfo();
             OnlineManager.sendSysInfo();
         } else if (this._enemyTeamID == OnlineManager.user.uid && !$gameSwitches.value(19) && $gameSwitches.value(20)) {
             //} else {
