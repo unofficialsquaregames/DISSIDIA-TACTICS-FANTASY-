@@ -7955,6 +7955,7 @@ Imported.TacticsBattleSys = true;
         }
     };
 
+
     // 2,SRPGコマンド【移動】
     Scene_Map.prototype.commandMove = function () {
         var turnUnit = $gameSystem._turnUnit;

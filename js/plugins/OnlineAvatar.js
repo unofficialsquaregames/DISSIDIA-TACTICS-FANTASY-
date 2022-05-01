@@ -317,7 +317,7 @@ function Game_Avatar() {
                     };
                 }
             }
-               
+
             this.unitRef.update(send);
         }
     };
@@ -680,8 +680,10 @@ function Game_Avatar() {
         if ($gameSystem.isEnemyTurn()) {
             if ($gameSystem._turnUnit.isActor().checkCtrlGrantor()) {
                 if ($gameSystem._allyTeamID == OnlineManager.user.uid) this.updateAllyTurn();
+                else this.updateSyncTurn();
             } else {
-                if ($gameSystem._enemyTeamID == OnlineManager.user.uid) this.updateAllyTurn();       // 敵ターンの更新
+                if ($gameSystem._enemyTeamID == OnlineManager.user.uid) this.updateAllyTurn();
+                else this.updateSyncTurn();
             }
             return;
         }
@@ -689,13 +691,157 @@ function Game_Avatar() {
         if ($gameSystem.isAllyTurn()) {
             if ($gameSystem._turnUnit.isActor().checkHateState() || $gameSystem._turnUnit.isActor().checkHateGrantor() || $gameSystem._turnUnit.isActor().checkCtrlGrantor() || $gameSystem._turnUnit.isActor().checkNoCtrlState()) {
                 if ($gameSystem._enemyTeamID == OnlineManager.user.uid) this.updateAllyTurn();
+                else this.updateSyncTurn();
             } else {
                 if ($gameSystem._allyTeamID == OnlineManager.user.uid) this.updateAllyTurn();
+                else this.updateSyncTurn();
             }
             return;
         }
     };
 
+    //同期ターンの更新
+    Scene_Map.prototype.updateSyncTurn = function () {
+        var turnUnit = $gameSystem._turnUnit;
+        switch ($gameSystem._phaseState) {
+            case 0: //カメラ移動完了後コマンド表示
+                $gameMap.initColorArea();
+                $gameMap.setMovableArea(turnUnit);
+                //カメラが移動中かどうか
+                if ($gamePlayer.isStopping() && $gameTemp._cameraWait) {
+                    //対象ターン行動フラグ
+                    $gameTemp._cameraWait = false;
+                    this.openBattleStatusWindow(turnUnit); //自身のステータスを表示
+                    //ターン開始前処理(リジェネ回復など)
+                    $gameSystem._phaseState = 1;
+                }
+                break;
+            case 1: //ターン開始前処理(アニメーションを取り扱う)
+                //ターン開始前の処理
+                $gameSystem.startTurn(turnUnit);
+                turnUnit.beforeTurnStart();
+                $gameSystem.syncVariable(); //同期
+                $gameSystem._phaseState = 2;
+                break;
+            case 2: //試行錯誤
+                $gameMap.setInvisibleArea($gameSystem.unitList());
+                $gameMap.showInvisibleArea(turnUnit);
+                //クラス設定されたタグに合わせてターゲットを変更する
+                //turnUnit.targetSearch();
+                if (!turnUnit.isActor().canMove()) {
+                    //$gameMessage.add("行動不能");
+                    SoundManager.playBuzzer();//ブザー
+                    //$gameMessage.clear(); //行動不能などのメッセージを消去したい
+                    $gameSystem._phaseState = 11; //麻痺とかであれば以降の処理は行わず次のターンへ
+                    return;
+                }
+                //if (turnUnit.target()){
+                //この時点でコマンドもセットする
+                $gameSystem._phaseState = 3; //状況によっては5に移行
+                //}else{
+                // $gameMap._phaseState = 11; //ターンエンド
+                //}
+                break;
+            case 3: //移動先選択
+                //移動タイルを表示し
+                $gameMap.setMovableArea(turnUnit);
+                $gameMap.showMovableArea(turnUnit);
+
+                OnlineManager.unitRef.once("value").then(function (data) {
+                    //ユニット更新用、行動順更新用などで分けた方が良い
+                    for (var i = 0; i < $gameSystem.unitList().length; i++) {
+                        if (turnUnit == $gameSystem.unitList()[i]) {
+                            $gameTemp._toX = data.child(i).child("x").val();
+                            $gameTemp._toY = data.child(i).child("y").val();
+                        }
+                    }
+                });
+                $gamePlayer.setCameraXy($gameTemp._toX, $gameTemp._toY);
+
+                $gameSystem._phaseState = 4;
+                break;
+            case 4: //移動処理(移動完了したらphaseStateを上げる)
+                if (!this.isMoveWaitingMode()) return;//待ち時間
+                //移動処理
+                if (turnUnit.pos($gameTemp._toX, $gameTemp._toY)) {
+                    $gameMap.initColorArea();
+                    turnUnit.endMove();
+                    $gameSystem._phaseState = 5;
+                } else {
+                    this.updateMove();//指定座標へ移動する処理
+                }
+                break;
+            case 5: //対象選択
+                if (turnUnit.useSkill()) {
+                    $gameMap.showRangeArea(turnUnit, null);
+                    $gameSystem._phaseState = 6;//範囲確認へ移行
+                } else {
+                    //待機という扱いになるためMP回復しターン終了
+                    this.commandWait();
+                }
+                break;
+            case 6: //範囲確認
+                if (!this.isSelectWaitingMode()) return;//待ち時間
+                if (turnUnit.target() == null) {
+                    this.commandWait();
+                    return;
+                }
+                //対象が範囲内にいた場合行動開始、そうでない場合待機
+                if ($gameTemp._moveTargetPointFlag || $gameMap.isInsideArea(turnUnit.target().x, turnUnit.target().y)) {
+                    this.targetBattleStatusWindow(turnUnit.useSkill(), turnUnit.target());//ターゲットを表示
+                    $gameMap.showEffectArea(turnUnit);//効果範囲表示
+                    $gamePlayer.setCameraEvent(turnUnit.target()); //カメラを選択した対象へ回す
+                    $gameSystem._phaseState = 7;//対象アニメーションフェーズへ移行
+                } else {
+                    //待機という扱いになるためMP回復しターン終了
+                    this.commandWait();
+                }
+                break;
+            case 7: //コマンド実行処理(詠唱アニメーション)
+                if (!this.isYesNoWaitingMode()) return;//待ち時間
+                //移動しながら攻撃の場合
+                if ($gameTemp._moveTargetPointFlag) {
+                    var xPlus = $gameTemp._moveTargetPointX - turnUnit.x;
+                    var yPlus = $gameTemp._moveTargetPointY - turnUnit.y;
+                    turnUnit.jump(xPlus, yPlus); //移動しながらの攻撃はジャンプで行う
+                }
+                //蘇生の場合
+                if ($gameTemp._resurrectionFlag) {
+                    $gameTemp.isResurrectionUnit().resurrectionUnit();
+                }
+                //自身に攻撃アニメーション
+                this.showActionMotion(turnUnit);
+                //this.showActionAnimation(turnUnit);
+                $gameSystem._phaseState = 9;//対象アニメーションフェーズへ移行
+                break;
+            case 9: //コマンド実行処理(対象アニメーション)
+                //対象に攻撃アニメーション
+                //Game_Eventにて「たたかう」だと対象の装備が反映されたアニメーションが表示される
+                turnUnit.setBattlerReturn();//攻撃アニメから歩行アニメへ戻す
+                turnUnit.target().showActionAnimation(turnUnit, turnUnit.useSkill());  // 行動アニメーションの表示
+                //多段ヒット時の設定
+                $gameTemp.setMultiHit(turnUnit.useSkill());
+                $gameSystem._phaseState = 10;//ダメージ表示フェーズへ移行
+                break;
+            case 10: //コマンド実行処理(ダメージ表示)
+                if (!this.isMultiHitPopWaitingMode()) return;//待ち時間
+                turnUnit.executeAction();
+                $gameTemp.countMultiHit();
+                if (!$gameTemp.endMultiHit()) return;//ヒットが終わってない場合やり直し
+                this.updateBattleStatusWindow();//戦闘用ステータスウインドウを更新
+                $gameMap.initColorArea();
+                $gameSystem._phaseState = 11;//ターン終了後処理へ移行
+                break;
+            case 11: //ターン終了後処理(アニメーションを取り扱う)
+                //ターン終了後の処理
+                turnUnit.afterTurnEnd();
+                $gameSystem._phaseState = 12;//事後処理
+                break;
+            case 12: //事後処理
+                this.endTurn(); //
+                break;
+        }
+    };
     //行動順調整用スクリプトの同期
     Game_System.prototype.setWtTurnListOnline = function () {
         OnlineManager.sendUnitInfo();
@@ -727,9 +873,9 @@ function Game_Avatar() {
             //ユニット更新用、行動順更新用などで分けた方が良い
             for (var i = 0; i < $gameSystem.unitList().length; i++) {
                 var unit = $gameSystem.unitList()[i];
-                unit._x = data.child(i).child("x").val();
-                unit._y = data.child(i).child("y").val();
-                unit._direction = data.child(i).child("direction").val();
+                //unit._x = data.child(i).child("x").val();
+                //unit._y = data.child(i).child("y").val();
+                //unit._direction = data.child(i).child("direction").val();
                 unit._target = data.child(i).child("target").val();
                 unit._useSkill = data.child(i).child("useSkill").val();
                 unit.isActor()._hp = data.child(i).child("hp").val();
