@@ -698,7 +698,7 @@ function Game_Avatar() {
     };
     //WTリスト設定中
     Game_System.prototype.settingEnemyWtTurnList = function () {
-        if ($gameSwitches.value(15){
+        if ($gameSwitches.value(15)){
             $gameSwitches.setValue(19, true);
             $gameSwitches.setValue(20, true);
         }
