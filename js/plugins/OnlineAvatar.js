@@ -306,7 +306,7 @@ function Game_Avatar() {
                 for (var i = 0; i < $gameSystem.allyList().length; i++) {
                     var $ = $gameSystem.unitList()[i];
                     send[i] = {
-                        x: $.x, y: $.y, direction: $.direction(), actor: $.isActor()
+                        x: $.x, y: $.y, direction: $.direction(), target: $._target, useSkill: $._useSkill, hp: $.isActor()._hp, mp: $.isActor()._mp, tp: $.isActor()._tp, wt: $.isActor()._wt, states: $.isActor()._states, stateTurns: $.isActor()._stateTurns
                     };
                 }
             } else if ($gameSystem._enemyTeamID == OnlineManager.user.uid) {
