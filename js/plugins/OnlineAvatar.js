@@ -305,13 +305,13 @@ function Game_Avatar() {
     //システム情報を送信
     OnlineManager.sendSysInfo = function () {
         if (this.sysRef && !this.syncBusy) {
-            //var send = $gameSystem;
-            
+            var send = $gameSystem;
+            /*
             var $ = $gameSystem;
             var send = {
                 _allyTeamID: $._allyTeamID, _enemyTeamID: $._enemyTeamID, _isAllyTurn: $._isAllyTurn, _isEnemyTurn: $._isEnemyTurn, _unitList: $._unitList, _wtTurnList: $._wtTurnList
             }
-            
+            */
             this.sysRef.update(send);
         }
     };
@@ -697,11 +697,13 @@ function Game_Avatar() {
     //同期用
     Game_System.prototype.syncVariable = function () {
         OnlineManager.sysRef.once("value").then(function (data) {
-            //$gameSystem = data.val();
+            $gameSystem = data.val();
+            /*
             $gameSystem._isAllyTurn = data.child("_isAllyTurn").val();
             $gameSystem._isEnemyTurn = data.child("_isEnemyTurn").val();
             $gameSystem._unitList = data.child("_unitList").val();
             $gameSystem._wtTurnList = data.child("_wtTurnList").val();
+            */
         });
     };
     //WTリスト設定中
