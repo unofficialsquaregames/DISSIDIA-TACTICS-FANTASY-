@@ -301,7 +301,7 @@ function Game_Avatar() {
     //敵と味方どういう風にわけるか
     OnlineManager.sendUnitInfo = function () {
         if (this.unitRef && !this.syncBusy) {
-            //var send = {};
+            var send = {};
             if ($gameSystem._allyTeamID == OnlineManager.user.uid) {
                 for (var i = 0; i < $gameSystem.allyList().length; i++) {
                     var $ = $gameSystem.unitList()[i];
