@@ -736,8 +736,8 @@ function Game_Avatar() {
                 unit.isActor()._mp = data.child(i).child("mp").val();
                 unit.isActor()._tp = data.child(i).child("tp").val();
                 unit.isActor()._wt = data.child(i).child("wt").val();
-                unit.isActor()._states = data.child(i).child("states").val();
-                unit.isActor()._stateTurns = data.child(i).child("stateTurns").val();
+                //unit.isActor()._states = data.child(i).child("states").val();
+                //unit.isActor()._stateTurns = data.child(i).child("stateTurns").val();
             }
         });
     };
