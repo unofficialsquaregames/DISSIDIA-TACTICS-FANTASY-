@@ -5071,6 +5071,7 @@ Imported.TacticsBattleSys = true;
     Sprite_WtTurnList.prototype.refresh = function () {
         this.bitmap.clear();
         if (!$gameSystem._wtTurnList) return;
+        if (!$gameSystem._wtTurnList[this._number]) $gameSystem.setWtTurnList(); //下記エラー対策
         var id = $gameSystem._wtTurnList[this._number][0]; //OnlineAvatar.jsと併用させるとエラーが発生する
         var character = $gameMap._events[id];
         if (!character) return;
