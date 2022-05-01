@@ -235,6 +235,18 @@ function Game_Avatar() {
         this.sysRef.on('child_changed', function (data) {
             //$gameVariables.setValue(data.key, data.val(), true);
         });
+        if (this.unitRef) this.unitRef.off();
+        else this.unitRef = firebase.database().ref('units');
+        OnlineManager.syncBusy = true;
+        this.unitRef.once('value', function (data) {
+            OnlineManager.syncBusy = false;
+        });
+        this.unitRef.on('child_added', function (data) {
+            //$gameVariables.setValue(data.key, data.val(), true);
+        });
+        this.unitRef.on('child_changed', function (data) {
+            //$gameVariables.setValue(data.key, data.val(), true);
+        });
     };
 
     //新しいマップのオンラインデータを購読してアバターの情報を受け取る
@@ -710,6 +722,7 @@ function Game_Avatar() {
             $gameSystem._isEnemyTurn = data.child("_isEnemyTurn").val();
             $gameSystem._wtTurnList = data.child("_wtTurnList").val();
         });
+        /*
         OnlineManager.unitRef.once("value").then(function (data) {
             //ユニット更新用、行動順更新用などで分けた方が良い
 
@@ -718,6 +731,7 @@ function Game_Avatar() {
             $gameSystem._isEnemyTurn = data.child("_isEnemyTurn").val();
             $gameSystem._wtTurnList = data.child("_wtTurnList").val();
         });
+        */
     };
     //WTリスト設定中
     Game_System.prototype.setSyncTime = function () {
