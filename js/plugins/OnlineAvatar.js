@@ -681,16 +681,16 @@ function Game_Avatar() {
 
     //行動順調整用スクリプトの同期
     Game_System.prototype.setWtTurnListOnline = function () {
-        //if (this._allyTeamID == OnlineManager.user.uid && $gameSwitches.value(19)) {
-        if (!$gameSwitches.value(19)) {
-            //$gameSwitches.setValue(19, false);
-            $gameSwitches.setValue(19, true);
-            OnlineManager.sendSysInfo();
-        //} else if (this._enemyTeamID == OnlineManager.user.uid && !$gameSwitches.value(19) && $gameSwitches.value(20)) {
-        } else {
-            this.syncVariable();
-            //$gameSwitches.setValue(20, false);
+        if (this._allyTeamID == OnlineManager.user.uid && $gameSwitches.value(19)) {
+        //if (!$gameSwitches.value(19)) {
             $gameSwitches.setValue(19, false);
+            //$gameSwitches.setValue(19, true);
+            OnlineManager.sendSysInfo();
+        } else if (this._enemyTeamID == OnlineManager.user.uid && !$gameSwitches.value(19) && $gameSwitches.value(20)) {
+        //} else {
+            this.syncVariable();
+            $gameSwitches.setValue(20, false);
+            //$gameSwitches.setValue(19, false);
         }
     };
 
@@ -707,14 +707,14 @@ function Game_Avatar() {
         });
     };
     //WTリスト設定中
-    Game_System.prototype.settingWtTurnList = function () {
+    Game_System.prototype.setSyncTime = function () {
         if ($gameSwitches.value(15)){
             $gameSwitches.setValue(19, true);
             $gameSwitches.setValue(20, true);
         }
     };
     //WTリスト設定中か
-    Game_System.prototype.isSettingWtTurnList = function () {
+    Game_System.prototype.isSyncTime = function () {
         if ($gameSwitches.value(19) || $gameSwitches.value(20)) return true;
         else return false;
     };
