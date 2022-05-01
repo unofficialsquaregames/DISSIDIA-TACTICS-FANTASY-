@@ -108,6 +108,7 @@ function Game_Avatar() {
     OnlineManager.selfRef = null;
     OnlineManager.switchRef = null;
     OnlineManager.variableRef = null;
+    OnlineManager.unitRef = null;
     OnlineManager.userRef = null;
     //OnlineManager.tempRef = null;
     OnlineManager.sysRef = null;
@@ -287,31 +288,35 @@ function Game_Avatar() {
     //ユニット情報を送信(unitsはプレイヤーごとにわけて4体4体で編成させた方がいいか)
     //敵と味方どういう風にわけるか
     OnlineManager.sendUnitInfo = function () {
-        //if (this.unitRef && !this.syncBusy) {
-        //var send = {};
-        //for (var i = 0; i < $gameSystem.allyList().length; i++) { //iじゃなくて変数を使用
-        //send[i] = $gameSystem.allyList()[i];
-        /*
-        var $ = $gameSystem.unitList()[i];
-        send[i] = {
-            x: $.x, y: $.y, direction: $.direction(), speed: $.realMoveSpeed(), charaName: $.characterName(), charaIndex: $.characterIndex(), useSkill: $.useSkill(), target: $.target(), actor: $.isActor()
-            //x: $.x
-        };
-        */
-        //}
-        //this.unitRef.update(send);
-        //}
+        if (this.unitRef && !this.syncBusy) {
+            //var send = {};
+            if ($gameSystem._allyTeamID == OnlineManager.user.uid) {
+                for (var i = 0; i < $gameSystem.allyList().length; i++) {
+                    var $ = $gameSystem.unitList()[i];
+                    send[i] = {
+                        x: $.x, y: $.y, direction: $.direction(), actor: $.isActor()
+                    };
+                }
+            } else if ($gameSystem._enemyTeamID == OnlineManager.user.uid) {
+                for (var i = 0; i < $gameSystem.enemyList().length; i++) {
+                    var $ = $gameSystem.unitList()[i + 4];
+                    send[i + 4] = {
+                        x: $.x, y: $.y, direction: $.direction(), target: $._target, useSkill: $._useSkill, hp: $.isActor()._hp, mp: $.isActor()._mp, tp: $.isActor()._tp, wt: $.isActor()._wt, states: $.isActor()._states, stateTurns: $.isActor()._stateTurns
+                    };
+                }
+            }
+               
+            this.unitRef.update(send);
+        }
     };
     //システム情報を送信
     OnlineManager.sendSysInfo = function () {
         if (this.sysRef && !this.syncBusy) {
-            var send = $gameSystem;
-            /*
+            //var send = $gameSystem;
             var $ = $gameSystem;
             var send = {
-                _allyTeamID: $._allyTeamID, _enemyTeamID: $._enemyTeamID, _isAllyTurn: $._isAllyTurn, _isEnemyTurn: $._isEnemyTurn, _unitList: $._unitList, _wtTurnList: $._wtTurnList
+                _allyTeamID: $._allyTeamID, _enemyTeamID: $._enemyTeamID, _isAllyTurn: $._isAllyTurn, _isEnemyTurn: $._isEnemyTurn, _wtTurnList: $._wtTurnList
             }
-            */
             this.sysRef.update(send);
         }
     };
@@ -505,7 +510,7 @@ function Game_Avatar() {
     Scene_Map.prototype.endTurn = function () {
         _Scene_Map_endTurn.call(this);
         if ($gameSwitches.value(15)) {
-            //OnlineManager.sendUnitInfo();
+            OnlineManager.sendUnitInfo();
             OnlineManager.sendSysInfo();
             //OnlineManager.sendTempInfo();
         }
@@ -515,7 +520,7 @@ function Game_Avatar() {
     Scene_Map.prototype.startBattle = function () {
         _Scene_Map_startBattle.call(this);
         if ($gameSwitches.value(15)) {
-            //OnlineManager.sendUnitInfo();
+            OnlineManager.sendUnitInfo();
             OnlineManager.sendSysInfo();
             //OnlineManager.sendTempInfo();
         }
@@ -682,12 +687,13 @@ function Game_Avatar() {
     //行動順調整用スクリプトの同期
     Game_System.prototype.setWtTurnListOnline = function () {
         if (this._allyTeamID == OnlineManager.user.uid && $gameSwitches.value(19)) {
-        //if (!$gameSwitches.value(19)) {
+            //if (!$gameSwitches.value(19)) {
             $gameSwitches.setValue(19, false);
             //$gameSwitches.setValue(19, true);
+            OnlineManager.sendUnitInfo();
             OnlineManager.sendSysInfo();
         } else if (this._enemyTeamID == OnlineManager.user.uid && !$gameSwitches.value(19) && $gameSwitches.value(20)) {
-        //} else {
+            //} else {
             this.syncVariable();
             $gameSwitches.setValue(20, false);
             //$gameSwitches.setValue(19, false);
@@ -697,18 +703,25 @@ function Game_Avatar() {
     //同期用
     Game_System.prototype.syncVariable = function () {
         OnlineManager.sysRef.once("value").then(function (data) {
-            $gameSystem = data.val();
-            /*
+            //ユニット更新用、行動順更新用などで分けた方が良い
+
+            //$gameSystem = data.val();
             $gameSystem._isAllyTurn = data.child("_isAllyTurn").val();
             $gameSystem._isEnemyTurn = data.child("_isEnemyTurn").val();
-            $gameSystem._unitList = data.child("_unitList").val();
             $gameSystem._wtTurnList = data.child("_wtTurnList").val();
-            */
+        });
+        OnlineManager.unitRef.once("value").then(function (data) {
+            //ユニット更新用、行動順更新用などで分けた方が良い
+
+            //$gameSystem = data.val();
+            $gameSystem._isAllyTurn = data.child("_actor").val();
+            $gameSystem._isEnemyTurn = data.child("_isEnemyTurn").val();
+            $gameSystem._wtTurnList = data.child("_wtTurnList").val();
         });
     };
     //WTリスト設定中
     Game_System.prototype.setSyncTime = function () {
-        if ($gameSwitches.value(15)){
+        if ($gameSwitches.value(15)) {
             $gameSwitches.setValue(19, true);
             $gameSwitches.setValue(20, true);
         }

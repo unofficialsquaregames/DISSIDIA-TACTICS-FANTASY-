@@ -1940,7 +1940,7 @@ Imported.TacticsBattleSys = true;
             //マップ上にいるユニットのステートをチェックする
             for (var i = 0; i < $gameSystem.unitList().length; i++) {
                 var robbedUnit = $gameSystem.unitList()[i];
-                var robbedActor = robbedUnit.isActor();
+                var robbedActor = robbedUnit.isActor(); //メソッドをデータベースに保存してないからエラーが発生する
                 //オンラインデータベースの都合上アクタークラスからキャラクラスにアクセスしないようにしたい
                 if (robbedUnit == $gameMap.event(this.eventId())) continue;
                 for (var id = 1; id < $dataStates.length; id++) {
@@ -5073,7 +5073,8 @@ Imported.TacticsBattleSys = true;
     Sprite_WtTurnList.prototype.refresh = function () {
         this.bitmap.clear();
         if (!$gameSystem._wtTurnList) return;
-        if (!$gameSystem._wtTurnList[this._number]) $gameSystem.setWtTurnList(); //下記エラー対策
+        if (!$gameSystem._wtTurnList[this._number]) return;
+
         var id = $gameSystem._wtTurnList[this._number][0]; //OnlineAvatar.jsと併用させるとエラーが発生する
         var character = $gameMap._events[id];
         if (!character) return;
