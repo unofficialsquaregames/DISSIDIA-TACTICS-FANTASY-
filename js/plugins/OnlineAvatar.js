@@ -684,10 +684,9 @@ function Game_Avatar() {
         if (this._allyTeamID == OnlineManager.user.uid && $gameSwitches.value(19)) {
             $gameSwitches.setValue(19, false);
             OnlineManager.sendSysInfo();
-        } else if (this._enemyTeamID == OnlineManager.user.uid && $gameSwitches.value(20)) {
+        } else if (this._enemyTeamID == OnlineManager.user.uid && !$gameSwitches.value(19) && $gameSwitches.value(20)) {
             this.syncVariable();
             $gameSwitches.setValue(20, false);
-            OnlineManager.sendSysInfo();
         }
     };
 
@@ -702,7 +701,6 @@ function Game_Avatar() {
         if ($gameSwitches.value(15){
             $gameSwitches.setValue(19, true);
             $gameSwitches.setValue(20, true);
-            OnlineManager.sendSysInfo();
         }
     };
     //WTリスト設定中か
