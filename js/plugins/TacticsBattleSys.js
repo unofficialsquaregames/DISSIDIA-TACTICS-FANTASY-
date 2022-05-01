@@ -576,7 +576,6 @@ Imported.TacticsBattleSys = true;
         this._uids = [];
         this._allyTeamID = ""; //味方チームのID
         this._enemyTeamID = ""; //敵チームのID
-        this._settingWtTurnList = false; //WTターンリスト設定中かどうか
     }
 
 
@@ -713,8 +712,10 @@ Imported.TacticsBattleSys = true;
             }
         }
         this.wtTurnListSort();
-        if ($gameSwitches.value(15)) this.setWtTurnListOnline();
-
+        if ($gameSwitches.value(15)) {
+            this.settingEnemyWtTurnList();
+            this.setWtTurnListOnline();
+        }
     };
 
     //ターンリストを行動順にソート
@@ -7542,13 +7543,13 @@ Imported.TacticsBattleSys = true;
         }
         if ($gameMap.isUnitAnimationPlaying() || !$gameSystem.isBattleActivate() || $gameMap.isEventRunning()) return; //戦闘中以外、イベント実行中は処理をしない
 
-        /*
+        
         //オンライン対戦中WTリスト同期中
-        if (!$gameSwitches.value(15) && $gameSystem._settingWtTurnList) {
+        if ($gameSwitches.value(15) && $gameSystem.isSettingEnemyWtTurnList()) {
             $gameSystem.setWtTurnListOnline();
             return;
         }
-        */
+        
 
         //ゲームオーバー判定
         if ($gameMap.updateAllyUnitNums() == 0) {
