@@ -713,7 +713,7 @@ Imported.TacticsBattleSys = true;
         }
         this.wtTurnListSort();
         if ($gameSwitches.value(15)) {
-            this.settingEnemyWtTurnList();
+            //this.settingWtTurnList();
             this.setWtTurnListOnline();
         }
     };
@@ -7542,14 +7542,13 @@ Imported.TacticsBattleSys = true;
             return;
         }
         if ($gameMap.isUnitAnimationPlaying() || !$gameSystem.isBattleActivate() || $gameMap.isEventRunning()) return; //戦闘中以外、イベント実行中は処理をしない
-
-        
+        /*
         //オンライン対戦中WTリスト同期中
-        if ($gameSwitches.value(15) && $gameSystem.isSettingEnemyWtTurnList()) {
+        if ($gameSwitches.value(15) && $gameSystem.isSettingWtTurnList()) {
             $gameSystem.setWtTurnListOnline();
             return;
         }
-        
+        */
 
         //ゲームオーバー判定
         if ($gameMap.updateAllyUnitNums() == 0) {
