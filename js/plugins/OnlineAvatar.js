@@ -306,14 +306,14 @@ function Game_Avatar() {
                 for (var i = 0; i < $gameSystem.allyList().length; i++) {
                     var $ = $gameSystem.unitList()[i];
                     send[i] = {
-                        x: $.x, y: $.y, direction: $.direction(), target: $._target, useSkill: $._useSkill, hp: $.isActor()._hp, mp: $.isActor()._mp, tp: $.isActor()._tp, wt: $.isActor()._wt, states: $.isActor()._states, stateTurns: $.isActor()._stateTurns
+                        x: $._x, y: $._y, direction: $.direction(), target: $._target, useSkill: $._useSkill, hp: $.isActor()._hp, mp: $.isActor()._mp, tp: $.isActor()._tp, wt: $.isActor()._wt, states: $.isActor()._states, stateTurns: $.isActor()._stateTurns
                     };
                 }
             } else if ($gameSystem._enemyTeamID == OnlineManager.user.uid) {
                 for (var i = 0; i < $gameSystem.enemyList().length; i++) {
                     var $ = $gameSystem.unitList()[i + 4];
                     send[i + 4] = {
-                        x: $.x, y: $.y, direction: $.direction(), target: $._target, useSkill: $._useSkill, hp: $.isActor()._hp, mp: $.isActor()._mp, tp: $.isActor()._tp, wt: $.isActor()._wt, states: $.isActor()._states, stateTurns: $.isActor()._stateTurns
+                        x: $._x, y: $._y, direction: $.direction(), target: $._target, useSkill: $._useSkill, hp: $.isActor()._hp, mp: $.isActor()._mp, tp: $.isActor()._tp, wt: $.isActor()._wt, states: $.isActor()._states, stateTurns: $.isActor()._stateTurns
                     };
                 }
             }
@@ -722,16 +722,24 @@ function Game_Avatar() {
             $gameSystem._isEnemyTurn = data.child("_isEnemyTurn").val();
             $gameSystem._wtTurnList = data.child("_wtTurnList").val();
         });
-        /*
+
         OnlineManager.unitRef.once("value").then(function (data) {
             //ユニット更新用、行動順更新用などで分けた方が良い
-
-            //$gameSystem = data.val();
-            $gameSystem._isAllyTurn = data.child("_actor").val();
-            $gameSystem._isEnemyTurn = data.child("_isEnemyTurn").val();
-            $gameSystem._wtTurnList = data.child("_wtTurnList").val();
+            for (var i = 0; i < $gameSystem.unitList().length; i++) {
+                var unit = $gameSystem.unitList()[i];
+                unit._x = data.child(i).child("x").val();
+                unit._y = data.child(i).child("y").val();
+                unit._direction = data.child(i).child("direction").val();
+                unit._target = data.child(i).child("target").val();
+                unit._useSkill = data.child(i).child("useSkill").val();
+                unit.isActor()._hp = data.child(i).child("hp").val();
+                unit.isActor()._mp = data.child(i).child("mp").val();
+                unit.isActor()._tp = data.child(i).child("tp").val();
+                unit.isActor()._wt = data.child(i).child("wt").val();
+                unit.isActor()._states = data.child(i).child("states").val();
+                unit.isActor()._stateTurns = data.child(i).child("stateTurns").val();
+            }
         });
-        */
     };
     //WTリスト設定中
     Game_System.prototype.setSyncTime = function () {
