@@ -302,6 +302,7 @@ function Game_Avatar() {
     OnlineManager.sendUnitInfo = function () {
         if (this.unitRef && !this.syncBusy) {
             var send = {};
+            /*
             if ($gameSystem._allyTeamID == OnlineManager.user.uid) {
                 for (var i = 0; i < $gameSystem.allyList().length; i++) {
                     var $ = $gameSystem.unitList()[i];
@@ -317,7 +318,13 @@ function Game_Avatar() {
                     };
                 }
             }
-
+            */
+            for (var i = 0; i < $gameSystem.unitList().length; i++) {
+                var $ = $gameSystem.unitList()[i];
+                send[i] = {
+                    x: $._x, y: $._y, direction: $.direction(), target: $._target, useSkill: $._useSkill, hp: $.isActor()._hp, mp: $.isActor()._mp, tp: $.isActor()._tp, wt: $.isActor()._wt, states: $.isActor()._states, stateTurns: $.isActor()._stateTurns
+                };
+            }
             this.unitRef.update(send);
         }
     };
