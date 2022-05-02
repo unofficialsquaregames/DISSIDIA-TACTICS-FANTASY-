@@ -721,7 +721,7 @@ Imported.TacticsBattleSys = true;
         this.wtTurnListSort();
         if ($gameSwitches.value(15)) {
             this.setSyncVariableTime();
-            this.setWtTurnListOnline();
+            //this.setWtTurnListOnline();
         }
     };
 
@@ -747,8 +747,6 @@ Imported.TacticsBattleSys = true;
                 return 0;
             }
         });
-
-
     };
 
     //WTカウント
