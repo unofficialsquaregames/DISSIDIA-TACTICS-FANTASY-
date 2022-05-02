@@ -760,6 +760,8 @@ Imported.TacticsBattleSys = true;
                 } else {
                     this._isEnemyTurn = true;
                 }
+                if ($gameSwitches.value(15)) $gameSwitches.setValue(21, true);
+
                 //どういう風にデータをまとめようか
                 this._turnUnit = this.unitList()[i];
                 var target = this._turnUnit;

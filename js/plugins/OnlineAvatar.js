@@ -524,6 +524,7 @@ function Game_Avatar() {
         if ($gameSwitches.value(15)) {
             OnlineManager.sendUnitInfo();
             OnlineManager.sendSysInfo();
+            $gameSwitches.setValue(21, false);
             //OnlineManager.sendTempInfo();
         }
     };
@@ -720,7 +721,6 @@ function Game_Avatar() {
                 //ターン開始前の処理
                 $gameSystem.startTurn(turnUnit);
                 turnUnit.beforeTurnStart();
-                $gameSystem.syncVariable(); //同期
                 $gameSystem._phaseState = 2;
                 break;
             case 2: //試行錯誤
@@ -728,6 +728,7 @@ function Game_Avatar() {
                 $gameMap.showInvisibleArea(turnUnit);
                 //クラス設定されたタグに合わせてターゲットを変更する
                 //turnUnit.targetSearch();
+                if ($gameSwitches.value(21)) return;
                 if (!turnUnit.isActor().canMove()) {
                     //$gameMessage.add("行動不能");
                     SoundManager.playBuzzer();//ブザー
@@ -746,6 +747,7 @@ function Game_Avatar() {
                 //移動タイルを表示し
                 $gameMap.setMovableArea(turnUnit);
                 $gameMap.showMovableArea(turnUnit);
+                $gameSystem.syncVariable(); //同期
 
                 OnlineManager.unitRef.once("value").then(function (data) {
                     //ユニット更新用、行動順更新用などで分けた方が良い
