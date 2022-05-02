@@ -385,6 +385,9 @@ Imported.TacticsBattleSys = true;
                 case 'matching':
                     $gameSystem.setMatchingOnline();
                     break;
+                case 'sync':
+                    $gameSystem.syncVariable();
+                    break;
             }
         }
     };
@@ -705,7 +708,6 @@ Imported.TacticsBattleSys = true;
         //以下の変数は初期化の時に定義するべきでは？
         //行動順に並べるリスト
         this._wtTurnList = [];
-
         for (var i = 0; i < this.unitList().length; i++) {
             var unit = this.unitList()[i];
             var battler = unit.isActor();
@@ -721,7 +723,7 @@ Imported.TacticsBattleSys = true;
         this.wtTurnListSort();
         if ($gameSwitches.value(15)) {
             this.setSyncVariableTime();
-            //this.setWtTurnListOnline();
+            this.setWtTurnListOnline();
         }
     };
 
@@ -7544,7 +7546,7 @@ Imported.TacticsBattleSys = true;
         
         //オンライン対戦中WTリスト同期中
         if ($gameSwitches.value(15) && $gameSystem.isSyncVariableTime()) {
-            $gameSystem.setWtTurnListOnline();
+            //$gameSystem.setWtTurnListOnline();
             return;
         }
 
