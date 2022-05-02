@@ -535,8 +535,9 @@ function Game_Avatar() {
     Scene_Map.prototype.startBattle = function () {
         _Scene_Map_startBattle.call(this);
         if ($gameSwitches.value(15)) {
-            OnlineManager.sendUnitInfo();
-            OnlineManager.sendSysInfo();
+            this.syncVariable();
+            //OnlineManager.sendUnitInfo();
+            //OnlineManager.sendSysInfo();
             //OnlineManager.sendTempInfo();
         }
     };
