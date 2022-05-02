@@ -524,7 +524,9 @@ function Game_Avatar() {
         if ($gameSwitches.value(15)) {
             OnlineManager.sendUnitInfo();
             OnlineManager.sendSysInfo();
-            $gameSwitches.setValue(21, false);
+            if ($gameSystem._allyTeamID == OnlineManager.user.uid) $gameSwitches.setValue(21, false);
+            else if ($gameSystem._enemyTeamID == OnlineManager.user.uid) $gameSwitches.setValue(22, false);
+            
             //OnlineManager.sendTempInfo();
         }
     };
@@ -728,7 +730,8 @@ function Game_Avatar() {
                 $gameMap.showInvisibleArea(turnUnit);
                 //クラス設定されたタグに合わせてターゲットを変更する
                 //turnUnit.targetSearch();
-                if ($gameSwitches.value(21)) return;
+                if ($gameSystem._allyTeamID == OnlineManager.user.uid && $gameSwitches.value(22)) return;
+                else if ($gameSystem._enemyTeamID == OnlineManager.user.uid && $gameSwitches.value(21)) return;
                 if (!turnUnit.isActor().canMove()) {
                     //$gameMessage.add("行動不能");
                     SoundManager.playBuzzer();//ブザー
@@ -890,15 +893,20 @@ function Game_Avatar() {
         });
     };
     //WTリスト設定中
-    Game_System.prototype.setSyncTime = function () {
+    Game_System.prototype.setSyncVariableTime = function () {
         if ($gameSwitches.value(15)) {
             $gameSwitches.setValue(19, true);
             $gameSwitches.setValue(20, true);
         }
     };
     //WTリスト設定中か
-    Game_System.prototype.isSyncTime = function () {
+    Game_System.prototype.isSyncVariableTime = function () {
         if ($gameSwitches.value(19) || $gameSwitches.value(20)) return true;
         else return false;
+    };
+    //行動順調整用スクリプトの同期
+    Game_System.prototype.setSyncActionTime = function () {
+        if (this._allyTeamID == OnlineManager.user.uid) $gameSwitches.setValue(21);
+        else if (this._enemyTeamID == OnlineManager.user.uid) $gameSwitches.setValue(22);
     };
 })();

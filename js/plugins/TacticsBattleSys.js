@@ -713,7 +713,7 @@ Imported.TacticsBattleSys = true;
         }
         this.wtTurnListSort();
         if ($gameSwitches.value(15)) {
-            this.setSyncTime();
+            this.setSyncVariableTime();
             this.setWtTurnListOnline();
         }
     };
@@ -760,7 +760,7 @@ Imported.TacticsBattleSys = true;
                 } else {
                     this._isEnemyTurn = true;
                 }
-                if ($gameSwitches.value(15)) $gameSwitches.setValue(21, true);
+                if ($gameSwitches.value(15)) this.setSyncActionTime();
 
                 //どういう風にデータをまとめようか
                 this._turnUnit = this.unitList()[i];
@@ -7537,7 +7537,7 @@ Imported.TacticsBattleSys = true;
 
         
         //オンライン対戦中WTリスト同期中
-        if ($gameSwitches.value(15) && $gameSystem.isSyncTime()) {
+        if ($gameSwitches.value(15) && $gameSystem.isSyncVariableTime()) {
             $gameSystem.setWtTurnListOnline();
             return;
         }
