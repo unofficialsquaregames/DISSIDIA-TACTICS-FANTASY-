@@ -681,7 +681,7 @@ function Game_Avatar() {
     Scene_Map.prototype.updateOnline = function () {
         //敵のターン
         if ($gameSystem.isEnemyTurn()) {
-            if ($gameSystem._turnUnit.isActor().checkCtrlGrantor()) {
+            if ($gameSystem._turnUnit.isActor().checkHateState() || $gameSystem._turnUnit.isActor().checkHateGrantor() || $gameSystem._turnUnit.isActor().checkCtrlGrantor() || $gameSystem._turnUnit.isActor().checkNoCtrlState()) {
                 if ($gameSystem._allyTeamID == OnlineManager.user.uid) this.updateAllyTurn();
                 else this.updateSyncTurn();
             } else {
@@ -903,10 +903,5 @@ function Game_Avatar() {
     Game_System.prototype.isSyncVariableTime = function () {
         if ($gameSwitches.value(19) || $gameSwitches.value(20)) return true;
         else return false;
-    };
-    //行動順調整用スクリプトの同期
-    Game_System.prototype.setSyncActionTime = function () {
-        if (this._allyTeamID == OnlineManager.user.uid) $gameSwitches.setValue(21);
-        else if (this._enemyTeamID == OnlineManager.user.uid) $gameSwitches.setValue(22);
     };
 })();
