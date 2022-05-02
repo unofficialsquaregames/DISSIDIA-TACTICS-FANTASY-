@@ -732,6 +732,7 @@ function Game_Avatar() {
                 //turnUnit.targetSearch();
                 if ($gameSystem._allyTeamID == OnlineManager.user.uid && $gameSwitches.value(22)) return;
                 else if ($gameSystem._enemyTeamID == OnlineManager.user.uid && $gameSwitches.value(21)) return;
+                $gameSystem.syncVariable(); //同期
                 if (!turnUnit.isActor().canMove()) {
                     //$gameMessage.add("行動不能");
                     SoundManager.playBuzzer();//ブザー
@@ -750,7 +751,6 @@ function Game_Avatar() {
                 //移動タイルを表示し
                 $gameMap.setMovableArea(turnUnit);
                 $gameMap.showMovableArea(turnUnit);
-                $gameSystem.syncVariable(); //同期
 
                 OnlineManager.unitRef.once("value").then(function (data) {
                     //ユニット更新用、行動順更新用などで分けた方が良い

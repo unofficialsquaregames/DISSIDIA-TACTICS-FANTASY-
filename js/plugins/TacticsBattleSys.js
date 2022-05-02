@@ -8148,19 +8148,19 @@ Imported.TacticsBattleSys = true;
             if (turnUnit.useSkill().scope == 1 || turnUnit.useSkill().scope == 2) {
                 //対象が敵の場合
                 //turnUnit.setTarget($gameMap.unitEnemyXy(x, y));
-                turnUnit.setTarget($gameMap.unitAttackTargetXy(x, y));
+                turnUnit.setTarget($gameMap.unitAttackTargetXy(x, y, turnUnit));
                 //以下ターゲット選択時、座標のズレバグ対策
                 if (!turnUnit.target() && $gameMap.isInsideArea(x - 1, y)) {
-                    turnUnit.setTarget($gameMap.unitAttackTargetXy(x - 1, y));
+                    turnUnit.setTarget($gameMap.unitAttackTargetXy(x - 1, y, turnUnit));
                 }
                 if (!turnUnit.target() && $gameMap.isInsideArea(x + 1, y)) {
-                    turnUnit.setTarget($gameMap.unitAttackTargetXy(x + 1, y));
+                    turnUnit.setTarget($gameMap.unitAttackTargetXy(x + 1, y, turnUnit));
                 }
                 if (!turnUnit.target() && $gameMap.isInsideArea(x, y - 1)) {
-                    turnUnit.setTarget($gameMap.unitAttackTargetXy(x, y - 1));
+                    turnUnit.setTarget($gameMap.unitAttackTargetXy(x, y - 1, turnUnit));
                 }
                 if (!turnUnit.target() && $gameMap.isInsideArea(x, y + 1)) {
-                    turnUnit.setTarget($gameMap.unitAttackTargetXy(x, y + 1));
+                    turnUnit.setTarget($gameMap.unitAttackTargetXy(x, y + 1, turnUnit));
                 }
                 //目的地点へ移動しながら攻撃の場合(空の地点が選べて敵を選べない)
                 if (turnUnit.useSkill().meta.move) {
@@ -8184,19 +8184,19 @@ Imported.TacticsBattleSys = true;
             } else if (turnUnit.useSkill().scope == 7 || turnUnit.useSkill().scope == 8 || turnUnit.useSkill().scope == 11) {
                 //対象が味方の場合
                 //turnUnit.setTarget($gameMap.unitAllyXy(x, y));
-                turnUnit.setTarget($gameMap.unitCoverTargetXy(x, y));
+                turnUnit.setTarget($gameMap.unitCoverTargetXy(x, y, turnUnit));
                 //以下ターゲット選択時、座標のズレバグ対策
                 if (!turnUnit.target() && $gameMap.isInsideArea(x - 1, y)) {
-                    turnUnit.setTarget($gameMap.unitCoverTargetXy(x - 1, y));
+                    turnUnit.setTarget($gameMap.unitCoverTargetXy(x - 1, y, turnUnit));
                 }
                 if (!turnUnit.target() && $gameMap.isInsideArea(x + 1, y)) {
-                    turnUnit.setTarget($gameMap.unitCoverTargetXy(x + 1, y));
+                    turnUnit.setTarget($gameMap.unitCoverTargetXy(x + 1, y, turnUnit));
                 }
                 if (!turnUnit.target() && $gameMap.isInsideArea(x, y - 1)) {
-                    turnUnit.setTarget($gameMap.unitCoverTargetXy(x, y - 1));
+                    turnUnit.setTarget($gameMap.unitCoverTargetXy(x, y - 1, turnUnit));
                 }
                 if (!turnUnit.target() && $gameMap.isInsideArea(x, y + 1)) {
-                    turnUnit.setTarget($gameMap.unitCoverTargetXy(x, y + 1));
+                    turnUnit.setTarget($gameMap.unitCoverTargetXy(x, y + 1, turnUnit));
                 }
                 //蘇生の場合
                 if (turnUnit.useSkill().meta.resurrection) {
