@@ -681,7 +681,7 @@ function Game_Avatar() {
     Scene_Map.prototype.updateOnline = function () {
         //敵のターン
         if ($gameSystem.isEnemyTurn()) {
-            if ($gameSystem._turnUnit.isActor().checkHateState() || $gameSystem._turnUnit.isActor().checkHateGrantor() || $gameSystem._turnUnit.isActor().checkCtrlGrantor() || $gameSystem._turnUnit.isActor().checkNoCtrlState()) {
+            if ($gameSystem.turnUnit().isActor().checkHateState() || $gameSystem.turnUnit().isActor().checkHateGrantor() || $gameSystem.turnUnit().isActor().checkCtrlGrantor() || $gameSystem.turnUnit().isActor().checkNoCtrlState()) {
                 if ($gameSystem._allyTeamID == OnlineManager.user.uid) this.updateAllyTurn();
                 else this.updateSyncTurn();
             } else {
@@ -692,7 +692,7 @@ function Game_Avatar() {
         }
         //味方のターン
         if ($gameSystem.isAllyTurn()) {
-            if ($gameSystem._turnUnit.isActor().checkHateState() || $gameSystem._turnUnit.isActor().checkHateGrantor() || $gameSystem._turnUnit.isActor().checkCtrlGrantor() || $gameSystem._turnUnit.isActor().checkNoCtrlState()) {
+            if ($gameSystem.turnUnit().isActor().checkHateState() || $gameSystem.turnUnit().isActor().checkHateGrantor() || $gameSystem.turnUnit().isActor().checkCtrlGrantor() || $gameSystem.turnUnit().isActor().checkNoCtrlState()) {
                 if ($gameSystem._enemyTeamID == OnlineManager.user.uid) this.updateAllyTurn();
                 else this.updateSyncTurn();
             } else {
@@ -705,7 +705,7 @@ function Game_Avatar() {
 
     //同期ターンの更新
     Scene_Map.prototype.updateSyncTurn = function () {
-        var turnUnit = $gameSystem._turnUnit;
+        var turnUnit = $gameSystem.turnUnit();
         switch ($gameSystem._phaseState) {
             case 0: //カメラ移動完了後コマンド表示
                 $gameMap.initColorArea();

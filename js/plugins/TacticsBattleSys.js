@@ -570,7 +570,7 @@ Imported.TacticsBattleSys = true;
         this._allyList = []; //敵ユニットリスト
         this._enemyList = []; //ただのユニットリスト
         this._wtTurnList = []; //行動順リスト
-        this._turnUnit = []; //ターンが回ったユニット
+        this._turnUnit = 0; //ターンが回ったユニット
         this.ActorTurn = false; //敵ターンに操作不能にするため(必要ない？)
         //以下オンライン時
         this._uids = [];
@@ -633,7 +633,14 @@ Imported.TacticsBattleSys = true;
             return event.isUnit(alive);
         });
     };
-
+    // 現在ターンが回ってるユニット情報を返す
+    Game_System.prototype.turnUnit = function () {
+        return $gameMap.event(this._turnUnit);
+    };
+    // ターンが回ってるユニットをセットする
+    Game_System.prototype.setTurnUnit = function (unit) {
+        this._turnUnit = unit.event().id;
+    };
     /*
     行動順系-----------------------------------------------------------------------------
     */
@@ -764,8 +771,8 @@ Imported.TacticsBattleSys = true;
                 }
 
                 //どういう風にデータをまとめようか
-                this._turnUnit = this.unitList()[i];
-                var target = this._turnUnit;
+                this.setTurnUnit(this.unitList()[i]);
+                var target = this.turnUnit();
                 $gamePlayer.setCameraEvent(target); //カメラをターンが回ったキャラへ回す
                 $gameTemp._cameraWait = true;
                 $gameTemp._countWtTime = false;
@@ -5024,7 +5031,7 @@ Imported.TacticsBattleSys = true;
 
     //武器アニメの準備
     Spriteset_Map.prototype.setupWeaponAnimation = function () {
-        var turnUnit = $gameSystem._turnUnit;
+        var turnUnit = $gameSystem.turnUnit();
         if (!turnUnit) return;
         if (turnUnit.length == 0) return; //配列が空の場合処理を終了する
         var character = turnUnit.isActor();
@@ -7581,7 +7588,7 @@ Imported.TacticsBattleSys = true;
         } else {
             //敵のターン
             if ($gameSystem.isEnemyTurn()) {
-                if ($gameSystem._turnUnit.isActor().checkCtrlGrantor()) {
+                if ($gameSystem.turnUnit().isActor().checkCtrlGrantor()) {
                     this.updateAllyTurn();
                 } else {
                     this.updateEnemyTurn();       // 敵ターンの更新
@@ -7590,7 +7597,7 @@ Imported.TacticsBattleSys = true;
             }
             //味方のターン
             if ($gameSystem.isAllyTurn()) {
-                if ($gameSystem._turnUnit.isActor().checkHateState() || $gameSystem._turnUnit.isActor().checkHateGrantor() || $gameSystem._turnUnit.isActor().checkCtrlGrantor() || $gameSystem._turnUnit.isActor().checkNoCtrlState()) {
+                if ($gameSystem.turnUnit().isActor().checkHateState() || $gameSystem.turnUnit().isActor().checkHateGrantor() || $gameSystem.turnUnit().isActor().checkCtrlGrantor() || $gameSystem.turnUnit().isActor().checkNoCtrlState()) {
                     this.updateEnemyTurn();
                 } else {
                     this.updateAllyTurn();
@@ -7603,7 +7610,7 @@ Imported.TacticsBattleSys = true;
     // 味方ターンの更新
     Scene_Map.prototype.updateAllyTurn = function () {
 
-        var turnUnit = $gameSystem._turnUnit;
+        var turnUnit = $gameSystem.turnUnit();
         switch ($gameSystem._phaseState) {
             case 0: //カメラ移動完了後コマンド表示
                 $gameMap.initColorArea();
@@ -7737,7 +7744,7 @@ Imported.TacticsBattleSys = true;
 
     // 敵ターンの更新
     Scene_Map.prototype.updateEnemyTurn = function () {
-        var turnUnit = $gameSystem._turnUnit;
+        var turnUnit = $gameSystem.turnUnit();
         switch ($gameSystem._phaseState) {
             case 0: //カメラ移動完了後コマンド表示
                 $gameMap.initColorArea();
@@ -7961,7 +7968,7 @@ Imported.TacticsBattleSys = true;
 
     // 2,SRPGコマンド【移動】
     Scene_Map.prototype.commandMove = function () {
-        var turnUnit = $gameSystem._turnUnit;
+        var turnUnit = $gameSystem.turnUnit();
         $gameSystem._phaseState = 3;//移動選択
         //コマンドウインドウを閉じる
         this.closeCommandWindow();
@@ -7976,7 +7983,7 @@ Imported.TacticsBattleSys = true;
     };
     // 2,SRPGコマンド【第一アビリティ】
     Scene_Map.prototype.firstAbility = function () {
-        var turnUnit = $gameSystem._turnUnit;
+        var turnUnit = $gameSystem.turnUnit();
         turnUnit.setUseSkill(turnUnit._myAbility[0]);
         //コマンドウインドウを閉じる
         this.closeCommandWindow();
@@ -7993,7 +8000,7 @@ Imported.TacticsBattleSys = true;
 
     // 2,SRPGコマンド【第二アビリティ】
     Scene_Map.prototype.secondAbility = function () {
-        var turnUnit = $gameSystem._turnUnit;
+        var turnUnit = $gameSystem.turnUnit();
         turnUnit.setUseSkill(turnUnit._myAbility[1]);
         //コマンドウインドウを閉じる
         this.closeCommandWindow();
@@ -8010,7 +8017,7 @@ Imported.TacticsBattleSys = true;
 
     // 2,SRPGコマンド【第三アビリティ】
     Scene_Map.prototype.thirdAbility = function () {
-        var turnUnit = $gameSystem._turnUnit;
+        var turnUnit = $gameSystem.turnUnit();
         var useSkill = turnUnit.checkSpecialSkill();
         if (useSkill) turnUnit.setUseSkill($dataSkills[useSkill]);
 
@@ -8030,7 +8037,7 @@ Imported.TacticsBattleSys = true;
 
     // 2,SRPGコマンド【バーストアビリティ】
     Scene_Map.prototype.burstAbility = function () {
-        var turnUnit = $gameSystem._turnUnit;
+        var turnUnit = $gameSystem.turnUnit();
         turnUnit.setUseSkill(turnUnit._myAbility[2]);
         //コマンドウインドウを閉じる
         this.closeCommandWindow();
@@ -8047,7 +8054,7 @@ Imported.TacticsBattleSys = true;
 
     // 2,SRPGコマンド【待機】
     Scene_Map.prototype.commandWait = function () {
-        var turnUnit = $gameSystem._turnUnit;
+        var turnUnit = $gameSystem.turnUnit();
         var actor = turnUnit.isActor();
         //待機した場合MPが回復する
         actor.gainMp(Math.round(actor.mmp * 10 / 100));
@@ -8087,7 +8094,7 @@ Imported.TacticsBattleSys = true;
     };
     // 3,移動先選択
     Scene_Map.prototype.updateMoveInput = function () {
-        var turnUnit = $gameSystem._turnUnit;
+        var turnUnit = $gameSystem.turnUnit();
 
         //タッチした瞬間の処理
         if (TouchInput.isTriggered() || Input.isPressed('ok')) {
@@ -8131,14 +8138,14 @@ Imported.TacticsBattleSys = true;
 
     // 4,移動処理
     Scene_Map.prototype.updateMove = function () {
-        var turnUnit = $gameSystem._turnUnit;
+        var turnUnit = $gameSystem.turnUnit();
         var d = turnUnit.findDirectionTo($gameTemp._toX, $gameTemp._toY);
         turnUnit.moveStraight(d);
     }
 
     // 5,対象選択
     Scene_Map.prototype.updateTargetInput = function () {
-        var turnUnit = $gameSystem._turnUnit;
+        var turnUnit = $gameSystem.turnUnit();
         //タッチした瞬間の処理
         if (TouchInput.isTriggered() || Input.isPressed('ok')) {
             var x = $gameMap.canvasToMapX(TouchInput.x);
@@ -8241,7 +8248,7 @@ Imported.TacticsBattleSys = true;
 
     // 6,YesNo選択【Yes】
     Scene_Map.prototype.commandYes = function () {
-        var turnUnit = $gameSystem._turnUnit;
+        var turnUnit = $gameSystem.turnUnit();
         //YesNoウインドウを閉じる
         this.closeYesNoWindow();
         $gameTemp._attackStartFlag = true;
@@ -8251,7 +8258,7 @@ Imported.TacticsBattleSys = true;
 
     // 6,YesNo選択【No】
     Scene_Map.prototype.commandNo = function () {
-        var turnUnit = $gameSystem._turnUnit;
+        var turnUnit = $gameSystem.turnUnit();
         //攻撃後移動の場合、リセットする
         $gameTemp._moveTargetPointFlag = false;
         $gameTemp._moveTargetPointX = 0;
@@ -8287,7 +8294,7 @@ Imported.TacticsBattleSys = true;
 
     // 12,事後処理
     Scene_Map.prototype.endTurn = function () {
-        var turnUnit = $gameSystem._turnUnit;
+        var turnUnit = $gameSystem.turnUnit();
         var battler = turnUnit.isActor();
         this.closeBattleStatusWindow();
         $gameSystem.stateAction();
@@ -8321,15 +8328,15 @@ Imported.TacticsBattleSys = true;
         this.closeUnitListWindow();
         this._battleStatusWindow.setUnit(null);
         this.openCommandWindow();
-        $gamePlayer.setCameraEvent($gameSystem._turnUnit);
-        $gameMap.showInvisibleArea($gameSystem._turnUnit);
+        $gamePlayer.setCameraEvent($gameSystem.turnUnit());
+        $gameMap.showInvisibleArea($gameSystem.turnUnit());
         $gameSystem._phaseState = 2;//コマンド選択に戻る
 
     };
 
     // 14,戦闘不能者リストウインドウ【決定】
     Scene_Map.prototype.okDeadUnitList = function () {
-        var turnUnit = $gameSystem._turnUnit;
+        var turnUnit = $gameSystem.turnUnit();
         var resurrectionUnit = this._deadUnitListWindow.item();
         if (resurrectionUnit) {
             $gameTemp.setResurrectionUnit(resurrectionUnit);//ステータス画面に遷移するため、どのユニットを選択したか記憶したい
@@ -8345,12 +8352,12 @@ Imported.TacticsBattleSys = true;
 
     // 14,戦闘不能者リストウインドウ【キャンセル】
     Scene_Map.prototype.cancelDeadUnitList = function () {
-        var turnUnit = $gameSystem._turnUnit;
+        var turnUnit = $gameSystem.turnUnit();
         this.closeDeadUnitListWindow();
         this._battleStatusWindow.setUnit(null);
         this.openCommandWindow();
-        $gamePlayer.setCameraEvent($gameSystem._turnUnit);
-        $gameMap.showInvisibleArea($gameSystem._turnUnit);
+        $gamePlayer.setCameraEvent($gameSystem.turnUnit());
+        $gameMap.showInvisibleArea($gameSystem.turnUnit());
         $gameSystem._phaseState = 2;//コマンド選択に戻る
     };
 
