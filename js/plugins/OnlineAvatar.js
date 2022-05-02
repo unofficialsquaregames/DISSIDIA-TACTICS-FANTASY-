@@ -327,7 +327,7 @@ function Game_Avatar() {
             //var send = $gameSystem;
             var $ = $gameSystem;
             var send = {
-                _allyTeamID: $._allyTeamID, _enemyTeamID: $._enemyTeamID, _isAllyTurn: $._isAllyTurn, _isEnemyTurn: $._isEnemyTurn, _wtTurnList: $._wtTurnList
+                _allyTeamID: $._allyTeamID, _enemyTeamID: $._enemyTeamID, _isAllyTurn: $._isAllyTurn, _isEnemyTurn: $._isEnemyTurn, _wtTurnList: $._wtTurnList, _turnUnit: $._turnUnit
             }
             this.sysRef.update(send);
         }
@@ -871,6 +871,7 @@ function Game_Avatar() {
             //$gameSystem = data.val();
             $gameSystem._isAllyTurn = data.child("_isAllyTurn").val();
             $gameSystem._isEnemyTurn = data.child("_isEnemyTurn").val();
+            $gameSystem._turnUnit = data.child("_turnUnit").val();
             $gameSystem._wtTurnList = data.child("_wtTurnList").val();
         });
 
