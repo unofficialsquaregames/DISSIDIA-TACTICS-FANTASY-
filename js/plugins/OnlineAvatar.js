@@ -619,6 +619,7 @@ function Game_Avatar() {
         OnlineManager.sysRef.once("value").then(function (data) {
             if (!$gameSwitches.value(17)) {
                 $gameSystem._allyTeamID = OnlineManager.user.uid;
+                $gameSystem._enemyTeamID = data.child("_enemyTeamID").val();
                 $gameSwitches.setValue(17, true);
                 OnlineManager.sendSysInfo();
             } else if (!$gameSwitches.value(18) && $gameSystem._allyTeamID != OnlineManager.user.uid) {
@@ -870,6 +871,8 @@ function Game_Avatar() {
             //ユニット更新用、行動順更新用などで分けた方が良い
 
             //$gameSystem = data.val();
+            $gameSystem._allyTeamID = data.child("_allyTeamID").val();
+            $gameSystem._enemyTeamID = data.child("_enemyTeamID").val();
             $gameSystem._isAllyTurn = data.child("_isAllyTurn").val();
             $gameSystem._isEnemyTurn = data.child("_isEnemyTurn").val();
             $gameSystem._turnUnit = data.child("_turnUnit").val();
