@@ -545,7 +545,7 @@ function Game_Avatar() {
     Scene_Map.prototype.startBattle = function () {
         _Scene_Map_startBattle.call(this);
         if ($gameSwitches.value(15)) {
-            $gameSystem.setSyncVariableTime();
+            //$gameSystem.setSyncVariableTime();
             $gameSystem.sendWtTurnList();
         }
     };
