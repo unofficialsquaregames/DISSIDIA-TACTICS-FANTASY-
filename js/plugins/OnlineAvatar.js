@@ -751,6 +751,7 @@ function Game_Avatar() {
 
                 if (!$gameSwitches.value(20)) return;
                 else {
+                    $gameSystem.syncVariable(); //phaseStateの同期
                     /*
                     OnlineManager.unitRef.once("value").then(function (data) {
                         //ユニット更新用、行動順更新用などで分けた方が良い
