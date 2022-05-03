@@ -538,7 +538,6 @@ function Game_Avatar() {
                 OnlineManager.sendUnitInfo();
                 OnlineManager.sendSysInfo();
                 $gameSwitches.setValue(22, false);
-            }
             } else {
                 $gameSystem.syncVariable();
             }
