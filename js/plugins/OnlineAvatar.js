@@ -334,8 +334,8 @@ function Game_Avatar() {
             //var send = $gameSystem;
             var $ = $gameSystem;
             var send = {
-                _allyTeamID: $._allyTeamID, _enemyTeamID: $._enemyTeamID, _isAllyTurn: $._isAllyTurn, _isEnemyTurn: $._isEnemyTurn, _turnUnit: $._turnUnit
-                //_allyTeamID: $._allyTeamID, _enemyTeamID: $._enemyTeamID, _isAllyTurn: $._isAllyTurn, _isEnemyTurn: $._isEnemyTurn, _wtTurnList: $._wtTurnList, _turnUnit: $._turnUnit
+                //_allyTeamID: $._allyTeamID, _enemyTeamID: $._enemyTeamID, _isAllyTurn: $._isAllyTurn, _isEnemyTurn: $._isEnemyTurn
+                _allyTeamID: $._allyTeamID, _enemyTeamID: $._enemyTeamID, _isAllyTurn: $._isAllyTurn, _isEnemyTurn: $._isEnemyTurn, _wtTurnList: $._wtTurnList, _turnUnit: $._turnUnit
             }
             this.sysRef.update(send);
         }
@@ -875,18 +875,6 @@ function Game_Avatar() {
 
     //同期用
     Game_System.prototype.syncVariable = function () {
-        OnlineManager.sysRef.once("value").then(function (data) {
-            //ユニット更新用、行動順更新用などで分けた方が良い
-
-            //$gameSystem = data.val();
-            $gameSystem._allyTeamID = data.child("_allyTeamID").val();
-            $gameSystem._enemyTeamID = data.child("_enemyTeamID").val();
-            $gameSystem._isAllyTurn = data.child("_isAllyTurn").val();
-            $gameSystem._isEnemyTurn = data.child("_isEnemyTurn").val();
-            $gameSystem._turnUnit = data.child("_turnUnit").val();
-            //$gameSystem._wtTurnList = data.child("_wtTurnList").val();
-        });
-
         OnlineManager.unitRef.once("value").then(function (data) {
             //ユニット更新用、行動順更新用などで分けた方が良い
             for (var i = 0; i < $gameSystem.unitList().length; i++) {
@@ -904,6 +892,18 @@ function Game_Avatar() {
                 //unit.isActor()._stateTurns = data.child(i).child("stateTurns").val();
             }
         });
+
+        OnlineManager.sysRef.once("value").then(function (data) {
+            //ユニット更新用、行動順更新用などで分けた方が良い
+            //$gameSystem = data.val();
+            $gameSystem._allyTeamID = data.child("_allyTeamID").val();
+            $gameSystem._enemyTeamID = data.child("_enemyTeamID").val();
+            $gameSystem._isAllyTurn = data.child("_isAllyTurn").val();
+            $gameSystem._isEnemyTurn = data.child("_isEnemyTurn").val();
+            $gameSystem._turnUnit = data.child("_turnUnit").val();
+            $gameSystem._wtTurnList = data.child("_wtTurnList").val();
+        });
+
     };
     //WTリスト設定中
     Game_System.prototype.setSyncVariableTime = function () {
