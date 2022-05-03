@@ -681,6 +681,7 @@ function Game_Avatar() {
     Scene_Map.prototype.updateOnline = function () {
         //敵のターン
         if ($gameSystem.isEnemyTurn()) {
+            /*
             if ($gameSystem.turnUnit().isActor().checkHateState() || $gameSystem.turnUnit().isActor().checkHateGrantor() || $gameSystem.turnUnit().isActor().checkCtrlGrantor() || $gameSystem.turnUnit().isActor().checkNoCtrlState()) {
                 if ($gameSystem._allyTeamID == OnlineManager.user.uid) this.updateAllyTurn();
                 else this.updateSyncTurn();
@@ -688,10 +689,14 @@ function Game_Avatar() {
                 if ($gameSystem._enemyTeamID == OnlineManager.user.uid) this.updateAllyTurn();
                 else this.updateSyncTurn();
             }
+            */
+            if ($gameSystem._enemyTeamID == OnlineManager.user.uid) this.updateAllyTurn();
+            else this.updateSyncTurn();
             return;
         }
         //味方のターン
         if ($gameSystem.isAllyTurn()) {
+            /*
             if ($gameSystem.turnUnit().isActor().checkHateState() || $gameSystem.turnUnit().isActor().checkHateGrantor() || $gameSystem.turnUnit().isActor().checkCtrlGrantor() || $gameSystem.turnUnit().isActor().checkNoCtrlState()) {
                 if ($gameSystem._enemyTeamID == OnlineManager.user.uid) this.updateAllyTurn();
                 else this.updateSyncTurn();
@@ -699,11 +704,14 @@ function Game_Avatar() {
                 if ($gameSystem._allyTeamID == OnlineManager.user.uid) this.updateAllyTurn();
                 else this.updateSyncTurn();
             }
+            */
+            if ($gameSystem._allyTeamID == OnlineManager.user.uid) this.updateAllyTurn();
+            else this.updateSyncTurn();
             return;
         }
     };
 
-    //同期ターンの更新
+    //同期ターンの更新(呼び出されない不具合あり)
     Scene_Map.prototype.updateSyncTurn = function () {
         var turnUnit = $gameSystem.turnUnit();
         switch ($gameSystem._phaseState) {
@@ -769,7 +777,6 @@ function Game_Avatar() {
                 //}
                 break;
             case 4: //移動処理(移動完了したらphaseStateを上げる)
-                if (!this.isMoveWaitingMode()) return;//待ち時間
                 //移動処理
                 if (turnUnit.pos(turnUnit.toX(), turnUnit.toY())) {
                     $gameMap.initColorArea();
@@ -905,24 +912,14 @@ function Game_Avatar() {
         });
 
     };
-    /*
-    //WTリスト設定中
-    Game_System.prototype.setSyncVariableTime = function () {
-        if ($gameSwitches.value(15)) {
-            $gameSwitches.setValue(19, true);
-            $gameSwitches.setValue(20, true);
-        }
-    };
-    */
     //WTリスト設定中か
     Game_System.prototype.isSyncVariableTime = function () {
-        //if ($gameSwitches.value(19) || $gameSwitches.value(20)) return true;
         if ($gameSwitches.value(19)) return true;
         else return false;
     };
-    Scene_Map.prototype.setSyncTime = function () {
+    Game_System.prototype.sendInfo = function () {
         OnlineManager.sendUnitInfo();
         OnlineManager.sendSysInfo();
-        $gameSwitches.setValue(20, true);
+        //$gameSwitches.setValue(20, true);
     };
 })();

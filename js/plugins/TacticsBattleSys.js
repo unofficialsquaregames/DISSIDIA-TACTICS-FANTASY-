@@ -772,6 +772,8 @@ Imported.TacticsBattleSys = true;
                 $gamePlayer.setCameraEvent(target); //カメラをターンが回ったキャラへ回す
                 $gameTemp._cameraWait = true;
                 $gameTemp._countWtTime = false;
+
+                if ($gameSwitches.value(15)) $gameSystem.sendInfo();
                 return;
                 //}else{
                 //  battler.countWt(); //WT数を加算する
@@ -7782,7 +7784,7 @@ Imported.TacticsBattleSys = true;
                 this.updateBattleStatusWindow();
                 break;
         }
-        //if ($gameSwitches.value(15)) this.setSyncTime(); //オンライン時の処理
+        //if ($gameSwitches.value(15)) $gameSystem.sendInfo(); //オンライン時の処理
     };
 
 
@@ -8163,7 +8165,10 @@ Imported.TacticsBattleSys = true;
 
                 //turnUnit.endMove();
                 $gameTemp._cameraWait = true;
-                if ($gameSwitches.value(15)) this.setSyncTime(); //オンライン時の処理
+                if ($gameSwitches.value(15)) {
+                    $gameSystem.sendInfo(); //オンライン時の処理
+                    $gameSwitches.setValue(20, true);
+                }
 
                 $gameSystem._phaseState = 4;//移動中
             } else {
@@ -8269,7 +8274,10 @@ Imported.TacticsBattleSys = true;
 
                 $gamePlayer.setCameraEvent(turnUnit.target()); //カメラを選択した対象へ回す
 
-                if ($gameSwitches.value(15)) this.setSyncTime(); //オンライン時の処理
+                if ($gameSwitches.value(15)) {
+                    $gameSystem.sendInfo(); //オンライン時の処理
+                    //$gameSwitches.setValue(20, true);
+                }
                 $gameSystem._phaseState = 6;//範囲表示およびYesNo選択
             } else {
                 SoundManager.playBuzzer();//ブザー
