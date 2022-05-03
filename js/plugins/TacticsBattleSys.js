@@ -7542,7 +7542,7 @@ Imported.TacticsBattleSys = true;
         
         //オンライン対戦中WTリスト同期中
         if ($gameSwitches.value(15) && $gameSystem.isSyncVariableTime()) {
-            $gameSystem.receiveWtTurnList();
+            $gameSystem.sendWtTurnList();
             return;
         }
 

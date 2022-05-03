@@ -861,11 +861,12 @@ function Game_Avatar() {
     };
     //行動順調整用スクリプトの同期
     Game_System.prototype.sendWtTurnList = function () {
+        OnlineManager.sendUnitInfo();
         if (this._allyTeamID == OnlineManager.user.uid && $gameSwitches.value(19)) {
             $gameSwitches.setValue(19, false);
-            OnlineManager.sendUnitInfo();
             OnlineManager.sendSysInfo();
         }
+        this.receiveWtTurnList();
     };
     //行動順調整用スクリプトの同期
     Game_System.prototype.receiveWtTurnList = function () {
