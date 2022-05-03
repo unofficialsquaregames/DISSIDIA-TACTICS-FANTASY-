@@ -2937,7 +2937,6 @@ Imported.TacticsBattleSys = true;
     Game_Event.prototype.setToXy = function (x, y) {
         this._toX = x;
         this._toY = y;
-        this._toD = d;
     };
     // 移動元座標Xの情報
     Game_Event.prototype.fromX = function () {
