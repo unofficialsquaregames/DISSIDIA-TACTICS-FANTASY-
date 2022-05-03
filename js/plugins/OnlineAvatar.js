@@ -530,28 +530,19 @@ function Game_Avatar() {
     Scene_Map.prototype.endTurn = function () {
         _Scene_Map_endTurn.call(this);
         if ($gameSwitches.value(15)) {
-            if ($gameSwitches.value(21)) {
-                if ($gameSystem._allyTeamID == OnlineManager.user.uid) {
-                    OnlineManager.sendUnitInfo();
-                    OnlineManager.sendSysInfo();
-                } else {
-                    $gameSystem.syncVariable();
-                }
-            } else if ($gameSwitches.value(22)) {
-                if ($gameSystem._enemyTeamID == OnlineManager.user.uid) {
-                    OnlineManager.sendUnitInfo();
-                    OnlineManager.sendSysInfo();
-                } else {
-                    $gameSystem.syncVariable();
-                }
+            if (($gameSwitches.value(21) && $gameSystem._allyTeamID == OnlineManager.user.uid) || ($gameSwitches.value(22) && $gameSystem._enemyTeamID == OnlineManager.user.uid)) {
+                OnlineManager.sendUnitInfo();
+                OnlineManager.sendSysInfo();
+            } else {
+                $gameSystem.syncVariable();
             }
             //OnlineManager.sendTempInfo();
         }
     };
+    /*
     //ユニット同期
-    var _Scene_Map_startBattle = Scene_Map.prototype.startBattle;
-    Scene_Map.prototype.startBattle = function () {
-        _Scene_Map_startBattle.call(this);
+    var _Scene_Map_setStartBattle = Scene_Map.prototype.setStartBattle;
+    Scene_Map.prototype.setStartBattle = function () {
         if ($gameSwitches.value(15)) {
             if ($gameSystem._allyTeamID == OnlineManager.user.uid) {
                 OnlineManager.sendUnitInfo();
@@ -561,7 +552,10 @@ function Game_Avatar() {
             }
             //OnlineManager.sendTempInfo();
         }
+        _Scene_Map_setStartBattle.call(this);
     };
+    */
+
     //オンライン経由でスイッチ・変数が変更された時、デバッグウィンドウ(F9)に反映
     //やや重い処理だが、F9はスマホやブラウザで実行されることはないためこれで大丈夫
     var _Window_DebugEdit_update = Window_DebugEdit.prototype.update;
@@ -878,8 +872,10 @@ function Game_Avatar() {
             $gameSwitches.setValue(19, false);
             //$gameSwitches.setValue(19, true);
             OnlineManager.sendSysInfo();
-        } else if (this._enemyTeamID == OnlineManager.user.uid && !$gameSwitches.value(19) && $gameSwitches.value(20)) {
+        } else if (this._enemyTeamID == OnlineManager.user.uid && $gameSwitches.value(20)) {
             //} else {
+            do {
+            } while (!$gameSwitches.value(19));
             this.syncVariable();
             $gameSwitches.setValue(20, false);
             //$gameSwitches.setValue(19, false);
