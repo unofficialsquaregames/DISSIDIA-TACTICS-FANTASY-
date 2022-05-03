@@ -888,7 +888,7 @@ function Game_Avatar() {
                 $gameSystem.unitList()[i].isActor()._mp = data.child(i).child("mp").val();
                 $gameSystem.unitList()[i].isActor()._tp = data.child(i).child("tp").val();
                 $gameSystem.unitList()[i].isActor()._wt = data.child(i).child("wt").val();
-                $gameSystem.unitList()[i].setToXy(data.child(i).child("toX").val(), data.child(i).child("toY").val();
+                $gameSystem.unitList()[i].setToXy(data.child(i).child("toX").val(), data.child(i).child("toY").val());
                 //unit.isActor()._states = data.child(i).child("states").val();
                 //unit.isActor()._stateTurns = data.child(i).child("stateTurns").val();
             }
