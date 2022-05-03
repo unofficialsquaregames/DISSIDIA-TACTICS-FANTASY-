@@ -721,10 +721,6 @@ Imported.TacticsBattleSys = true;
             }
         }
         this.wtTurnListSort();
-        if ($gameSwitches.value(15)) {
-            this.setSyncVariableTime();
-            this.setWtTurnListOnline();
-        }
     };
 
     //ターンリストを行動順にソート
@@ -7546,7 +7542,7 @@ Imported.TacticsBattleSys = true;
         
         //オンライン対戦中WTリスト同期中
         if ($gameSwitches.value(15) && $gameSystem.isSyncVariableTime()) {
-            $gameSystem.setWtTurnListOnline();
+            $gameSystem.receiveWtTurnList();
             return;
         }
 
@@ -8429,8 +8425,6 @@ Imported.TacticsBattleSys = true;
         //移動先座標
         $gameTemp._toX = 0;
         $gameTemp._toY = 0;
-
-
         //メニューを禁止
         $gameSystem.disableMenu();
         //テスト用(ここで入れるべきではない)

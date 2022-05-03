@@ -539,22 +539,17 @@ function Game_Avatar() {
             //OnlineManager.sendTempInfo();
         }
     };
-    /*
+
     //ユニット同期
-    var _Scene_Map_setStartBattle = Scene_Map.prototype.setStartBattle;
-    Scene_Map.prototype.setStartBattle = function () {
+    var _Scene_Map_startBattle = Scene_Map.prototype.startBattle;
+    Scene_Map.prototype.startBattle = function () {
+        _Scene_Map_startBattle.call(this);
         if ($gameSwitches.value(15)) {
-            if ($gameSystem._allyTeamID == OnlineManager.user.uid) {
-                OnlineManager.sendUnitInfo();
-                OnlineManager.sendSysInfo();
-            } else if ($gameSystem._enemyTeamID == OnlineManager.user.uid) {
-                $gameSystem.syncVariable();
-            }
-            //OnlineManager.sendTempInfo();
+            $gameSystem.setSyncVariableTime();
+            $gameSystem.sendWtTurnList();
         }
-        _Scene_Map_setStartBattle.call(this);
     };
-    */
+
 
     //オンライン経由でスイッチ・変数が変更された時、デバッグウィンドウ(F9)に反映
     //やや重い処理だが、F9はスマホやブラウザで実行されることはないためこれで大丈夫
@@ -865,23 +860,20 @@ function Game_Avatar() {
         }
     };
     //行動順調整用スクリプトの同期
-    Game_System.prototype.setWtTurnListOnline = function () {
-        OnlineManager.sendUnitInfo();
+    Game_System.prototype.sendWtTurnList = function () {
         if (this._allyTeamID == OnlineManager.user.uid && $gameSwitches.value(19)) {
-            //if (!$gameSwitches.value(19)) {
             $gameSwitches.setValue(19, false);
-            //$gameSwitches.setValue(19, true);
+            OnlineManager.sendUnitInfo();
             OnlineManager.sendSysInfo();
-        } else if (this._enemyTeamID == OnlineManager.user.uid && $gameSwitches.value(20)) {
-            //} else {
-            do {
-            } while (!$gameSwitches.value(19));
-            this.syncVariable();
-            $gameSwitches.setValue(20, false);
-            //$gameSwitches.setValue(19, false);
         }
     };
-
+    //行動順調整用スクリプトの同期
+    Game_System.prototype.receiveWtTurnList = function () {
+        if (this._enemyTeamID == OnlineManager.user.uid && !$gameSwitches.value(19) && $gameSwitches.value(20)) {
+            this.syncVariable();
+            $gameSwitches.setValue(20, false);
+        }
+    };
     //同期用
     Game_System.prototype.syncVariable = function () {
         OnlineManager.unitRef.once("value").then(function (data) {
