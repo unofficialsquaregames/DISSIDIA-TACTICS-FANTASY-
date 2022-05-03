@@ -721,10 +721,12 @@ Imported.TacticsBattleSys = true;
             }
         }
         this.wtTurnListSort();
+        /*
         if ($gameSwitches.value(15)) {
-            this.setSyncVariableTime();
+            //this.setSyncVariableTime();
             this.sendWtTurnList();
         }
+        */
     };
 
     //ターンリストを行動順にソート
