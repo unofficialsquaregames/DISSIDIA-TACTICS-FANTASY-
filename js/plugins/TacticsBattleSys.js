@@ -7701,8 +7701,8 @@ Imported.TacticsBattleSys = true;
                 break;
             case 4: //移動処理(移動完了したらphaseStateを上げる)
                 $gameTemp._commandTime = true;
-                //if (turnUnit.pos(turnUnit.toX(), turnUnit.toY()) && !$gameSwitches.value(20)) {
-                if (turnUnit.pos(turnUnit.toX(), turnUnit.toY())) {
+                if (turnUnit.pos(turnUnit.toX(), turnUnit.toY()) && !$gameSwitches.value(20)) {
+                //if (turnUnit.pos(turnUnit.toX(), turnUnit.toY())) {
                     $gameMap.showInvisibleArea(turnUnit);
                     this.openCommandWindow();
                     this.openBattleStatusWindow(turnUnit);
@@ -7782,7 +7782,7 @@ Imported.TacticsBattleSys = true;
                 this.updateBattleStatusWindow();
                 break;
         }
-        if ($gameSwitches.value(15)) this.setSyncTime(); //オンライン時の処理
+        //if ($gameSwitches.value(15)) this.setSyncTime(); //オンライン時の処理
     };
 
 
@@ -8163,7 +8163,7 @@ Imported.TacticsBattleSys = true;
 
                 //turnUnit.endMove();
                 $gameTemp._cameraWait = true;
-                //if ($gameSwitches.value(15)) this.setSyncTime(); //オンライン時の処理
+                if ($gameSwitches.value(15)) this.setSyncTime(); //オンライン時の処理
 
                 $gameSystem._phaseState = 4;//移動中
             } else {
@@ -8269,7 +8269,7 @@ Imported.TacticsBattleSys = true;
 
                 $gamePlayer.setCameraEvent(turnUnit.target()); //カメラを選択した対象へ回す
 
-                //if ($gameSwitches.value(15)) this.setSyncTime(); //オンライン時の処理
+                if ($gameSwitches.value(15)) this.setSyncTime(); //オンライン時の処理
                 $gameSystem._phaseState = 6;//範囲表示およびYesNo選択
             } else {
                 SoundManager.playBuzzer();//ブザー
