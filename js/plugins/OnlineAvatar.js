@@ -530,9 +530,15 @@ function Game_Avatar() {
     Scene_Map.prototype.endTurn = function () {
         _Scene_Map_endTurn.call(this);
         if ($gameSwitches.value(15)) {
-            if (($gameSwitches.value(21) && $gameSystem._allyTeamID == OnlineManager.user.uid) || ($gameSwitches.value(22) && $gameSystem._enemyTeamID == OnlineManager.user.uid)) {
+            if ($gameSwitches.value(21) && $gameSystem._allyTeamID == OnlineManager.user.uid) {
                 OnlineManager.sendUnitInfo();
                 OnlineManager.sendSysInfo();
+                $gameSwitches.setValue(21, false);
+            } else if ($gameSwitches.value(22) && $gameSystem._enemyTeamID == OnlineManager.user.uid) {
+                OnlineManager.sendUnitInfo();
+                OnlineManager.sendSysInfo();
+                $gameSwitches.setValue(22, false);
+            }
             } else {
                 $gameSystem.syncVariable();
             }
@@ -770,10 +776,11 @@ function Game_Avatar() {
                         if (turnUnit == $gameSystem.unitList()[i]) {
                             $gameTemp._toX = data.child(i).child("x").val();
                             $gameTemp._toY = data.child(i).child("y").val();
+                            break;
                         }
                     }
+                    $gamePlayer.setCameraXy($gameTemp._toX, $gameTemp._toY);
                 });
-                $gamePlayer.setCameraXy($gameTemp._toX, $gameTemp._toY);
 
                 $gameSystem._phaseState = 4;
                 break;
