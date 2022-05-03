@@ -302,27 +302,10 @@ function Game_Avatar() {
     OnlineManager.sendUnitInfo = function () {
         if (this.unitRef && !this.syncBusy) {
             var send = {};
-            /*
-            if ($gameSystem._allyTeamID == OnlineManager.user.uid) {
-                for (var i = 0; i < $gameSystem.allyList().length; i++) {
-                    var $ = $gameSystem.unitList()[i];
-                    send[i] = {
-                        x: $._x, y: $._y, direction: $.direction(), target: $._target, useSkill: $._useSkill, hp: $.isActor()._hp, mp: $.isActor()._mp, tp: $.isActor()._tp, wt: $.isActor()._wt, states: $.isActor()._states, stateTurns: $.isActor()._stateTurns
-                    };
-                }
-            } else if ($gameSystem._enemyTeamID == OnlineManager.user.uid) {
-                for (var i = 0; i < $gameSystem.enemyList().length; i++) {
-                    var $ = $gameSystem.unitList()[i + 4];
-                    send[i + 4] = {
-                        x: $._x, y: $._y, direction: $.direction(), target: $._target, useSkill: $._useSkill, hp: $.isActor()._hp, mp: $.isActor()._mp, tp: $.isActor()._tp, wt: $.isActor()._wt, states: $.isActor()._states, stateTurns: $.isActor()._stateTurns
-                    };
-                }
-            }
-            */
             for (var i = 0; i < $gameSystem.unitList().length; i++) {
                 var $ = $gameSystem.unitList()[i];
                 send[i] = {
-                    x: $._x, y: $._y, direction: $.direction(), target: $._target, useSkill: $._useSkill, hp: $.isActor()._hp, mp: $.isActor()._mp, tp: $.isActor()._tp, wt: $.isActor()._wt, states: $.isActor()._states, stateTurns: $.isActor()._stateTurns
+                    x: $._x, y: $._y, direction: $.direction(), toX: $._toX, toY: $._toY, target: $._target, useSkill: $._useSkill, hp: $.isActor()._hp, mp: $.isActor()._mp, tp: $.isActor()._tp, wt: $.isActor()._wt, states: $.isActor()._states, stateTurns: $.isActor()._stateTurns
                 };
             }
             this.unitRef.update(send);
@@ -740,6 +723,10 @@ function Game_Avatar() {
                 //ターン開始前の処理
                 $gameSystem.startTurn(turnUnit);
                 turnUnit.beforeTurnStart();
+
+                //元の座標を記憶
+                turnUnit.setFromXy(turnUnit.x, turnUnit.y, turnUnit.direction());
+
                 $gameSystem._phaseState = 2;
                 break;
             case 2: //試行錯誤
@@ -747,9 +734,11 @@ function Game_Avatar() {
                 $gameMap.showInvisibleArea(turnUnit);
                 //クラス設定されたタグに合わせてターゲットを変更する
                 //turnUnit.targetSearch();
+                /*
                 if ($gameSystem._allyTeamID == OnlineManager.user.uid && $gameSwitches.value(22)) return;
                 else if ($gameSystem._enemyTeamID == OnlineManager.user.uid && $gameSwitches.value(21)) return;
                 $gameSystem.syncVariable(); //同期
+                */
                 if (!turnUnit.isActor().canMove()) {
                     //$gameMessage.add("行動不能");
                     SoundManager.playBuzzer();//ブザー
@@ -769,24 +758,30 @@ function Game_Avatar() {
                 $gameMap.setMovableArea(turnUnit);
                 $gameMap.showMovableArea(turnUnit);
 
-                OnlineManager.unitRef.once("value").then(function (data) {
-                    //ユニット更新用、行動順更新用などで分けた方が良い
-                    for (var i = 0; i < $gameSystem.unitList().length; i++) {
-                        if (turnUnit == $gameSystem.unitList()[i]) {
-                            $gameTemp._toX = data.child(i).child("x").val();
-                            $gameTemp._toY = data.child(i).child("y").val();
-                            break;
+                if (!$gameSwitches.value(20)) return;
+                else {
+                    $gameSystem.syncVariable();
+                    /*
+                    OnlineManager.unitRef.once("value").then(function (data) {
+                        //ユニット更新用、行動順更新用などで分けた方が良い
+                        for (var i = 0; i < $gameSystem.unitList().length; i++) {
+                            if (turnUnit == $gameSystem.unitList()[i]) {
+                                turnUnit.setToXy(data.child(i).child("x").val(), data.child(i).child("y").val());
+                                break;
+                            }
                         }
-                    }
-                    $gamePlayer.setCameraXy($gameTemp._toX, $gameTemp._toY);
-                });
+                    });
+                    */
+                    $gamePlayer.setCameraXy(turnUnit.toX(), turnUnit.toY());
 
-                $gameSystem._phaseState = 4;
+                    $gameSystem._phaseState = 4;
+                    $gameSwitches.setValue(20, false);
+                }
                 break;
             case 4: //移動処理(移動完了したらphaseStateを上げる)
                 if (!this.isMoveWaitingMode()) return;//待ち時間
                 //移動処理
-                if (turnUnit.pos($gameTemp._toX, $gameTemp._toY)) {
+                if (turnUnit.pos(turnUnit.toX(), turnUnit.toY())) {
                     $gameMap.initColorArea();
                     turnUnit.endMove();
                     $gameSystem._phaseState = 5;
@@ -902,6 +897,8 @@ function Game_Avatar() {
                 unit.isActor()._mp = data.child(i).child("mp").val();
                 unit.isActor()._tp = data.child(i).child("tp").val();
                 unit.isActor()._wt = data.child(i).child("wt").val();
+                unit.isActor()._toX = data.child(i).child("toX").val();
+                unit.isActor()._toY = data.child(i).child("toY").val();
                 //unit.isActor()._states = data.child(i).child("states").val();
                 //unit.isActor()._stateTurns = data.child(i).child("stateTurns").val();
             }
@@ -933,5 +930,10 @@ function Game_Avatar() {
         //if ($gameSwitches.value(19) || $gameSwitches.value(20)) return true;
         if ($gameSwitches.value(19)) return true;
         else return false;
+    };
+    Scene_Map.prototype.setSyncTime = function () {
+        OnlineManager.sendUnitInfo();
+        OnlineManager.sendSysInfo();
+        $gameSwitches.setValue(20, true);
     };
 })();

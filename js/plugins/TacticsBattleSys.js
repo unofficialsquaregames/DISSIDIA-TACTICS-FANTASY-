@@ -420,12 +420,6 @@ Imported.TacticsBattleSys = true;
         this._selectUnit = []; //ユニットリストからのステータス画面で使用する
         //以下トラップやカウンター用の変数設定
         this._reservationActionList = []; //予約された戦闘
-        //移動先の座標
-        this._fromX = 0;
-        this._fromY = 0;
-        this._fromD = 0;
-        this._toX = 0; //移動先X座標
-        this._toY = 0; //移動先Y座標
     };
     // 多段ヒット時のカウントセット
     Game_Temp.prototype.setMultiHit = function (skill) {
@@ -2737,6 +2731,14 @@ Imported.TacticsBattleSys = true;
         this._moved = false; //移動したかどうか
         this._acted = false; //行動したかどうか
         this._deadFlag = false;
+
+        //移動先の座標
+        this._fromX = 0;
+        this._fromY = 0;
+        this._fromD = 0;
+        this._toX = 0; //移動先X座標
+        this._toY = 0; //移動先Y座標
+
         var unitId;
         var allyId = this.event().meta.Ally;
         var enemyId = this.event().meta.Enemy;
@@ -2920,6 +2922,47 @@ Imported.TacticsBattleSys = true;
         this._useSkill = skill;
     };
 
+    // 移動元座標を記憶する
+    Game_Event.prototype.setFromXy = function (x, y, d) {
+        this._fromX = x;
+        this._fromY = y;
+        this._fromD = d;
+    };
+    // 移動元座標に戻す
+    Game_Event.prototype.returnFromXy = function () {
+        this.setPosition(this.fromX(), this.fromY());
+        this.setDirection(this.fromD());
+    };
+    // 移動先座標を記憶する
+    Game_Event.prototype.setToXy = function (x, y) {
+        this._toX = x;
+        this._toY = y;
+        this._toD = d;
+    };
+    // 移動元座標Xの情報
+    Game_Event.prototype.fromX = function () {
+        return this._fromX;
+    };
+    // 移動元座標Xの情報
+    Game_Event.prototype.fromY = function () {
+        return this._fromX;
+    };
+    // 移動元座標Xの情報
+    Game_Event.prototype.fromY = function () {
+        return this._fromY;
+    };
+    // 移動元座標の情報
+    Game_Event.prototype.fromD = function () {
+        return this._fromD;
+    };
+    // 移動先座標Xの情報
+    Game_Event.prototype.toX = function () {
+        return this._toX;
+    };
+    // 移動先座標Yの情報
+    Game_Event.prototype.toY = function () {
+        return this._toY;
+    };
     // 攻撃時のアニメ設定
     Game_Event.prototype.setBattlerAttack = function () {
         /*
@@ -7636,9 +7679,7 @@ Imported.TacticsBattleSys = true;
                 //以下はアニメーション終了後の処理
                 $gameMap.setMovableArea(turnUnit);
                 //元の座標を記憶
-                $gameTemp._fromX = turnUnit.x;
-                $gameTemp._fromY = turnUnit.y;
-                $gameTemp._fromD = turnUnit.direction();
+                turnUnit.setFromXy(turnUnit.x, turnUnit.y, turnUnit.direction());
                 $gameMap.setInvisibleArea($gameSystem.unitList());
                 $gameMap.showInvisibleArea(turnUnit);
                 $gameSystem._phaseState = 2;
@@ -7661,7 +7702,7 @@ Imported.TacticsBattleSys = true;
                 break;
             case 4: //移動処理(移動完了したらphaseStateを上げる)
                 $gameTemp._commandTime = true;
-                if (turnUnit.pos($gameTemp._toX, $gameTemp._toY)) {
+                if (turnUnit.pos(turnUnit.toX(), turnUnit.toY()) && !$gameSwitches.value(20)) {
                     $gameMap.showInvisibleArea(turnUnit);
                     this.openCommandWindow();
                     this.openBattleStatusWindow(turnUnit);
@@ -7796,14 +7837,14 @@ Imported.TacticsBattleSys = true;
                     return;
                 }
                 $gamePlayer.setCameraXy(targetPos.x, targetPos.y);
-                $gameTemp._toX = targetPos.x;
-                $gameTemp._toY = targetPos.y;
+
+                turnUnit.setToXy(targetPos.x, targetPos.y);
                 $gameSystem._phaseState = 4;
                 break;
             case 4: //移動処理(移動完了したらphaseStateを上げる)
                 if (!this.isMoveWaitingMode()) return;//待ち時間
                 //移動処理
-                if (turnUnit.pos($gameTemp._toX, $gameTemp._toY)) {
+                if (turnUnit.pos(turnUnit.toX(), turnUnit.toY())) {
                     $gameMap.initColorArea();
                     turnUnit.endMove();
                     $gameSystem._phaseState = 5;
@@ -7975,8 +8016,7 @@ Imported.TacticsBattleSys = true;
         //コマンドウインドウを閉じる
         this.closeCommandWindow();
         //移動やり直し用
-        turnUnit.setPosition($gameTemp._fromX, $gameTemp._fromY);
-        turnUnit.setDirection($gameTemp._fromD);
+        turnUnit.returnFromXy();
 
         $gameMap.setMemoryMovableArea();
         $gameMap.showMovableArea(turnUnit);
@@ -8116,13 +8156,14 @@ Imported.TacticsBattleSys = true;
                 SoundManager.playOk(); // 決定効果音を鳴らす
                 //タッチした地点へカメラを移動
                 $gamePlayer.setCameraXy(x, y);
-                $gameTemp._toX = x;
-                $gameTemp._toY = y;
+                turnUnit.setToXy(x, y);
 
                 $gameTemp.setDestination(x, y);//移動目標地点を記憶(_toX_toYと役目が被る、どちらかに統一すべし)
 
                 //turnUnit.endMove();
                 $gameTemp._cameraWait = true;
+                if ($gameSwitches.value(15)) this.setSyncTime(); //オンライン時の処理
+
                 $gameSystem._phaseState = 4;//移動中
             } else {
                 SoundManager.playBuzzer();//ブザー
@@ -8141,7 +8182,7 @@ Imported.TacticsBattleSys = true;
     // 4,移動処理
     Scene_Map.prototype.updateMove = function () {
         var turnUnit = $gameSystem.turnUnit();
-        var d = turnUnit.findDirectionTo($gameTemp._toX, $gameTemp._toY);
+        var d = turnUnit.findDirectionTo(turnUnit.toX(), turnUnit.toY());
         turnUnit.moveStraight(d);
     }
 
@@ -8429,8 +8470,8 @@ Imported.TacticsBattleSys = true;
         $gameTemp._startBattleFlag = false;
         //this._phaseState = 0;
         //移動先座標
-        $gameTemp._toX = 0;
-        $gameTemp._toY = 0;
+        //$gameTemp._toX = 0;
+        //$gameTemp._toY = 0;
         //メニューを禁止
         $gameSystem.disableMenu();
         //テスト用(ここで入れるべきではない)
