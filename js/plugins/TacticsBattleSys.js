@@ -766,10 +766,10 @@ Imported.TacticsBattleSys = true;
                 //敵のターンか味方のターンか
                 if (character.isAlly()) {
                     this._isAllyTurn = true;
-                    if ($gameSwitches.value(15)) $gameSwitches.setValue(21);
+                    if ($gameSwitches.value(15)) $gameSwitches.setValue(21, true);
                 } else {
                     this._isEnemyTurn = true;
-                    if ($gameSwitches.value(15)) $gameSwitches.setValue(22);
+                    if ($gameSwitches.value(15)) $gameSwitches.setValue(22, true);
                 }
 
                 //どういう風にデータをまとめようか
