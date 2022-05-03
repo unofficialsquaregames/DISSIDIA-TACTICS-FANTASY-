@@ -8195,8 +8195,6 @@ Imported.TacticsBattleSys = true;
     // 4,移動処理
     Scene_Map.prototype.updateMove = function () {
         var turnUnit = $gameSystem.turnUnit();
-        console.log("updateMove"); //データベース経由で0を検知
-        console.log(turnUnit.toY()); //データベース経由で0を検知
         var d = turnUnit.findDirectionTo(turnUnit.toX(), turnUnit.toY());
         turnUnit.moveStraight(d);
     }

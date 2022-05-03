@@ -305,13 +305,10 @@ function Game_Avatar() {
             for (var i = 0; i < $gameSystem.unitList().length; i++) {
                 var $ = $gameSystem.unitList()[i];
                 send[i] = {
-                    x: $._x, y: $._y, direction: $.direction(), toX: $._toX, toY: $._toY, target: $._target, useSkill: $._useSkill, hp: $.isActor()._hp, mp: $.isActor()._mp, tp: $.isActor()._tp, wt: $.isActor()._wt, states: $.isActor()._states, stateTurns: $.isActor()._stateTurns
+                    x: $._x, y: $._y, direction: $.direction(), toX: $.toX(), toY: $.toY(), target: $._target, useSkill: $._useSkill, hp: $.isActor()._hp, mp: $.isActor()._mp, tp: $.isActor()._tp, wt: $.isActor()._wt, states: $.isActor()._states, stateTurns: $.isActor()._stateTurns
                 };
             }
             this.unitRef.update(send);
-            console.log("送信");
-            console.log($._toX);
-            console.log($._toY);
         }
     };
     //システム情報を送信
@@ -885,17 +882,13 @@ function Game_Avatar() {
                 //unit._x = data.child(i).child("x").val();
                 //unit._y = data.child(i).child("y").val();
                 //unit._direction = data.child(i).child("direction").val();
-                unit._target = data.child(i).child("target").val();
-                unit._useSkill = data.child(i).child("useSkill").val();
-                unit.isActor()._hp = data.child(i).child("hp").val();
-                unit.isActor()._mp = data.child(i).child("mp").val();
-                unit.isActor()._tp = data.child(i).child("tp").val();
-                unit.isActor()._wt = data.child(i).child("wt").val();
-                unit.isActor()._toX = data.child(i).child("toX").val();
-                unit.isActor()._toY = data.child(i).child("toY").val();
-                console.log("受信");
-                console.log(unit.isActor()._toX);
-                console.log(unit.isActor()._toY);
+                $gameSystem.unitList()[i]._target = data.child(i).child("target").val();
+                $gameSystem.unitList()[i]._useSkill = data.child(i).child("useSkill").val();
+                $gameSystem.unitList()[i].isActor()._hp = data.child(i).child("hp").val();
+                $gameSystem.unitList()[i].isActor()._mp = data.child(i).child("mp").val();
+                $gameSystem.unitList()[i].isActor()._tp = data.child(i).child("tp").val();
+                $gameSystem.unitList()[i].isActor()._wt = data.child(i).child("wt").val();
+                $gameSystem.unitList()[i].setToXy(data.child(i).child("toX").val(), data.child(i).child("toY").val();
                 //unit.isActor()._states = data.child(i).child("states").val();
                 //unit.isActor()._stateTurns = data.child(i).child("stateTurns").val();
             }
