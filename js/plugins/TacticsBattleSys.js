@@ -2911,7 +2911,9 @@ Imported.TacticsBattleSys = true;
     };
     // 使用スキルを返す
     Game_Event.prototype.useSkill = function () {
-        return this._useSkill;
+        //return this._useSkill;
+        if (this._useSkill) return $dataSkills[this._useSkill];
+        else return null;
     };
     // ターゲットをセットする
     Game_Event.prototype.setTarget = function (target) {
@@ -2921,7 +2923,9 @@ Imported.TacticsBattleSys = true;
     };
     // 使用スキルをセットする
     Game_Event.prototype.setUseSkill = function (skill) {
-        this._useSkill = skill;
+        //this._useSkill = skill;
+        if (skill) this._useSkill = skill.id;
+        else this._useSkill = null;
     };
 
     // 移動元座標を記憶する
@@ -7721,6 +7725,8 @@ Imported.TacticsBattleSys = true;
                 break;
             case 6: //範囲確認YesNo＆入力処理
                 this.openBattleStatusWindow(turnUnit);
+                console.log(turnUnit.useSkill());
+
                 this.targetBattleStatusWindow(turnUnit.useSkill(), turnUnit.target());//ターゲットを表示
                 $gameTemp._commandTime = true;
                 this.updateYesNoWindow();
