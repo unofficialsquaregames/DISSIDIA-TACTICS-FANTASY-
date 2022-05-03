@@ -530,11 +530,21 @@ function Game_Avatar() {
     Scene_Map.prototype.endTurn = function () {
         _Scene_Map_endTurn.call(this);
         if ($gameSwitches.value(15)) {
-            OnlineManager.sendUnitInfo();
-            OnlineManager.sendSysInfo();
-            if ($gameSystem._allyTeamID == OnlineManager.user.uid) $gameSwitches.setValue(21, false);
-            else if ($gameSystem._enemyTeamID == OnlineManager.user.uid) $gameSwitches.setValue(22, false);
-            
+            if ($gameSwitches.value(21)) {
+                if ($gameSystem._allyTeamID == OnlineManager.user.uid) {
+                    OnlineManager.sendUnitInfo();
+                    OnlineManager.sendSysInfo();
+                } else {
+                    $gameSystem.syncVariable();
+                }
+            } else if ($gameSwitches.value(22)) {
+                if ($gameSystem._enemyTeamID == OnlineManager.user.uid) {
+                    OnlineManager.sendUnitInfo();
+                    OnlineManager.sendSysInfo();
+                } else {
+                    $gameSystem.syncVariable();
+                }
+            }
             //OnlineManager.sendTempInfo();
         }
     };
@@ -543,9 +553,12 @@ function Game_Avatar() {
     Scene_Map.prototype.startBattle = function () {
         _Scene_Map_startBattle.call(this);
         if ($gameSwitches.value(15)) {
-            OnlineManager.sendUnitInfo();
-            OnlineManager.sendSysInfo();
-            $gameSystem.syncVariable();
+            if ($gameSystem._allyTeamID == OnlineManager.user.uid) {
+                OnlineManager.sendUnitInfo();
+                OnlineManager.sendSysInfo();
+            } else if ($gameSystem._enemyTeamID == OnlineManager.user.uid) {
+                $gameSystem.syncVariable();
+            }
             //OnlineManager.sendTempInfo();
         }
     };
