@@ -318,7 +318,7 @@ function Game_Avatar() {
             var $ = $gameSystem;
             var send = {
                 //_allyTeamID: $._allyTeamID, _enemyTeamID: $._enemyTeamID, _isAllyTurn: $._isAllyTurn, _isEnemyTurn: $._isEnemyTurn
-                _allyTeamID: $._allyTeamID, _enemyTeamID: $._enemyTeamID, _isAllyTurn: $._isAllyTurn, _isEnemyTurn: $._isEnemyTurn, _wtTurnList: $._wtTurnList, _turnUnit: $._turnUnit
+                _allyTeamID: $._allyTeamID, _enemyTeamID: $._enemyTeamID, _isAllyTurn: $._isAllyTurn, _isEnemyTurn: $._isEnemyTurn, _wtTurnList: $._wtTurnList, _turnUnit: $._turnUnit, _phaseState: $._phaseState
             }
             this.sysRef.update(send);
         }
@@ -733,12 +733,6 @@ function Game_Avatar() {
                 $gameMap.setInvisibleArea($gameSystem.unitList());
                 $gameMap.showInvisibleArea(turnUnit);
                 //クラス設定されたタグに合わせてターゲットを変更する
-                //turnUnit.targetSearch();
-                /*
-                if ($gameSystem._allyTeamID == OnlineManager.user.uid && $gameSwitches.value(22)) return;
-                else if ($gameSystem._enemyTeamID == OnlineManager.user.uid && $gameSwitches.value(21)) return;
-                $gameSystem.syncVariable(); //同期
-                */
                 if (!turnUnit.isActor().canMove()) {
                     //$gameMessage.add("行動不能");
                     SoundManager.playBuzzer();//ブザー
@@ -746,21 +740,17 @@ function Game_Avatar() {
                     $gameSystem._phaseState = 11; //麻痺とかであれば以降の処理は行わず次のターンへ
                     return;
                 }
-                //if (turnUnit.target()){
                 //この時点でコマンドもセットする
-                $gameSystem._phaseState = 3; //状況によっては5に移行
-                //}else{
-                // $gameMap._phaseState = 11; //ターンエンド
-                //}
+                //$gameSystem._phaseState = 3; //状況によっては5に移行
+                $gameSystem.syncVariable(); //phaseStateの同期
                 break;
             case 3: //移動先選択
                 //移動タイルを表示し
                 $gameMap.setMovableArea(turnUnit);
                 $gameMap.showMovableArea(turnUnit);
 
-                if (!$gameSwitches.value(20)) return;
-                else {
-                    $gameSystem.syncVariable();
+                //if (!$gameSwitches.value(20)) return;
+                //else {
                     /*
                     OnlineManager.unitRef.once("value").then(function (data) {
                         //ユニット更新用、行動順更新用などで分けた方が良い
@@ -776,7 +766,7 @@ function Game_Avatar() {
 
                     $gameSystem._phaseState = 4;
                     $gameSwitches.setValue(20, false);
-                }
+                //}
                 break;
             case 4: //移動処理(移動完了したらphaseStateを上げる)
                 if (!this.isMoveWaitingMode()) return;//待ち時間
@@ -784,39 +774,22 @@ function Game_Avatar() {
                 if (turnUnit.pos(turnUnit.toX(), turnUnit.toY())) {
                     $gameMap.initColorArea();
                     turnUnit.endMove();
-                    $gameSystem._phaseState = 5;
+                    $gameSystem._phaseState = 2; //一旦phase2へ戻る
                 } else {
                     this.updateMove();//指定座標へ移動する処理
                 }
                 break;
             case 5: //対象選択
-                if (turnUnit.useSkill()) {
-                    $gameMap.showRangeArea(turnUnit, null);
-                    $gameSystem._phaseState = 6;//範囲確認へ移行
-                } else {
-                    //待機という扱いになるためMP回復しターン終了
-                    this.commandWait();
-                }
+                $gameMap.showRangeArea(turnUnit, null);
+                $gameSystem.syncVariable();
                 break;
             case 6: //範囲確認
-                if (!this.isSelectWaitingMode()) return;//待ち時間
-                if (turnUnit.target() == null) {
-                    this.commandWait();
-                    return;
-                }
-                //対象が範囲内にいた場合行動開始、そうでない場合待機
-                if ($gameTemp._moveTargetPointFlag || $gameMap.isInsideArea(turnUnit.target().x, turnUnit.target().y)) {
-                    this.targetBattleStatusWindow(turnUnit.useSkill(), turnUnit.target());//ターゲットを表示
-                    $gameMap.showEffectArea(turnUnit);//効果範囲表示
-                    $gamePlayer.setCameraEvent(turnUnit.target()); //カメラを選択した対象へ回す
-                    $gameSystem._phaseState = 7;//対象アニメーションフェーズへ移行
-                } else {
-                    //待機という扱いになるためMP回復しターン終了
-                    this.commandWait();
-                }
+                this.targetBattleStatusWindow(turnUnit.useSkill(), turnUnit.target());//ターゲットを表示
+                $gameMap.showEffectArea(turnUnit);//効果範囲表示
+                $gamePlayer.setCameraEvent(turnUnit.target()); //カメラを選択した対象へ回す
+                $gameSystem.syncVariable();
                 break;
             case 7: //コマンド実行処理(詠唱アニメーション)
-                if (!this.isYesNoWaitingMode()) return;//待ち時間
                 //移動しながら攻撃の場合
                 if ($gameTemp._moveTargetPointFlag) {
                     var xPlus = $gameTemp._moveTargetPointX - turnUnit.x;
@@ -830,12 +803,16 @@ function Game_Avatar() {
                 //自身に攻撃アニメーション
                 this.showActionMotion(turnUnit);
                 //this.showActionAnimation(turnUnit);
-                $gameSystem._phaseState = 9;//対象アニメーションフェーズへ移行
+                $gameSystem._phaseState = 8;//対象アニメーションフェーズへ移行
+                break;
+            case 8: //コマンド実行処理(詠唱アニメーション)
+                if ($gameTemp._attackTime == false) {
+                    turnUnit.setBattlerReturn();
+                    $gameSystem._phaseState = 9;
+                }
                 break;
             case 9: //コマンド実行処理(対象アニメーション)
-                //対象に攻撃アニメーション
-                //Game_Eventにて「たたかう」だと対象の装備が反映されたアニメーションが表示される
-                turnUnit.setBattlerReturn();//攻撃アニメから歩行アニメへ戻す
+                turnUnit.setBattlerReturn();
                 turnUnit.target().showActionAnimation(turnUnit, turnUnit.useSkill());  // 行動アニメーションの表示
                 //多段ヒット時の設定
                 $gameTemp.setMultiHit(turnUnit.useSkill());
@@ -857,6 +834,15 @@ function Game_Avatar() {
                 break;
             case 12: //事後処理
                 this.endTurn(); //
+                break;
+            case 13: //ユニットリスト選択フェーズ
+                this.updateUnitListWindow();
+                break;
+            case 14: //蘇生ユニット選択フェーズ
+                this.updateDeadUnitListWindow();
+                break;
+            case 15: //ステート確認フェーズ
+                this.updateBattleStatusWindow();
                 break;
         }
     };
@@ -913,6 +899,7 @@ function Game_Avatar() {
             $gameSystem._isEnemyTurn = data.child("_isEnemyTurn").val();
             $gameSystem._turnUnit = data.child("_turnUnit").val();
             $gameSystem._wtTurnList = data.child("_wtTurnList").val();
+            $gameSystem._phaseState = data.child("_phaseState").val();
         });
 
     };
