@@ -749,9 +749,9 @@ function Game_Avatar() {
                 $gameMap.setMovableArea(turnUnit);
                 $gameMap.showMovableArea(turnUnit);
 
-                if (!$gameSwitches.value(20)) return;
-                else {
-                    $gameSystem.syncVariable(); //phaseStateの同期
+                //if (!$gameSwitches.value(20)) return;
+                //else {
+                    //$gameSystem.syncVariable(); //phaseStateの同期
                     /*
                     OnlineManager.unitRef.once("value").then(function (data) {
                         //ユニット更新用、行動順更新用などで分けた方が良い
@@ -766,8 +766,7 @@ function Game_Avatar() {
                     $gamePlayer.setCameraXy(turnUnit.toX(), turnUnit.toY());
 
                     $gameSystem._phaseState = 4;
-                    $gameSwitches.setValue(20, false);
-                }
+                //}
                 break;
             case 4: //移動処理(移動完了したらphaseStateを上げる)
                 if (!this.isMoveWaitingMode()) return;//待ち時間
@@ -776,6 +775,7 @@ function Game_Avatar() {
                     $gameMap.initColorArea();
                     turnUnit.endMove();
                     $gameSystem._phaseState = 2; //一旦phase2へ戻る
+                    $gameSwitches.setValue(20, false);
                 } else {
                     this.updateMove();//指定座標へ移動する処理
                 }
