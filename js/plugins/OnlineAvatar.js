@@ -318,7 +318,7 @@ function Game_Avatar() {
             var $ = $gameSystem;
             var send = {
                 //_allyTeamID: $._allyTeamID, _enemyTeamID: $._enemyTeamID, _isAllyTurn: $._isAllyTurn, _isEnemyTurn: $._isEnemyTurn
-                _allyTeamID: $._allyTeamID, _enemyTeamID: $._enemyTeamID, _isAllyTurn: $._isAllyTurn, _isEnemyTurn: $._isEnemyTurn, _wtTurnList: $._wtTurnList, _turnUnit: $._turnUnit, _phaseState: $._phaseState
+                _allyTeamID: $._allyTeamID, _enemyTeamID: $._enemyTeamID, _isAllyTurn: $._isAllyTurn, _isEnemyTurn: $._isEnemyTurn, _wtTurnList: $._wtTurnList, _turnUnit: $._turnUnit
             }
             this.sysRef.update(send);
         }
@@ -713,6 +713,7 @@ function Game_Avatar() {
 
     //同期ターンの更新(呼び出されない不具合あり)
     Scene_Map.prototype.updateSyncTurn = function () {
+        console.log($gameSystem._phaseState);
         var turnUnit = $gameSystem.turnUnit();
         switch ($gameSystem._phaseState) {
             case 0: //カメラ移動完了後コマンド表示
@@ -734,12 +735,11 @@ function Game_Avatar() {
 
                 //元の座標を記憶
                 turnUnit.setFromXy(turnUnit.x, turnUnit.y, turnUnit.direction());
-
+                $gameMap.setInvisibleArea($gameSystem.unitList());
+                $gameMap.showInvisibleArea(turnUnit);
                 $gameSystem._phaseState = 2;
                 break;
             case 2: //試行錯誤
-                $gameMap.setInvisibleArea($gameSystem.unitList());
-                $gameMap.showInvisibleArea(turnUnit);
                 //クラス設定されたタグに合わせてターゲットを変更する
                 if (!turnUnit.isActor().canMove()) {
                     //$gameMessage.add("行動不能");
@@ -748,15 +748,26 @@ function Game_Avatar() {
                     $gameSystem._phaseState = 11; //麻痺とかであれば以降の処理は行わず次のターンへ
                     return;
                 }
+                $gameSystem.syncVariable(); //phaseStateの同期
                 //この時点でコマンドもセットする
                 //$gameSystem._phaseState = 3; //状況によっては5に移行
-                $gameSystem.syncVariable(); //phaseStateの同期
+                if ($gameSwitches.value(23)) {
+                    $gameSystem._phaseState = 3; //状況によっては5に移行
+                    $gameSwitches.setValue(23, false);
+                }
+                if ($gameSwitches.value(24)) {
+                    $gameSystem._phaseState = 5; //状況によっては5に移行
+                    $gameSwitches.setValue(24, false);
+                }
+                if ($gameSwitches.value(25)) {
+                    this.commandWait();
+                    $gameSwitches.setValue(25, false);
+                }
                 break;
             case 3: //移動先選択
                 //移動タイルを表示し
                 $gameMap.setMovableArea(turnUnit);
                 $gameMap.showMovableArea(turnUnit);
-
                 //if (!$gameSwitches.value(20)) return;
                 //else {
                     //$gameSystem.syncVariable(); //phaseStateの同期
@@ -789,15 +800,17 @@ function Game_Avatar() {
                 break;
             case 5: //対象選択
                 $gameMap.showRangeArea(turnUnit, null);
-                $gameSystem.syncVariable();
+                $gameSystem._phaseState = 6;//範囲確認へ移行
                 break;
             case 6: //範囲確認
+                if (!this.isSelectWaitingMode()) return;//待ち時間
                 this.targetBattleStatusWindow(turnUnit.useSkill(), turnUnit.target());//ターゲットを表示
                 $gameMap.showEffectArea(turnUnit);//効果範囲表示
                 $gamePlayer.setCameraEvent(turnUnit.target()); //カメラを選択した対象へ回す
-                $gameSystem.syncVariable();
+                $gameSystem._phaseState = 7;//対象アニメーションフェーズへ移行
                 break;
             case 7: //コマンド実行処理(詠唱アニメーション)
+                if (!this.isYesNoWaitingMode()) return;//待ち時間
                 //移動しながら攻撃の場合
                 if ($gameTemp._moveTargetPointFlag) {
                     var xPlus = $gameTemp._moveTargetPointX - turnUnit.x;
@@ -908,7 +921,6 @@ function Game_Avatar() {
             $gameSystem._isEnemyTurn = data.child("_isEnemyTurn").val();
             $gameSystem._turnUnit = data.child("_turnUnit").val();
             $gameSystem._wtTurnList = data.child("_wtTurnList").val();
-            $gameSystem._phaseState = data.child("_phaseState").val();
         });
 
     };

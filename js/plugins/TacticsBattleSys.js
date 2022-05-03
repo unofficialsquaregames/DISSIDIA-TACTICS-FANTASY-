@@ -7703,8 +7703,8 @@ Imported.TacticsBattleSys = true;
                 break;
             case 4: //移動処理(移動完了したらphaseStateを上げる)
                 $gameTemp._commandTime = true;
-                if (turnUnit.pos(turnUnit.toX(), turnUnit.toY()) && !$gameSwitches.value(20)) {
-                //if (turnUnit.pos(turnUnit.toX(), turnUnit.toY())) {
+                //if (turnUnit.pos(turnUnit.toX(), turnUnit.toY()) && !$gameSwitches.value(20)) {
+                if (turnUnit.pos(turnUnit.toX(), turnUnit.toY())) {
                     $gameMap.showInvisibleArea(turnUnit);
                     this.openCommandWindow();
                     this.openBattleStatusWindow(turnUnit);
@@ -8105,9 +8105,15 @@ Imported.TacticsBattleSys = true;
         actor.gainMp(Math.round(actor.mmp * 10 / 100));
         //actor.gainMp(10);
         turnUnit.reserveDamagePopup(0);
+
         //コマンドウインドウを閉じる
         this.closeCommandWindow();
-
+        //オンライン
+        if ($gameSwitches.value(15)) {
+            $gameSystem.sendInfo(); //オンライン時の処理
+            //$gameSwitches.setValue(20, true);
+            $gameSwitches.setValue(25, true);
+        }
         //待機エリア表示しようか検討中(事後処理にいれる？)
         $gameSystem._phaseState = 11;//ターン終了後処理
     };
@@ -8167,7 +8173,8 @@ Imported.TacticsBattleSys = true;
                 $gameTemp._cameraWait = true;
                 if ($gameSwitches.value(15)) {
                     $gameSystem.sendInfo(); //オンライン時の処理
-                    $gameSwitches.setValue(20, true);
+                    //$gameSwitches.setValue(20, true);
+                    $gameSwitches.setValue(23, true);//移動選択フラグ
                 }
 
                 $gameSystem._phaseState = 4;//移動中
@@ -8274,10 +8281,6 @@ Imported.TacticsBattleSys = true;
 
                 $gamePlayer.setCameraEvent(turnUnit.target()); //カメラを選択した対象へ回す
 
-                if ($gameSwitches.value(15)) {
-                    $gameSystem.sendInfo(); //オンライン時の処理
-                    //$gameSwitches.setValue(20, true);
-                }
                 $gameSystem._phaseState = 6;//範囲表示およびYesNo選択
             } else {
                 SoundManager.playBuzzer();//ブザー
@@ -8305,6 +8308,11 @@ Imported.TacticsBattleSys = true;
         //YesNoウインドウを閉じる
         this.closeYesNoWindow();
         $gameTemp._attackStartFlag = true;
+        if ($gameSwitches.value(15)) {
+            $gameSystem.sendInfo(); //オンライン時の処理
+            //$gameSwitches.setValue(20, true);
+            $gameSwitches.setValue(24, true);
+        }
         //コマンド実行
         $gameSystem._phaseState = 7;//詠唱アニメーションフェーズへ移行
     };
