@@ -309,6 +309,9 @@ function Game_Avatar() {
                 };
             }
             this.unitRef.update(send);
+            console.log("送信");
+            console.log($._toX);
+            console.log($._toY);
         }
     };
     //システム情報を送信
@@ -713,7 +716,6 @@ function Game_Avatar() {
 
     //同期ターンの更新(呼び出されない不具合あり)
     Scene_Map.prototype.updateSyncTurn = function () {
-        console.log($gameSystem._phaseState);
         var turnUnit = $gameSystem.turnUnit();
         switch ($gameSystem._phaseState) {
             case 0: //カメラ移動完了後コマンド表示
@@ -768,24 +770,8 @@ function Game_Avatar() {
                 //移動タイルを表示し
                 $gameMap.setMovableArea(turnUnit);
                 $gameMap.showMovableArea(turnUnit);
-                //if (!$gameSwitches.value(20)) return;
-                //else {
-                    //$gameSystem.syncVariable(); //phaseStateの同期
-                    /*
-                    OnlineManager.unitRef.once("value").then(function (data) {
-                        //ユニット更新用、行動順更新用などで分けた方が良い
-                        for (var i = 0; i < $gameSystem.unitList().length; i++) {
-                            if (turnUnit == $gameSystem.unitList()[i]) {
-                                turnUnit.setToXy(data.child(i).child("x").val(), data.child(i).child("y").val());
-                                break;
-                            }
-                        }
-                    });
-                    */
-                    $gamePlayer.setCameraXy(turnUnit.toX(), turnUnit.toY());
-
-                    $gameSystem._phaseState = 4;
-                //}
+                $gamePlayer.setCameraXy(turnUnit.toX(), turnUnit.toY());
+                $gameSystem._phaseState = 4;
                 break;
             case 4: //移動処理(移動完了したらphaseStateを上げる)
                 //移動処理
@@ -907,6 +893,9 @@ function Game_Avatar() {
                 unit.isActor()._wt = data.child(i).child("wt").val();
                 unit.isActor()._toX = data.child(i).child("toX").val();
                 unit.isActor()._toY = data.child(i).child("toY").val();
+                console.log("受信");
+                console.log(unit.isActor()._toX);
+                console.log(unit.isActor()._toY);
                 //unit.isActor()._states = data.child(i).child("states").val();
                 //unit.isActor()._stateTurns = data.child(i).child("stateTurns").val();
             }

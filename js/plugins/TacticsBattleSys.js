@@ -8172,7 +8172,7 @@ Imported.TacticsBattleSys = true;
                 //turnUnit.endMove();
                 $gameTemp._cameraWait = true;
                 if ($gameSwitches.value(15)) {
-                    $gameSystem.sendInfo(); //オンライン時の処理
+                    $gameSystem.sendInfo(); //オンライン時の処理(送信は間開けた方がいい？)
                     //$gameSwitches.setValue(20, true);
                     $gameSwitches.setValue(23, true);//移動選択フラグ
                 }
@@ -8195,6 +8195,8 @@ Imported.TacticsBattleSys = true;
     // 4,移動処理
     Scene_Map.prototype.updateMove = function () {
         var turnUnit = $gameSystem.turnUnit();
+        console.log("updateMove"); //データベース経由で0を検知
+        console.log(turnUnit.toY()); //データベース経由で0を検知
         var d = turnUnit.findDirectionTo(turnUnit.toX(), turnUnit.toY());
         turnUnit.moveStraight(d);
     }
