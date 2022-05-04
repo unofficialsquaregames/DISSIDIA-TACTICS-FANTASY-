@@ -1028,7 +1028,6 @@ Imported.TacticsBattleSys = true;
         console.log(result);
         if ($gameSwitches.value(15)) {
             if ($gameSystem.isSyncTurn()) $gameSystem.syncIsHitVariable(target.eventId()); //不具合が発生している
-            else $gameSystem.sendInfo(target.eventId());
         }
         console.log(result);
         //ヒット時の挙動
@@ -1150,7 +1149,6 @@ Imported.TacticsBattleSys = true;
                 this.executeDamage(target, value);
                 if ($gameSwitches.value(15)) {
                     if ($gameSystem.isSyncTurn()) $gameSystem.syncDamageVariable(target.eventId()); //不具合が発生している
-                    else $gameSystem.sendInfo(target.eventId());
                 }
                 //バフ奪取(クリティカル発生時のみ)
                 if (turnUnit.useSkill().meta.steal) {
@@ -1225,11 +1223,16 @@ Imported.TacticsBattleSys = true;
                 }
             }
         }
-        /*
+        
         if ($gameSwitches.value(15)) {
-            if (!$gameSystem.isSyncTurn()) $gameSystem.sendInfo(target.eventId());
+            if (!$gameSystem.isSyncTurn()) {
+                $gameSystem.sendInfo(target.eventId());
+                $gameSwitches.setValue(20, true);
+            } else {
+                $gameSwitches.setValue(20, false);
+            }
         }
-        */
+        
     };
 
     //ダメージ設定
@@ -7722,7 +7725,6 @@ Imported.TacticsBattleSys = true;
                 break;
             case 4: //移動処理(移動完了したらphaseStateを上げる)
                 $gameTemp._commandTime = true;
-                //if (turnUnit.pos(turnUnit.toX(), turnUnit.toY()) && !$gameSwitches.value(20)) {
                 if (turnUnit.pos(turnUnit.toX(), turnUnit.toY())) {
                     $gameMap.showInvisibleArea(turnUnit);
                     this.openCommandWindow();

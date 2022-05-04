@@ -741,7 +741,6 @@ function Game_Avatar() {
                 //クラス設定されたタグに合わせてターゲットを変更する
                 if (!turnUnit.isActor().canMove()) {
                     //$gameMessage.add("行動不能");
-                    console.log("canMove");
                     SoundManager.playBuzzer();//ブザー
                     //$gameMessage.clear(); //行動不能などのメッセージを消去したい
                     $gameSystem._phaseState = 11; //麻痺とかであれば以降の処理は行わず次のターンへ
@@ -754,7 +753,7 @@ function Game_Avatar() {
                     $gameSystem._phaseState = 3; //状況によっては5に移行
                     $gameSwitches.setValue(23, false);
                 }
-                if ($gameSwitches.value(24)) {
+                if ($gameSwitches.value(24) && $gameSwitches.value(20)) {
                     if(!turnUnit.useSkill()) return;
                     $gameSystem._phaseState = 5; //状況によっては5に移行
                     $gameSwitches.setValue(24, false);
@@ -777,7 +776,6 @@ function Game_Avatar() {
                     $gameMap.initColorArea();
                     turnUnit.endMove();
                     $gameSystem._phaseState = 2; //一旦phase2へ戻る
-                    $gameSwitches.setValue(20, false);
                 } else {
                     this.updateMove();//指定座標へ移動する処理
                 }
@@ -865,15 +863,6 @@ function Game_Avatar() {
         }
         //this.receiveWtTurnList();
     };
-    /*
-    //行動順調整用スクリプトの同期
-    Game_System.prototype.receiveWtTurnList = function () {
-        if (this._enemyTeamID == OnlineManager.user.uid && !$gameSwitches.value(19) && $gameSwitches.value(20)) {
-            this.syncVariable();
-            $gameSwitches.setValue(20, false);
-        }
-    };
-    */
     //同期用
     Game_System.prototype.syncVariable = function (eventId) {
         OnlineManager.unitRef.once("value").then(function (data) {
