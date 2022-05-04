@@ -758,13 +758,8 @@ Imported.TacticsBattleSys = true;
                 //同一WTのユニットがいて先にターンが回られてしまった場合、以降の処理は行わない
                 //if (!$gameTemp._countWtTime) break;//continue;
                 //敵のターンか味方のターンか
-                if (character.isAlly()) {
-                    this._isAllyTurn = true;
-                    if ($gameSwitches.value(15)) $gameSwitches.setValue(21, true);
-                } else {
-                    this._isEnemyTurn = true;
-                    if ($gameSwitches.value(15)) $gameSwitches.setValue(22, true);
-                }
+                if (character.isAlly()) this._isAllyTurn = true;
+                else this._isEnemyTurn = true;
 
                 //どういう風にデータをまとめようか
                 this.setTurnUnit(this.unitList()[i]);
@@ -1220,6 +1215,7 @@ Imported.TacticsBattleSys = true;
                 }
             }
         }
+        if ($gameSwitches.value(15)) $gameSystem.sendInfo(target.eventId());
     };
 
     //ダメージ設定
@@ -7659,7 +7655,6 @@ Imported.TacticsBattleSys = true;
 
     // 味方ターンの更新
     Scene_Map.prototype.updateAllyTurn = function () {
-
         var turnUnit = $gameSystem.turnUnit();
         switch ($gameSystem._phaseState) {
             case 0: //カメラ移動完了後コマンド表示
@@ -7725,7 +7720,6 @@ Imported.TacticsBattleSys = true;
                 break;
             case 6: //範囲確認YesNo＆入力処理
                 this.openBattleStatusWindow(turnUnit);
-                console.log(turnUnit.useSkill());
 
                 this.targetBattleStatusWindow(turnUnit.useSkill(), turnUnit.target());//ターゲットを表示
                 $gameTemp._commandTime = true;
@@ -7779,6 +7773,7 @@ Imported.TacticsBattleSys = true;
                 break;
             case 12: //事後処理
                 this.endTurn(); //
+                if ($gameSwitches.value(15)) $gameSystem.sendInfo();
                 break;
             case 13: //ユニットリスト選択フェーズ
                 this.updateUnitListWindow();

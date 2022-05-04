@@ -278,12 +278,9 @@ function Game_Avatar() {
         //他プレイヤーが同マップに入場(gameSystem._allyTeamIDに直接割り振った方がいい？、プレイヤー自体をマップから独立させて)
         this.mapRef.on('child_added', function (data) {
             //avatarsInThisMap[data.key] = new Game_Avatar(avatarTemplate, data.val());
-
-
         });
 
         this.sendPlayerInfo();
-        //if ($gameSystem.isBattleActivate()) OnlineManager.sendUnitInfo();
     };
 
     //送信するプレイヤー情報(ユニットの情報もここで送信するか？)
@@ -299,14 +296,25 @@ function Game_Avatar() {
 
     //ユニット情報を送信(unitsはプレイヤーごとにわけて4体4体で編成させた方がいいか)
     //敵と味方どういう風にわけるか
-    OnlineManager.sendUnitInfo = function () {
+    OnlineManager.sendUnitInfo = function (eventId) {
         if (this.unitRef && !this.syncBusy) {
             var send = {};
             for (var i = 0; i < $gameSystem.unitList().length; i++) {
                 var $ = $gameSystem.unitList()[i];
+                if (eventId && eventId != $gameSystem.unitList()[i].event().id) continue;
                 send[i] = {
                     x: $._x, y: $._y, direction: $.direction(), toX: $.toX(), toY: $.toY(), target: $._target, useSkill: $._useSkill, hp: $.isActor()._hp, mp: $.isActor()._mp, tp: $.isActor()._tp, wt: $.isActor()._wt, states: $.isActor()._states, stateTurns: $.isActor()._stateTurns
                 };
+                //以下action
+                //var action = $.isActor().currentAction();
+                var result = $.isActor().result();
+                if (result) {
+                    send[i].isHit = result.isHit();
+                    send[i].critical = result.critical;
+                    if (result.hpAffected) send[i].hpDamage = result.hpDamage;
+                    send[i].addedStates = result.addedStates;
+                    send[i].removedStates = result.removedStates;
+                }
             }
             this.unitRef.update(send);
         }
@@ -507,7 +515,7 @@ function Game_Avatar() {
         _Game_Switches_initialize.apply(this, arguments);
         OnlineManager.startSync();
     };
-
+    /*
     //ユニット同期
     var _Scene_Map_endTurn = Scene_Map.prototype.endTurn;
     Scene_Map.prototype.endTurn = function () {
@@ -527,6 +535,7 @@ function Game_Avatar() {
             //OnlineManager.sendTempInfo();
         }
     };
+    */
 
     //ユニット同期
     var _Scene_Map_startBattle = Scene_Map.prototype.startBattle;
@@ -546,18 +555,6 @@ function Game_Avatar() {
         _Window_DebugEdit_update.apply(this, arguments);
         this.refresh();
     };
-    /*
-    //ユニット情報反映
-    var _Game_Map_setStartBattle = Game_Map.prototype.setStartBattle;
-    Game_Map.prototype.setStartBattle = function (byOnline) {
-        var prevD = this.direction();
-        _Game_Map_setStartBattle.call(this);
-        //前回と位置か方向が違う時のみ送信する
-        if (this.isMovementSucceeded() || d !== prevD) {
-            OnlineManager.sendPlayerInfo();
-        }
-    };
-    */
 
     //Game_Avatar
     //アバターとして使用するマップイベントを定義
@@ -612,6 +609,7 @@ function Game_Avatar() {
             this.moveTowardCharacter(this.online);
         }
     };
+
     // SRPGバトラー設定（オンライン用）
     Game_System.prototype.setMatchingOnline = function () {
         OnlineManager.sysRef.once("value").then(function (data) {
@@ -838,7 +836,7 @@ function Game_Avatar() {
                 break;
             case 12: //事後処理
                 this.endTurn(); //
-                $gameSystem.syncVariable(); //phaseStateの同期
+                //$gameSystem.syncVariable(); //phaseStateの同期(ここで行うとこちらのターンの時にphase2から始まってしまう不具合が発生するためコメントアウト(おそらく悪さしてるのはallyTurnとenemyTurn))
                 break;
             case 13: //ユニットリスト選択フェーズ
                 this.updateUnitListWindow();
@@ -879,9 +877,6 @@ function Game_Avatar() {
             //ユニット更新用、行動順更新用などで分けた方が良い
             for (var i = 0; i < $gameSystem.unitList().length; i++) {
                 var unit = $gameSystem.unitList()[i];
-                //unit._x = data.child(i).child("x").val();
-                //unit._y = data.child(i).child("y").val();
-                //unit._direction = data.child(i).child("direction").val();
                 $gameSystem.unitList()[i]._target = data.child(i).child("target").val();
                 $gameSystem.unitList()[i]._useSkill = data.child(i).child("useSkill").val();
                 $gameSystem.unitList()[i].isActor()._hp = data.child(i).child("hp").val();
@@ -899,8 +894,8 @@ function Game_Avatar() {
             //$gameSystem = data.val();
             $gameSystem._allyTeamID = data.child("_allyTeamID").val();
             $gameSystem._enemyTeamID = data.child("_enemyTeamID").val();
-            $gameSystem._isAllyTurn = data.child("_isAllyTurn").val();
-            $gameSystem._isEnemyTurn = data.child("_isEnemyTurn").val();
+            //$gameSystem._isAllyTurn = data.child("_isAllyTurn").val();
+            //$gameSystem._isEnemyTurn = data.child("_isEnemyTurn").val();
             $gameSystem._turnUnit = data.child("_turnUnit").val();
             $gameSystem._wtTurnList = data.child("_wtTurnList").val();
         });
@@ -911,9 +906,8 @@ function Game_Avatar() {
         if ($gameSwitches.value(19)) return true;
         else return false;
     };
-    Game_System.prototype.sendInfo = function () {
-        OnlineManager.sendUnitInfo();
+    Game_System.prototype.sendInfo = function (eventId = null) {
+        OnlineManager.sendUnitInfo(eventId);
         OnlineManager.sendSysInfo();
-        //$gameSwitches.setValue(20, true);
     };
 })();
