@@ -753,7 +753,8 @@ function Game_Avatar() {
                     $gameSystem._phaseState = 3; //状況によっては5に移行
                     $gameSwitches.setValue(23, false);
                 }
-                if ($gameSwitches.value(24) && $gameSwitches.value(20)) {
+                //if ($gameSwitches.value(24) && $gameSwitches.value(20)) {
+                if ($gameSwitches.value(24)) {
                     if(!turnUnit.useSkill()) return;
                     $gameSystem._phaseState = 5; //状況によっては5に移行
                     $gameSwitches.setValue(24, false);

@@ -1240,6 +1240,7 @@ Imported.TacticsBattleSys = true;
                 }
             }
         }
+        /*
         //送信が受信よりも遅いためスイッチ戦法を使う(うまくいかなかったのでスイッチと変数に一時格納戦法を使う)
         if ($gameSwitches.value(15)) {
             if (!$gameSystem.isSyncTurn()) {
@@ -1249,6 +1250,7 @@ Imported.TacticsBattleSys = true;
                 $gameSwitches.setValue(20, false);
             }
         }
+        */
         
     };
 
