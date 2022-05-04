@@ -3053,6 +3053,7 @@ Imported.TacticsBattleSys = true;
         var subject = this.isActor();
         var action = subject.currentAction();
         if (!action) {
+            console.log("action");
             SoundManager.playBuzzer();//ブザー
             return;
         }
