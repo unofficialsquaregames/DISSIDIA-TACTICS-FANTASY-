@@ -1027,9 +1027,7 @@ Imported.TacticsBattleSys = true;
 
         var isHit = result.isHit();
         if ($gameSwitches.value(15)) {
-            console.log(target.eventId);
-            var tunit = $gameMap.event(target.eventId);
-            console.log(tunit);
+            var tunit = $gameMap.event(target.eventId());
             var allyId = tunit.allyNumber();
             var enemyId = tunit.enemyNumber();
             var id;
@@ -1158,7 +1156,7 @@ Imported.TacticsBattleSys = true;
                 result.critical = (Math.random() < this.itemCri(target));
                 value = this.makeDamageValue(target, false, result.critical);
                 if ($gameSwitches.value(15)) {
-                    var tunit = $gameMap.event(target.eventId);
+                    var tunit = $gameMap.event(target.eventId());
                     var allyId = tunit.allyNumber();
                     var enemyId = tunit.enemyNumber();
                     var id;
