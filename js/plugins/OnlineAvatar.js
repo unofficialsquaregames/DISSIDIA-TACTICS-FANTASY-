@@ -309,7 +309,8 @@ function Game_Avatar() {
                 //var action = $.isActor().currentAction();
                 var result = $.isActor().result();
                 if (result) {
-                    send[i].isHit = result.isHit();
+                    send[i].missed = result.missed;
+                    send[i].evaded = result.evaded;
                     send[i].critical = result.critical;
                     if (result.hpAffected) send[i].hpDamage = result.hpDamage;
                     send[i].addedStates = result.addedStates;
@@ -836,7 +837,7 @@ function Game_Avatar() {
                 break;
             case 12: //事後処理
                 this.endTurn(); //
-                //$gameSystem.syncVariable(); //phaseStateの同期(ここで行うとこちらのターンの時にphase2から始まってしまう不具合が発生するためコメントアウト(おそらく悪さしてるのはallyTurnとenemyTurn))
+                //$gameSystem.syncVariable(); //phaseStateの同期(ここで行うと色々と不具合が怒るためコメントアウト)
                 break;
             case 13: //ユニットリスト選択フェーズ
                 this.updateUnitListWindow();
@@ -872,10 +873,11 @@ function Game_Avatar() {
     };
     */
     //同期用
-    Game_System.prototype.syncVariable = function () {
+    Game_System.prototype.syncVariable = function (eventId) {
         OnlineManager.unitRef.once("value").then(function (data) {
             //ユニット更新用、行動順更新用などで分けた方が良い
             for (var i = 0; i < $gameSystem.unitList().length; i++) {
+                if (eventId && eventId != $gameSystem.unitList()[i].event().id) continue;
                 var unit = $gameSystem.unitList()[i];
                 $gameSystem.unitList()[i]._target = data.child(i).child("target").val();
                 $gameSystem.unitList()[i]._useSkill = data.child(i).child("useSkill").val();
@@ -901,6 +903,39 @@ function Game_Avatar() {
         });
 
     };
+    //ヒットしたかを引き出す
+    Game_System.prototype.syncIsHitVariable = function (eventId) {
+        OnlineManager.unitRef.once("value").then(function (data) {
+            for (var i = 0; i < $gameSystem.unitList().length; i++) {
+                if (eventId != $gameSystem.unitList()[i].event().id) continue;
+                //ユニット更新用、行動順更新用などで分けた方が良い
+                var unit = $gameSystem.unitList()[i];
+                var result = unit.isActor().result();
+                if (result) {
+                    result.missed = data.child(i).child("missed").val();
+                    result.evaded = data.child(i).child("evaded").val();
+                }
+                return;
+            }
+        });
+    };
+
+    //受けたダメージを引き出す
+    Game_System.prototype.syncDamageVariable = function (eventId) {
+        OnlineManager.unitRef.once("value").then(function (data) {
+            for (var i = 0; i < $gameSystem.unitList().length; i++) {
+                if (eventId != $gameSystem.unitList()[i].event().id) continue;
+                //ユニット更新用、行動順更新用などで分けた方が良い
+                var unit = $gameSystem.unitList()[i];
+                var result = unit.isActor().result();
+                if (result) {
+                    result.critical = data.child(i).child("critical").val();
+                    result.hpDamage = data.child(i).child("hpDamage").val();
+                }
+                return;
+            }
+        });
+    };
     //WTリスト設定中か
     Game_System.prototype.isSyncVariableTime = function () {
         if ($gameSwitches.value(19)) return true;
@@ -909,5 +944,15 @@ function Game_Avatar() {
     Game_System.prototype.sendInfo = function (eventId = null) {
         OnlineManager.sendUnitInfo(eventId);
         OnlineManager.sendSysInfo();
+    };
+    //同期中のターンか
+    Game_System.prototype.isSyncTurn = function () {
+        if ($gameSystem.isEnemyTurn()) {
+            if ($gameSystem._enemyTeamID == OnlineManager.user.uid) return false;
+            else return true;
+        } else if ($gameSystem.isAllyTurn()) {
+            if ($gameSystem._allyTeamID == OnlineManager.user.uid) return false;
+            else return true;
+        }
     };
 })();

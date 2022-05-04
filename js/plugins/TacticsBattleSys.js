@@ -1025,6 +1025,10 @@ Imported.TacticsBattleSys = true;
         result.physical = this.isPhysical();
         result.drain = this.isDrain();
 
+        if ($gameSwitches.value(15)) {
+            if ($gameSystem.isSyncTurn()) $gameSystem.syncIsHitVariable(target.eventId()); //不具合が発生している
+        }
+
         //ヒット時の挙動
         if (result.isHit()) {
             //味方ユニットが対象
@@ -1142,6 +1146,9 @@ Imported.TacticsBattleSys = true;
                 result.critical = (Math.random() < this.itemCri(target));
                 value = this.makeDamageValue(target, false, result.critical);
                 this.executeDamage(target, value);
+                if ($gameSwitches.value(15)) {
+                    if ($gameSystem.isSyncTurn()) $gameSystem.syncDamageVariable(target.eventId()); //不具合が発生している
+                }
                 //バフ奪取(クリティカル発生時のみ)
                 if (turnUnit.useSkill().meta.steal) {
                     if ((turnUnit.useSkill().meta.steal == "buff" && result.critical) || turnUnit.useSkill().meta.steal == "burst") {
@@ -1215,7 +1222,9 @@ Imported.TacticsBattleSys = true;
                 }
             }
         }
-        if ($gameSwitches.value(15)) $gameSystem.sendInfo(target.eventId());
+        if ($gameSwitches.value(15)) {
+            if (!$gameSystem.isSyncTurn()) $gameSystem.sendInfo(target.eventId());
+        }
     };
 
     //ダメージ設定
@@ -2217,7 +2226,6 @@ Imported.TacticsBattleSys = true;
         var x = turnUnit.x;
         var y = turnUnit.y;
         var skill = turnUnit.useSkill();
-        console.log(skill);
         var a = (skill.meta.range || 'diamond 1').split(' ');
         a[1] = parseInt(a[1]);
         if (a[0] == "weapon") {
@@ -3053,7 +3061,7 @@ Imported.TacticsBattleSys = true;
         var subject = this.isActor();
         var action = subject.currentAction();
         if (!action) {
-            console.log("action");
+            console.log("executeAction");
             SoundManager.playBuzzer();//ブザー
             return;
         }
