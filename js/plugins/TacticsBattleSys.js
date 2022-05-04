@@ -1027,9 +1027,11 @@ Imported.TacticsBattleSys = true;
 
         var isHit = result.isHit();
         if ($gameSwitches.value(15)) {
+            console.log(target.eventId);
             var tunit = $gameMap.event(target.eventId);
-            var allyId = tunit.event().meta.Ally;
-            var enemyId = tunit.event().meta.Enemy;
+            console.log(tunit);
+            var allyId = tunit.allyNumber();
+            var enemyId = tunit.enemyNumber();
             var id;
             if (allyId) id = 31 + parseInt(allyId);
             else if (enemyId) id = 36 + parseInt(enemyId);
@@ -1157,8 +1159,8 @@ Imported.TacticsBattleSys = true;
                 value = this.makeDamageValue(target, false, result.critical);
                 if ($gameSwitches.value(15)) {
                     var tunit = $gameMap.event(target.eventId);
-                    var allyId = tunit.event().meta.Ally;
-                    var enemyId = tunit.event().meta.Enemy;
+                    var allyId = tunit.allyNumber();
+                    var enemyId = tunit.enemyNumber();
                     var id;
                     if (allyId) id = 21 + parseInt(allyId);
                     else if (enemyId) id = 26 + parseInt(enemyId);
@@ -2776,8 +2778,8 @@ Imported.TacticsBattleSys = true;
         this._toY = 0; //移動先Y座標
 
         var unitId;
-        var allyId = this.event().meta.Ally;
-        var enemyId = this.event().meta.Enemy;
+        var allyId = this.allyNumber();
+        var enemyId = this.enemyNumber();
 
         //this.setStepAnime(true); //足踏みアニメon
         this.setMoveSpeed(4);//移動速度を通常に設定
@@ -3001,6 +3003,13 @@ Imported.TacticsBattleSys = true;
     // 移動先座標Yの情報
     Game_Event.prototype.toY = function () {
         return this._toY;
+    };
+
+    Game_Event.prototype.allyNumber = function () {
+        return this.event().meta.Ally;
+    };
+    Game_Event.prototype.enemyNumber = function () {
+        return this.event().meta.Enemy;
     };
     // 攻撃時のアニメ設定
     Game_Event.prototype.setBattlerAttack = function () {
