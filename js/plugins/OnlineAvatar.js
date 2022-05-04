@@ -741,6 +741,7 @@ function Game_Avatar() {
                 //クラス設定されたタグに合わせてターゲットを変更する
                 if (!turnUnit.isActor().canMove()) {
                     //$gameMessage.add("行動不能");
+                    console.log("canMove");
                     SoundManager.playBuzzer();//ブザー
                     //$gameMessage.clear(); //行動不能などのメッセージを消去したい
                     $gameSystem._phaseState = 11; //麻痺とかであれば以降の処理は行わず次のターンへ
@@ -754,6 +755,7 @@ function Game_Avatar() {
                     $gameSwitches.setValue(23, false);
                 }
                 if ($gameSwitches.value(24)) {
+                    if(!turnUnit.useSkill()) return;
                     $gameSystem._phaseState = 5; //状況によっては5に移行
                     $gameSwitches.setValue(24, false);
                 }

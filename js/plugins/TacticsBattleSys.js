@@ -1025,10 +1025,12 @@ Imported.TacticsBattleSys = true;
         result.physical = this.isPhysical();
         result.drain = this.isDrain();
 
+        console.log(result);
         if ($gameSwitches.value(15)) {
             if ($gameSystem.isSyncTurn()) $gameSystem.syncIsHitVariable(target.eventId()); //不具合が発生している
+            else $gameSystem.sendInfo(target.eventId());
         }
-
+        console.log(result);
         //ヒット時の挙動
         if (result.isHit()) {
             //味方ユニットが対象
@@ -1148,6 +1150,7 @@ Imported.TacticsBattleSys = true;
                 this.executeDamage(target, value);
                 if ($gameSwitches.value(15)) {
                     if ($gameSystem.isSyncTurn()) $gameSystem.syncDamageVariable(target.eventId()); //不具合が発生している
+                    else $gameSystem.sendInfo(target.eventId());
                 }
                 //バフ奪取(クリティカル発生時のみ)
                 if (turnUnit.useSkill().meta.steal) {
@@ -1222,9 +1225,11 @@ Imported.TacticsBattleSys = true;
                 }
             }
         }
+        /*
         if ($gameSwitches.value(15)) {
             if (!$gameSystem.isSyncTurn()) $gameSystem.sendInfo(target.eventId());
         }
+        */
     };
 
     //ダメージ設定
@@ -2221,7 +2226,7 @@ Imported.TacticsBattleSys = true;
         }
     };
 
-    // 射程範囲を作成する
+    // 射程範囲を作成する(オンライン時skillにnullが入って強制終了(同期失敗))
     Game_Map.prototype.createRangeArea = function (turnUnit, weapon) {
         var x = turnUnit.x;
         var y = turnUnit.y;
@@ -3061,14 +3066,17 @@ Imported.TacticsBattleSys = true;
         var subject = this.isActor();
         var action = subject.currentAction();
         if (!action) {
+            subject.makeActions();
+            action = subject.currentAction();
             console.log("executeAction");
             SoundManager.playBuzzer();//ブザー
             return;
         }
-        var checkFlag = action.isSkill() || action.isItem();// && action.item().id === checkSkillId; //isSkillでエラー発生(Enemyだとundefind)
+        //var checkFlag = action.isSkill() || action.isItem();// && action.item().id === checkSkillId; //isSkillでエラー発生(Enemyだとundefind)
         var targets = $gameMap.unitsArea($gameMap._targetArea, true); //対象とその周囲を設定
         //対象にチャーム付与者がいた場合、攻撃中止する
         if (this.effectLieCryingCheck(targets)) {
+            console.log("effectLieCryingCheck");
             SoundManager.playBuzzer();//ブザー
             return;
         }
@@ -3088,11 +3096,13 @@ Imported.TacticsBattleSys = true;
                     if (coverUnit) targets[i] = coverUnit;
                     //ダメージ無効エリアチェック(CPU用?)
                     if (this.checkInvalidArea(targets[i])) {
+                        console.log("checkInvalidArea");
                         SoundManager.playBuzzer();//ブザー
                         continue;
                     }
                     //リフレクターチェック
                     if (this.checkReflector(targets[i], this.useSkill(), action)) {
+                        console.log("checkReflector");
                         SoundManager.playBuzzer();//ブザー
                         continue;
                     }
