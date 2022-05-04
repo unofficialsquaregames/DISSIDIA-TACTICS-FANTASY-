@@ -1025,13 +1025,21 @@ Imported.TacticsBattleSys = true;
         result.physical = this.isPhysical();
         result.drain = this.isDrain();
 
-        console.log(result);
+        var isHit = result.isHit();
         if ($gameSwitches.value(15)) {
-            if ($gameSystem.isSyncTurn()) $gameSystem.syncIsHitVariable(target.eventId()); //不具合が発生している
+            var allyId = $gameEvent[target.eventId].event().meta.Ally;
+            var enemyId = $gameEvent[target.eventId].event().meta.Enemy;
+            var id;
+            if (allyId) id = 31 + parseInt(allyId);
+            else if (enemyId) id = 36 + parseInt(enemyId);
+            if ($gameSystem.isSyncTurn()) {
+                isHit = $gameSwitches.value(id);
+            } else {
+                $gameSwitches.setValue(id, result.isHit()); //イベントIDに依存している
+            }
         }
-        console.log(result);
         //ヒット時の挙動
-        if (result.isHit()) {
+        if (isHit) {
             //味方ユニットが対象
             if (turnUnit.isCoverTarget(targetUnit)) {
                 //デバフ消去
@@ -1146,10 +1154,19 @@ Imported.TacticsBattleSys = true;
             if (this.item().damage.type > 0) {
                 result.critical = (Math.random() < this.itemCri(target));
                 value = this.makeDamageValue(target, false, result.critical);
-                this.executeDamage(target, value);
                 if ($gameSwitches.value(15)) {
-                    if ($gameSystem.isSyncTurn()) $gameSystem.syncDamageVariable(target.eventId()); //不具合が発生している
+                    var allyId = $gameEvent[target.eventId].event().meta.Ally;
+                    var enemyId = $gameEvent[target.eventId].event().meta.Enemy;
+                    var id;
+                    if (allyId) id = 21 + parseInt(allyId);
+                    else if (enemyId) id = 26 + parseInt(enemyId);
+                    if ($gameSystem.isSyncTurn()) {
+                        value = $gameVariables.value(id);
+                    } else {
+                        $gameVariables.setValue(id, value); //イベントIDに依存している
+                    }
                 }
+                this.executeDamage(target, value);
                 //バフ奪取(クリティカル発生時のみ)
                 if (turnUnit.useSkill().meta.steal) {
                     if ((turnUnit.useSkill().meta.steal == "buff" && result.critical) || turnUnit.useSkill().meta.steal == "burst") {
@@ -1223,7 +1240,7 @@ Imported.TacticsBattleSys = true;
                 }
             }
         }
-        
+        //送信が受信よりも遅いためスイッチ戦法を使う(うまくいかなかったのでスイッチと変数に一時格納戦法を使う)
         if ($gameSwitches.value(15)) {
             if (!$gameSystem.isSyncTurn()) {
                 $gameSystem.sendInfo(target.eventId());
@@ -8134,7 +8151,6 @@ Imported.TacticsBattleSys = true;
         //オンライン
         if ($gameSwitches.value(15)) {
             $gameSystem.sendInfo(); //オンライン時の処理
-            //$gameSwitches.setValue(20, true);
             $gameSwitches.setValue(25, true);
         }
         //待機エリア表示しようか検討中(事後処理にいれる？)
@@ -8196,7 +8212,6 @@ Imported.TacticsBattleSys = true;
                 $gameTemp._cameraWait = true;
                 if ($gameSwitches.value(15)) {
                     $gameSystem.sendInfo(); //オンライン時の処理(送信は間開けた方がいい？)
-                    //$gameSwitches.setValue(20, true);
                     $gameSwitches.setValue(23, true);//移動選択フラグ
                 }
 
@@ -8333,7 +8348,6 @@ Imported.TacticsBattleSys = true;
         $gameTemp._attackStartFlag = true;
         if ($gameSwitches.value(15)) {
             $gameSystem.sendInfo(); //オンライン時の処理
-            //$gameSwitches.setValue(20, true);
             $gameSwitches.setValue(24, true);
         }
         //コマンド実行
