@@ -1027,8 +1027,8 @@ Imported.TacticsBattleSys = true;
 
         var isHit = result.isHit();
         if ($gameSwitches.value(15)) {
-            var allyId = $gameMap.event(target.eventId).event().meta.Ally;
-            var enemyId = $gameMap.event(target.eventId).event().meta.Enemy;
+            var allyId = $gameMap.event(target.eventId).meta.Ally;
+            var enemyId = $gameMap.event(target.eventId).meta.Enemy;
             var id;
             if (allyId) id = 31 + parseInt(allyId);
             else if (enemyId) id = 36 + parseInt(enemyId);
@@ -1155,8 +1155,8 @@ Imported.TacticsBattleSys = true;
                 result.critical = (Math.random() < this.itemCri(target));
                 value = this.makeDamageValue(target, false, result.critical);
                 if ($gameSwitches.value(15)) {
-                    var allyId = $gameEvent(target.eventId).event().meta.Ally;
-                    var enemyId = $gameEvent(target.eventId).event().meta.Enemy;
+                    var allyId = $gameEvent(target.eventId).meta.Ally;
+                    var enemyId = $gameEvent(target.eventId).meta.Enemy;
                     var id;
                     if (allyId) id = 21 + parseInt(allyId);
                     else if (enemyId) id = 26 + parseInt(enemyId);
