@@ -836,7 +836,7 @@ function Game_Avatar() {
                 break;
             case 12: //事後処理
                 this.endTurn(); //
-                //$gameSystem.syncVariable(); //phaseStateの同期(ここで行うとこちらのターンの時にphase2から始まってしまう不具合が発生するためコメントアウト(おそらく悪さしてるのはallyTurnとenemyTurn))
+                $gameSystem.syncVariable(); //phaseStateの同期(ここで行うとこちらのターンの時にphase2から始まってしまう不具合が発生するためコメントアウト(おそらく悪さしてるのはallyTurnとenemyTurn))
                 break;
             case 13: //ユニットリスト選択フェーズ
                 this.updateUnitListWindow();

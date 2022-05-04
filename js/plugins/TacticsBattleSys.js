@@ -2217,6 +2217,7 @@ Imported.TacticsBattleSys = true;
         var x = turnUnit.x;
         var y = turnUnit.y;
         var skill = turnUnit.useSkill();
+        console.log(skill);
         var a = (skill.meta.range || 'diamond 1').split(' ');
         a[1] = parseInt(a[1]);
         if (a[0] == "weapon") {
