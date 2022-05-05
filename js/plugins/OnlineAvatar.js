@@ -303,7 +303,7 @@ function Game_Avatar() {
                 var $ = $gameSystem.unitList()[i];
                 if (eventId && eventId != $gameSystem.unitList()[i].event().id) continue;
                 send[i] = {
-                    x: $._x, y: $._y, direction: $.direction(), toX: $.toX(), toY: $.toY(), target: $._target, useSkill: $._useSkill, hp: $.isActor()._hp, mp: $.isActor()._mp, tp: $.isActor()._tp, wt: $.isActor()._wt, states: $.isActor()._states, stateTurns: $.isActor()._stateTurns
+                    x: $._x, y: $._y, direction: $.direction(), toX: $.toX(), toY: $.toY(), target: $._target, useSkill: $._useSkill, hp: $.isActor()._hp, mp: $.isActor()._mp, tp: $.isActor()._tp, wt: $.isActor()._wt, states: $.isActor()._states, stateTurns: $.isActor()._stateTurns, stateGrantors: $.isActor()._stateGrantors
                 };
                 //以下action
                 //var action = $.isActor().currentAction();
@@ -880,8 +880,10 @@ function Game_Avatar() {
                 $gameSystem.unitList()[i].setToXy(data.child(i).child("toX").val(), data.child(i).child("toY").val());
                 console.log(data.child(i).child("states").val());
                 console.log(data.child(i).child("stateTurns").val());
+                console.log(data.child(i).child("stateGrantors").val());
                 //unit.isActor()._states = data.child(i).child("states").val();
                 //unit.isActor()._stateTurns = data.child(i).child("stateTurns").val();
+                //unit.isActor()._stateTurns = data.child(i).child("stateGrantors").val();
             }
         });
 
@@ -890,10 +892,24 @@ function Game_Avatar() {
             //$gameSystem = data.val();
             $gameSystem._allyTeamID = data.child("allyTeamID").val();
             $gameSystem._enemyTeamID = data.child("enemyTeamID").val();
+            //$gameSystem._turnUnit = data.child("turnUnit").val();
+            //$gameSystem._wtTurnList = data.child("wtTurnList").val();
+        });
+
+    };
+    //同期用
+    Game_System.prototype.syncWtList = function () {
+        OnlineManager.sysRef.once("value").then(function (data) {
+            //ユニット更新用、行動順更新用などで分けた方が良い
             $gameSystem._turnUnit = data.child("turnUnit").val();
             $gameSystem._wtTurnList = data.child("wtTurnList").val();
         });
 
+        OnlineManager.unitRef.once("value").then(function (data) {
+            for (var i = 0; i < $gameSystem.unitList().length; i++) {
+                $gameSystem.unitList()[i].isActor()._wt = data.child(i).child("wt").val();
+            }
+        });
     };
     //WTリスト設定中か
     Game_System.prototype.isSyncVariableTime = function () {

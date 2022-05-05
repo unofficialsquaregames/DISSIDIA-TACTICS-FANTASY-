@@ -591,6 +591,7 @@ Imported.TacticsBattleSys = true;
         }
         $gamePlayer.setTransparent(false); //透明化OFF
         $gamePlayer.refresh(); //カーソル化
+        if ($gameSwitches.value(15)) $gameSystem.syncWtList();
     };
 
     // SRPG機能を無効にします
