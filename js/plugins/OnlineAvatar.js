@@ -613,8 +613,8 @@ function Game_Avatar() {
 
     // SRPGバトラー設定（オンライン用）
     Game_System.prototype.setMatchingOnline = function () {
-        $gameSystem.syncVariable();
         OnlineManager.sysRef.once("value").then(function (data) {
+            //$gameSystem.syncVariable();
             if (!$gameSwitches.value(17)) {
                 $gameSystem._allyTeamID = OnlineManager.user.uid;
                 $gameSystem._enemyTeamID = data.child("_enemyTeamID").val();
@@ -889,10 +889,8 @@ function Game_Avatar() {
         OnlineManager.sysRef.once("value").then(function (data) {
             //ユニット更新用、行動順更新用などで分けた方が良い
             //$gameSystem = data.val();
-            if (!$gameSystem._allyTeamID) $gameSystem._allyTeamID = data.child("allyTeamID").val();
-            if (!$gameSystem._enemyTeamID) $gameSystem._enemyTeamID = data.child("enemyTeamID").val();
-            //$gameSystem._isAllyTurn = data.child("isAllyTurn").val();
-            //$gameSystem._isEnemyTurn = data.child("isEnemyTurn").val();
+            //$gameSystem._allyTeamID = data.child("allyTeamID").val();
+            //$gameSystem._enemyTeamID = data.child("enemyTeamID").val();
             $gameSystem._turnUnit = data.child("turnUnit").val();
             $gameSystem._wtTurnList = data.child("wtTurnList").val();
         });
