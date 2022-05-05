@@ -895,39 +895,6 @@ function Game_Avatar() {
         });
 
     };
-    //ヒットしたかを引き出す
-    Game_System.prototype.syncIsHitVariable = function (eventId) {
-        OnlineManager.unitRef.once("value").then(function (data) {
-            for (var i = 0; i < $gameSystem.unitList().length; i++) {
-                if (eventId != $gameSystem.unitList()[i].event().id) continue;
-                //ユニット更新用、行動順更新用などで分けた方が良い
-                var unit = $gameSystem.unitList()[i];
-                var result = unit.isActor().result();
-                if (result) {
-                    result.missed = data.child(i).child("missed").val();
-                    result.evaded = data.child(i).child("evaded").val();
-                }
-                return;
-            }
-        });
-    };
-
-    //受けたダメージを引き出す
-    Game_System.prototype.syncDamageVariable = function (eventId) {
-        OnlineManager.unitRef.once("value").then(function (data) {
-            for (var i = 0; i < $gameSystem.unitList().length; i++) {
-                if (eventId != $gameSystem.unitList()[i].event().id) continue;
-                //ユニット更新用、行動順更新用などで分けた方が良い
-                var unit = $gameSystem.unitList()[i];
-                var result = unit.isActor().result();
-                if (result) {
-                    result.critical = data.child(i).child("critical").val();
-                    result.hpDamage = data.child(i).child("hpDamage").val();
-                }
-                return;
-            }
-        });
-    };
     //WTリスト設定中か
     Game_System.prototype.isSyncVariableTime = function () {
         if ($gameSwitches.value(19)) return true;

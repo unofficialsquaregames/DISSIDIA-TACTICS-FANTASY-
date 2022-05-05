@@ -1167,6 +1167,13 @@ Imported.TacticsBattleSys = true;
                     } else {
                         $gameVariables.setValue(id, value); //イベントIDに依存している
                     }
+                    if (allyId) id = 41 + parseInt(allyId);
+                    else if (enemyId) id = 46 + parseInt(enemyId);
+                    if ($gameSystem.isSyncTurn()) {
+                        result.critical = $gameSwitches.value(id);
+                    } else {
+                        $gameSwitches.setValue(id, result.critical); //イベントIDに依存している
+                    }
                 }
                 this.executeDamage(target, value);
                 //バフ奪取(クリティカル発生時のみ)
@@ -1242,18 +1249,6 @@ Imported.TacticsBattleSys = true;
                 }
             }
         }
-        /*
-        //送信が受信よりも遅いためスイッチ戦法を使う(うまくいかなかったのでスイッチと変数に一時格納戦法を使う)
-        if ($gameSwitches.value(15)) {
-            if (!$gameSystem.isSyncTurn()) {
-                $gameSystem.sendInfo(target.eventId());
-                $gameSwitches.setValue(20, true);
-            } else {
-                $gameSwitches.setValue(20, false);
-            }
-        }
-        */
-        
     };
 
     //ダメージ設定
