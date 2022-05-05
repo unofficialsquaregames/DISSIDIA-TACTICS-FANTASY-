@@ -878,12 +878,12 @@ function Game_Avatar() {
                 $gameSystem.unitList()[i].isActor()._tp = data.child(i).child("tp").val();
                 $gameSystem.unitList()[i].isActor()._wt = data.child(i).child("wt").val();
                 $gameSystem.unitList()[i].setToXy(data.child(i).child("toX").val(), data.child(i).child("toY").val());
-                console.log(data.child(i).child("states").val());
-                console.log(data.child(i).child("stateTurns").val());
-                console.log(data.child(i).child("stateGrantors").val());
-                //unit.isActor()._states = data.child(i).child("states").val();
-                //unit.isActor()._stateTurns = data.child(i).child("stateTurns").val();
-                //unit.isActor()._stateTurns = data.child(i).child("stateGrantors").val();
+                unit.isActor()._states = data.child(i).child("states").val();
+                unit.isActor()._stateTurns = data.child(i).child("stateTurns").val();
+                unit.isActor()._stateGrantors = data.child(i).child("stateGrantors").val();
+                console.log(unit.isActor()._states);
+                console.log(unit.isActor()._stateTurns);
+                console.log(unit.isActor()._stateGrantors);
             }
         });
 
