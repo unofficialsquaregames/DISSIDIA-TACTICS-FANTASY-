@@ -881,9 +881,7 @@ function Game_Avatar() {
                 unit.isActor()._states = data.child(i).child("states").val();
                 unit.isActor()._stateTurns = data.child(i).child("stateTurns").val();
                 unit.isActor()._stateGrantors = data.child(i).child("stateGrantors").val();
-                console.log(unit.isActor()._states);
-                console.log(unit.isActor()._stateTurns);
-                console.log(unit.isActor()._stateGrantors);
+                if(!unit.isActor()._states) this.isActor().clearStates();
             }
         });
 
