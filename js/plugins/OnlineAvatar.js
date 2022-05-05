@@ -613,6 +613,7 @@ function Game_Avatar() {
 
     // SRPGバトラー設定（オンライン用）
     Game_System.prototype.setMatchingOnline = function () {
+        OnlineManager.sendSysInfo();
         OnlineManager.sysRef.once("value").then(function (data) {
             if (!$gameSwitches.value(17)) {
                 $gameSystem._allyTeamID = OnlineManager.user.uid;
@@ -878,6 +879,8 @@ function Game_Avatar() {
                 $gameSystem.unitList()[i].isActor()._tp = data.child(i).child("tp").val();
                 $gameSystem.unitList()[i].isActor()._wt = data.child(i).child("wt").val();
                 $gameSystem.unitList()[i].setToXy(data.child(i).child("toX").val(), data.child(i).child("toY").val());
+                console.log(data.child(i).child("states").val());
+                console.log(data.child(i).child("stateTurns").val());
                 //unit.isActor()._states = data.child(i).child("states").val();
                 //unit.isActor()._stateTurns = data.child(i).child("stateTurns").val();
             }
@@ -886,8 +889,8 @@ function Game_Avatar() {
         OnlineManager.sysRef.once("value").then(function (data) {
             //ユニット更新用、行動順更新用などで分けた方が良い
             //$gameSystem = data.val();
-            $gameSystem._allyTeamID = data.child("allyTeamID").val();
-            $gameSystem._enemyTeamID = data.child("enemyTeamID").val();
+            if (!$gameSystem._allyTeamID) $gameSystem._allyTeamID = data.child("allyTeamID").val();
+            if (!$gameSystem._enemyTeamID) $gameSystem._enemyTeamID = data.child("enemyTeamID").val();
             //$gameSystem._isAllyTurn = data.child("isAllyTurn").val();
             //$gameSystem._isEnemyTurn = data.child("isEnemyTurn").val();
             $gameSystem._turnUnit = data.child("turnUnit").val();
