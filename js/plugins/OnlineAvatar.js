@@ -613,7 +613,7 @@ function Game_Avatar() {
 
     // SRPGバトラー設定（オンライン用）
     Game_System.prototype.setMatchingOnline = function () {
-        OnlineManager.sendSysInfo();
+        $gameSystem.syncVariable();
         OnlineManager.sysRef.once("value").then(function (data) {
             if (!$gameSwitches.value(17)) {
                 $gameSystem._allyTeamID = OnlineManager.user.uid;
