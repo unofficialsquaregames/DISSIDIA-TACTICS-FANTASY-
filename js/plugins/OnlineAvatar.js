@@ -614,14 +614,13 @@ function Game_Avatar() {
     // SRPGバトラー設定（オンライン用）
     Game_System.prototype.setMatchingOnline = function () {
         OnlineManager.sysRef.once("value").then(function (data) {
-            //$gameSystem.syncVariable();
-            if (!$gameSwitches.value(17)) {
+            if (!$gameSwitches.value(17) && $gameSystem._allyTeamID == "") {
                 $gameSystem._allyTeamID = OnlineManager.user.uid;
-                $gameSystem._enemyTeamID = data.child("_enemyTeamID").val();
+                $gameSystem._enemyTeamID = data.child("enemyTeamID").val();
                 $gameSwitches.setValue(17, true);
                 OnlineManager.sendSysInfo();
             } else if (!$gameSwitches.value(18) && $gameSystem._allyTeamID != OnlineManager.user.uid) {
-                $gameSystem._allyTeamID = data.child("_allyTeamID").val();
+                $gameSystem._allyTeamID = data.child("allyTeamID").val();
                 $gameSystem._enemyTeamID = OnlineManager.user.uid;
                 $gameSwitches.setValue(18, true);
                 OnlineManager.sendSysInfo();
