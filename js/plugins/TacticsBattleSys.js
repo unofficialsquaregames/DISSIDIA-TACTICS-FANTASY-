@@ -595,7 +595,7 @@ Imported.TacticsBattleSys = true;
 
     // SRPG機能を無効にします
     Game_System.prototype.battleDeactivate = function () {
-        this.initColorArea();
+        $gameMap.initColorArea();
         this._battleActive = false;
         $gameParty.reviveBattleMembers();
         $gameParty.removeBattleStates();
@@ -837,7 +837,8 @@ Imported.TacticsBattleSys = true;
                                 var trapGrantorUnit = this.unitList()[j];
                                 var trapGrantorActor = trapGrantorUnit.isActor();
                                 var trapGrantorIsArea = false;
-                                if ((trapGrantorActor._classId == parseInt(trapGrantor)) && trapGrantorUnit.isHostileUnit(target)) {
+                                //if ((trapGrantorActor._classId == parseInt(trapGrantor)) && trapGrantorUnit.isHostileUnit(target)) {
+                                if (actor.checkStateGrantorId(trapGrantorActor.eventId(), id)) {
                                     trapGrantorIsArea = true;
                                     break;
                                 }
@@ -855,7 +856,8 @@ Imported.TacticsBattleSys = true;
                             var slipUnit = this.unitList()[j];
                             var slipActor = slipUnit.isActor();
                             var slipIsArea = false;
-                            if ((slipActor._classId == parseInt(slipGrantor)) && slipUnit.isHostileUnit(target)) {
+                            //if ((slipActor._classId == parseInt(slipGrantor)) && slipUnit.isHostileUnit(target)) {
+                            if (actor.checkStateGrantorId(slipActor.eventId(), id)) {
                                 slipIsArea = true;
                                 break;
                             }
@@ -872,7 +874,8 @@ Imported.TacticsBattleSys = true;
                             var coverUnit = this.unitList()[j];
                             var coverActor = coverUnit.isActor();
                             var coverIsArea = false;
-                            if ((coverActor._classId == parseInt(coverGrantor)) && !coverUnit.isHostileUnit(target)) {
+                            //if ((coverActor._classId == parseInt(coverGrantor)) && !coverUnit.isHostileUnit(target)) {
+                            if (actor.checkStateGrantorId(coverActor.eventId(), id)) {
                                 coverIsArea = true;
                                 break;
                             }
@@ -888,7 +891,8 @@ Imported.TacticsBattleSys = true;
                             var changeUnit = this.unitList()[j];
                             var changeActor = changeUnit.isActor();
                             var changeIsArea = false;
-                            if ((changeActor._classId == parseInt(changeGrantor)) && !changeUnit.isHostileUnit(target)) {
+                            //if ((changeActor._classId == parseInt(changeGrantor)) && !changeUnit.isHostileUnit(target)) {
+                            if (actor.checkStateGrantorId(changeActor.eventId(), id)) {
                                 changeIsArea = true;
                                 break;
                             }
@@ -906,7 +910,8 @@ Imported.TacticsBattleSys = true;
                             if (!hateUnit.isHostileUnit(target)) continue;
                             if ($dataStates[id].meta.hateGrantor) {
                                 var hateGrantor = $dataStates[id].meta.hateGrantor;
-                                if (hateActor._classId == parseInt(hateGrantor)) {
+                                //if (hateActor._classId == parseInt(hateGrantor)) {
+                                if (actor.checkStateGrantorId(hateActor.eventId(), id)) {
                                     hateIsArea = true;
                                     break;
                                 }
@@ -929,7 +934,8 @@ Imported.TacticsBattleSys = true;
                             var ctrlUnit = this.unitList()[j];
                             var ctrlActor = ctrlUnit.isActor();
                             var ctrlIsArea = false;
-                            if (ctrlActor._classId == parseInt(ctrlGrantor) && !target.isHostileUnit(ctrlUnit)) {
+                            //if (ctrlActor._classId == parseInt(ctrlGrantor) && !target.isHostileUnit(ctrlUnit)) {
+                            if (actor.checkStateGrantorId(ctrlActor.eventId(), id)) {
                                 ctrlIsArea = true;
                                 break;
                             }
@@ -945,7 +951,8 @@ Imported.TacticsBattleSys = true;
                             var shiftUnit = this.unitList()[j];
                             var shiftActor = shiftUnit.isActor();
                             var shiftIsArea = false;
-                            if (shiftActor._classId == parseInt(shiftGrantor) && !target.isHostileUnit(shiftUnit)) {
+                            //if (shiftActor._classId == parseInt(shiftGrantor) && !target.isHostileUnit(shiftUnit)) {
+                            if (actor.checkStateGrantorId(shiftActor.eventId(), id)) {
                                 shiftIsArea = true;
                                 break;
                             }
@@ -961,7 +968,8 @@ Imported.TacticsBattleSys = true;
                             var traceUnit = this.unitList()[j];
                             var traceActor = traceUnit.isActor();
                             var traceIsArea = false;
-                            if (traceActor._classId == parseInt(traceGrantor) && target.isHostileUnit(traceUnit)) {
+                            //if (traceActor._classId == parseInt(traceGrantor) && target.isHostileUnit(traceUnit)) {
+                            if (actor.checkStateGrantorId(traceActor.eventId(), id)) {
                                 traceIsArea = true;
                                 break;
                             }
@@ -1130,7 +1138,7 @@ Imported.TacticsBattleSys = true;
                     if (turnUnit.useSkill().meta.throw == "debuff") {
                         var states = this.subject()._states; //ステータスIDの配列
                         for (var id = 0; id < states.length; id++) {
-                            if ($dataStates[states[id]].meta.type == "debuff") target.addState(states[id]);
+                            if ($dataStates[states[id]].meta.type == "debuff") target.addState(this.subject().eventId(), states[id]);
                         }
                         //this.subject().removeDebuffState(); //自身のデバフを消去
                     }
@@ -1183,7 +1191,7 @@ Imported.TacticsBattleSys = true;
                         for (var id = 0; id < states.length; id++) {
                             if ($dataStates[states[id]].meta.type == "buff") {
                                 if ($dataStates[states[id]].meta.buffFixed && !result.critical) continue; //フレーム付きの場合、クリティカルヒット時にダッシュ可能
-                                this.subject().addState(states[id]);
+                                this.subject().addState(this.subject().eventId(), states[id]);
                                 target.removeState(states[id]);
                                 break;
                             }
@@ -1335,6 +1343,30 @@ Imported.TacticsBattleSys = true;
         var value = Math.floor(this.item().tpGain * this.subject().tcr);
         this.subject().gainSilentTp(value);
     };
+    //addNewState仕様変更のため再定義する必要あり
+    Game_Action.prototype.itemEffectAddNormalState = function (target, effect) {
+        var chance = effect.value1;
+        if (!this.isCertainHit()) {
+            chance *= target.stateRate(effect.dataId);
+            chance *= this.lukEffectRate(target);
+        }
+        if (Math.random() < chance) {
+            target.addState(this.subject().eventId(), effect.dataId);
+            this.makeSuccess(target);
+        }
+    };
+    Game_Action.prototype.itemEffectAddAttackState = function (target, effect) {
+        this.subject().attackStates().forEach(function (stateId) {
+            var chance = effect.value1;
+            chance *= target.stateRate(stateId);
+            chance *= this.subject().attackStatesRate(stateId);
+            chance *= this.lukEffectRate(target);
+            if (Math.random() < chance) {
+                target.addState(this.subject().eventId(), stateId);
+                this.makeSuccess(target);
+            }
+        }.bind(this), target);
+    };
     //-----------------------------------------------------------------------------
     // Game_ActionResult
     //
@@ -1355,14 +1387,33 @@ Imported.TacticsBattleSys = true;
         this._wt = Math.floor(Math.random() * 50); //自身のウェイトターン到達でターンが回り、行動終了後リセットされるような
         this._eventId = null; //バトラーと紐づいてるイベントをセットする
     }
+    //rpg_object.jsより
+    Game_BattlerBase.prototype.clearStates = function () {
+        this._states = [];
+        this._stateTurns = {};
+        this._stateGrantors = {}; //新規追加(ステート付与者)
+    };
     //紐づいてるイベントを返す
     Game_BattlerBase.prototype.eventId = function () {
         return this._eventId;
-    }
+    };
     //イベントを紐づける
     Game_BattlerBase.prototype.setEventId = function (eventId) {
         this._eventId = eventId;
-    }
+    };
+
+    //ステート付与者を返す
+    Game_BattlerBase.prototype.stateGrantor = function (stateId) {
+        var grantorId = this._stateGrantors[stateId];
+        if (grantorId) return $gameMap.event(grantorId);
+        else return null;
+    };
+
+    //ステート付与者と一致しているか
+    Game_BattlerBase.prototype.checkStateGrantorId = function (targetId, stateId) {
+        if(targetId == this._stateGrantors[stateId]) return true;
+        else return false;
+    };
 
     // 使用可能時の適合判定
     var _Game_BattlerBase_isOccasionOk = Game_BattlerBase.prototype.isOccasionOk;
@@ -1494,12 +1545,14 @@ Imported.TacticsBattleSys = true;
 
     //すでに付与されたステートか(元々の関数にバグがあったため改修)
     var _Game_BattlerBase_addNewState = Game_BattlerBase.prototype.addNewState;
-    Game_BattlerBase.prototype.addNewState = function (stateId) {
+    Game_BattlerBase.prototype.addNewState = function (grantorId, stateId) {
         if (stateId === this.deathStateId()) {
             this.die();
         }
         var restricted = this.isRestricted();
         this._states.push(parseInt(stateId));//改修ポイント(確実に数値化する)
+        this._stateGrantors[stateId] = grantorId; //付与者情報格納
+        //ステート付与者をいれたい
         this.sortStates();
         if (!restricted && this.isRestricted()) {
             this.onRestrict();
@@ -1677,7 +1730,7 @@ Imported.TacticsBattleSys = true;
     //ステートの上限数を制限してオーバーしたモノは上書きされる
     //すでに付与されたステートは配列最後尾に移動する形にしたい
     var _Game_Battler_addState = Game_Battler.prototype.addState;
-    Game_Battler.prototype.addState = function (stateId) {
+    Game_Battler.prototype.addState = function (grantorId, stateId) {
         //バフ無効デバフ無効ステートがついているか(ついていたら以降の処理を行わない)
         for (var id = 1; id < $dataStates.length; id++) {
             if (this.isStateAffected(id)) {
@@ -1698,7 +1751,7 @@ Imported.TacticsBattleSys = true;
         //即死攻撃の扱い
         if (stateId == this.deathStateId()) {
             if (this.isDying() && !this.isStateResist(this.deathStateId())) {
-                this.addNewState(stateId);
+                this.addNewState(grantorId, stateId);
                 this.refresh();
                 this._result.pushAddedState(parseInt(stateId)); //指定ステートの付加を追加。
                 return;
@@ -1738,7 +1791,7 @@ Imported.TacticsBattleSys = true;
                 }
                 //ステート削除に失敗した場合は通らない
                 if (this._states.length < stateMax) {
-                    this.addNewState(stateId);
+                    this.addNewState(grantorId, stateId);
                     if (!$gameTemp._selfState.contains(parseInt(stateId))) $gameTemp._selfState.push(parseInt(stateId)); //セルフバフ追加
                     this.refresh();
                     this.resetStateCounts(parseInt(stateId)); //指定ステートの有効ターン数を初期化。
@@ -1841,6 +1894,15 @@ Imported.TacticsBattleSys = true;
         return false;
     };
     //ヘイトステートが付与されているか
+    Game_Battler.prototype.checkHateId = function () {
+        for (var stateId = 1; stateId < $dataStates.length; stateId++) {
+            if (this.isStateAffected(stateId)) {
+                if ($dataStates[stateId].meta.hateGrantor) return stateId;
+            }
+        }
+        return false;
+    };
+    //ヘイトステートが付与されているか
     Game_Battler.prototype.checkHateGrantor = function () {
         for (var stateId = 1; stateId < $dataStates.length; stateId++) {
             if (this.isStateAffected(stateId)) {
@@ -1866,6 +1928,14 @@ Imported.TacticsBattleSys = true;
             }
         }
         return false;
+    };
+    Game_Battler.prototype.refresh = function () {
+        Game_BattlerBase.prototype.refresh.call(this);
+        if (this.hp === 0) {
+            this.addState(this.eventId(),this.deathStateId());
+        } else {
+            this.removeState(this.deathStateId());
+        }
     };
     //-----------------------------------------------------------------------------
     // Game_Actor
@@ -1984,7 +2054,8 @@ Imported.TacticsBattleSys = true;
                     if (robbedActor.isStateAffected(id)) {
                         var stealGrantor = $dataStates[id].meta.stealGrantor;
                         if (stealGrantor) {
-                            if (this._classId == parseInt(stealGrantor)) {
+                            //if (this._classId == parseInt(stealGrantor)) {
+                            if (robbedActor.checkStateGrantorId(this.eventId(), id)) {
                                 var atk = $dataStates[id].meta.stealAtk;
                                 var def = $dataStates[id].meta.stealDef;
                                 var mat = $dataStates[id].meta.stealMat;
@@ -3177,7 +3248,7 @@ Imported.TacticsBattleSys = true;
             var state = this.useSkill().meta.state;
             if (state) {
                 if (parseInt(state) == 1) this._deadFlag = true;
-                actor.addState(state);
+                actor.addState(this.event().id, state);
             }
             //HP回復処理
             var gainHp = this.useSkill().meta.gainHp;
@@ -3211,7 +3282,7 @@ Imported.TacticsBattleSys = true;
                 if (actor.isDead()) continue;
                 //ステート追加処理
                 var state = this.useSkill().meta.state;
-                if (state) actor.addState(state);
+                if (state) actor.addState(this.event().id, state);
                 //デバフ消去処理
                 if (this.useSkill().meta.clear) {
                     if (this.useSkill().meta.clear == "allyDebuff") {
@@ -3281,7 +3352,8 @@ Imported.TacticsBattleSys = true;
                         for (var j = 0; j < $gameSystem.unitList().length; j++) {
                             var trapGrantorUnit = $gameSystem.unitList()[j];
                             var trapGrantorActor = trapGrantorUnit.isActor();
-                            if ((trapGrantorActor._classId == parseInt(trapGrantor)) && trapGrantorUnit.isAttackTarget(this)) {
+                            //if ((trapGrantorActor._classId == parseInt(trapGrantor)) && trapGrantorUnit.isAttackTarget(this)) {
+                            if (actor.checkStateGrantorId(trapGrantorActor.eventId(), id)) {
                                 $gameTemp.addReservationActionList(trapGrantorUnit, $dataSkills[parseInt(skill)], this, "trapChase");
                                 //return;
                             }
@@ -3446,7 +3518,8 @@ Imported.TacticsBattleSys = true;
                     for (var i = 0; i < $gameSystem.unitList().length; i++) {
                         var target = $gameSystem.unitList()[i];
                         var targetActor = target.isActor();
-                        if ((targetActor._classId == parseInt(slipGrantor)) && this.isHostileUnit(target)) {
+                        //if ((targetActor._classId == parseInt(slipGrantor)) && this.isHostileUnit(target)) {
+                        if (actor.checkStateGrantorId(targetActor.eventId(), id)) {
                             var gainHp = targetActor.mhp - targetActor.hp;//最大HP-HP(被ダメージ分のHP)
                             if (gainHp > actor.hp) {
                                 gainHp = actor.hp - 1;
@@ -3490,7 +3563,8 @@ Imported.TacticsBattleSys = true;
                     for (var j = 0; j < $gameSystem.unitList().length; j++) {
                         var traceGrantorUnit = $gameSystem.unitList()[j];
                         var traceGrantorActor = traceGrantorUnit.isActor();
-                        if (parseInt(traceGrantor) == traceGrantorActor._classId) traceGrantorActor.wtTurnAdvance();
+                        //if (parseInt(traceGrantor) == traceGrantorActor._classId) traceGrantorActor.wtTurnAdvance();
+                        if (actor.checkStateGrantorId(traceGrantorActor.eventId(), id)) traceGrantorActor.wtTurnAdvance();
                     }
                 }
                 //行動終了後発動するスキルのあるバフデバフを持っているか
@@ -3507,7 +3581,8 @@ Imported.TacticsBattleSys = true;
                                     var trapGrantorUnit = $gameSystem.unitList()[j];
                                     var trapGrantorActor = trapGrantorUnit.isActor();
                                     var trapGrantorIsArea = false;
-                                    if ((trapGrantorActor._classId == parseInt(trapGrantor)) && trapGrantorUnit.isAttackTarget(this)) {
+                                    //if ((trapGrantorActor._classId == parseInt(trapGrantor)) && trapGrantorUnit.isAttackTarget(this)) {
+                                    if (actor.checkStateGrantorId(trapGrantorActor.eventId(), id)) {
                                         if ($dataStates[id].meta.skill == "impersonation") {
                                             if (this.useSkill().scope == 1 || this.useSkill().scope == 2) {
                                                 $gameTemp.addReservationActionList(trapGrantorUnit, this.useSkill(), this, $dataStates[id].meta.activate);
@@ -3589,7 +3664,8 @@ Imported.TacticsBattleSys = true;
                     }
                     var shiftGrantor = $dataStates[id].meta.shiftGrantor;
                     if (shiftGrantor) {
-                        if (parseInt(shiftGrantor) == actor._classId) checkActor.wtTurnAdvance();
+                        //if (parseInt(shiftGrantor) == actor._classId) checkActor.wtTurnAdvance();
+                        if (checkActor.checkStateGrantorId(actor.eventId(), id)) checkActor.wtTurnAdvance();
                     }
                 }
             }
@@ -3597,7 +3673,7 @@ Imported.TacticsBattleSys = true;
         this.resetMove();
         this.resetAction();
         if (this._deadFlag) {
-            actor.addState(1);
+            actor.addState(this.event().id, 1);
             this.checkDead();
         }
         actor.updateStateTurns(); //バフ期間1act減少
@@ -3773,7 +3849,8 @@ Imported.TacticsBattleSys = true;
                     }
                     //アフマウのアクティベート
                     if ($dataStates[id].meta.changeGrantor) {
-                        if ((this.isActor()._classId == parseInt($dataStates[id].meta.changeGrantor)) && coverUnitActor.canMove() && coverUnitActor.meetsSkillConditions($dataSkills[2]) && coverGrantor.checkProceedInvisibleArea(this.x, this.y) && (coverGrantor.isCoverTarget(this)) && (!coverGrantor._alreadyCover) && (!targets.includes(coverGrantor))) {
+                        //if ((this.isActor()._classId == parseInt($dataStates[id].meta.changeGrantor)) && coverUnitActor.canMove() && coverUnitActor.meetsSkillConditions($dataSkills[2]) && coverGrantor.checkProceedInvisibleArea(this.x, this.y) && (coverGrantor.isCoverTarget(this)) && (!coverGrantor._alreadyCover) && (!targets.includes(coverGrantor))) {
+                        if (coverUnitActor.checkStateGrantorId(this.isActor().eventId(), id) && coverUnitActor.canMove() && coverUnitActor.meetsSkillConditions($dataSkills[2]) && coverGrantor.checkProceedInvisibleArea(this.x, this.y) && (coverGrantor.isCoverTarget(this)) && (!coverGrantor._alreadyCover) && (!targets.includes(coverGrantor))) {
                             //座標入れ替え
                             var x = this.x;
                             var y = this.y;
@@ -3789,7 +3866,8 @@ Imported.TacticsBattleSys = true;
                 } else if (this.isActor().isStateAffected(id)) {
                     //レオンハルトのチェンジ用
                     if ($dataStates[id].meta.coverGrantor) {
-                        if ((coverUnitActor._classId == parseInt($dataStates[id].meta.coverGrantor)) && coverUnitActor.canMove() && coverUnitActor.meetsSkillConditions($dataSkills[2]) && coverGrantor.checkProceedInvisibleArea(this.x, this.y) && (coverGrantor.isCoverTarget(this)) && (!coverGrantor._alreadyCover) && (!targets.includes(coverGrantor))) {
+                        //if ((coverUnitActor._classId == parseInt($dataStates[id].meta.coverGrantor)) && coverUnitActor.canMove() && coverUnitActor.meetsSkillConditions($dataSkills[2]) && coverGrantor.checkProceedInvisibleArea(this.x, this.y) && (coverGrantor.isCoverTarget(this)) && (!coverGrantor._alreadyCover) && (!targets.includes(coverGrantor))) {
+                        if (this.isActor().checkStateGrantorId(coverUnitActor.eventId(), id) && coverUnitActor.canMove() && coverUnitActor.meetsSkillConditions($dataSkills[2]) && coverGrantor.checkProceedInvisibleArea(this.x, this.y) && (coverGrantor.isCoverTarget(this)) && (!coverGrantor._alreadyCover) && (!targets.includes(coverGrantor))) {
                             //座標入れ替え(入れ替えできない、リフレッシュ必要？)
                             var x = this.x;
                             var y = this.y;
@@ -4357,11 +4435,13 @@ Imported.TacticsBattleSys = true;
         //ターゲット固定されてた場合
         var hateGrantor = this.isActor().checkHateGrantor();
         var hateState = this.isActor().checkHateState();
+        var hateId = this.isActor().checkHateId();
         if (hateGrantor || hateState) {
             for (var j = 0; j < $gameSystem.unitList().length; j++) {
                 var unit = $gameSystem.unitList()[j];
                 if (hateGrantor) {
-                    if (hateGrantor == parseInt(unit.isActor()._classId)) {
+                    //if (hateGrantor == parseInt(unit.isActor()._classId)) {
+                    if (this.isActor().checkStateGrantorId(unit.isActor().eventId(), hateId)) {
                         this.setTarget(unit);
                         targetpos = this.setMovePoint(1);
                         return targetpos;

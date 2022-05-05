@@ -327,7 +327,7 @@ function Game_Avatar() {
             var $ = $gameSystem;
             var send = {
                 //_allyTeamID: $._allyTeamID, _enemyTeamID: $._enemyTeamID, _isAllyTurn: $._isAllyTurn, _isEnemyTurn: $._isEnemyTurn
-                _allyTeamID: $._allyTeamID, _enemyTeamID: $._enemyTeamID, _isAllyTurn: $._isAllyTurn, _isEnemyTurn: $._isEnemyTurn, _wtTurnList: $._wtTurnList, _turnUnit: $._turnUnit
+                allyTeamID: $._allyTeamID, enemyTeamID: $._enemyTeamID, isAllyTurn: $._isAllyTurn, isEnemyTurn: $._isEnemyTurn, wtTurnList: $._wtTurnList, turnUnit: $._turnUnit
             }
             this.sysRef.update(send);
         }
@@ -886,12 +886,12 @@ function Game_Avatar() {
         OnlineManager.sysRef.once("value").then(function (data) {
             //ユニット更新用、行動順更新用などで分けた方が良い
             //$gameSystem = data.val();
-            $gameSystem._allyTeamID = data.child("_allyTeamID").val();
-            $gameSystem._enemyTeamID = data.child("_enemyTeamID").val();
-            //$gameSystem._isAllyTurn = data.child("_isAllyTurn").val();
-            //$gameSystem._isEnemyTurn = data.child("_isEnemyTurn").val();
-            $gameSystem._turnUnit = data.child("_turnUnit").val();
-            $gameSystem._wtTurnList = data.child("_wtTurnList").val();
+            $gameSystem._allyTeamID = data.child("allyTeamID").val();
+            $gameSystem._enemyTeamID = data.child("enemyTeamID").val();
+            //$gameSystem._isAllyTurn = data.child("isAllyTurn").val();
+            //$gameSystem._isEnemyTurn = data.child("isEnemyTurn").val();
+            $gameSystem._turnUnit = data.child("turnUnit").val();
+            $gameSystem._wtTurnList = data.child("wtTurnList").val();
         });
 
     };
