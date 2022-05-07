@@ -848,6 +848,24 @@ Imported.TacticsBattleSys = true;
                         //トラッパーがいない場合トラップデバフは剥がれる
                         if (!trapGrantorIsArea) actor.removeState(id);
                     }
+                    
+                    //スティーラーがいない状態でのトラップデバフの扱い
+                    var stealGrantor = $dataStates[id].meta.stealGrantor;
+                    if (stealGrantor) {
+                        //マップ上にいるユニットのステートをチェックする
+                        for (var j = 0; j < this.unitList().length; j++) {
+                            var stealGrantorUnit = this.unitList()[j];
+                            var stealGrantorActor = stealGrantorUnit.isActor();
+                            var stealGrantorIsArea = false;
+                            //if ((stealGrantorActor._classId == parseInt(stealGrantor)) && stealGrantorUnit.isHostileUnit(target)) {
+                            if (actor.checkStateGrantorId(stealGrantorActor.eventId(), id)) {
+                                stealGrantorIsArea = true;
+                                break;
+                            }
+                        }
+                        //スティーラーがいない場合トラップデバフは剥がれる
+                        if (!stealGrantorIsArea) actor.removeState(id);
+                    }
 
                     //スリップデバフの扱い
                     var slipGrantor = $dataStates[id].meta.slipGrantor;

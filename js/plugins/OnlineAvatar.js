@@ -882,6 +882,9 @@ function Game_Avatar() {
                 unit.isActor()._stateTurns = data.child(i).child("stateTurns").val();
                 unit.isActor()._stateGrantors = data.child(i).child("stateGrantors").val();
                 if(!unit.isActor()._states) unit.isActor().clearStates();
+                console.log(unit.isActor()._states); //付与後すぐに消されたため、どっかの同期タイミングで上書きし反映されなくなった
+                console.log(unit.isActor()._stateTurns);
+                console.log(unit.isActor()._stateGrantors);
             }
         });
 
