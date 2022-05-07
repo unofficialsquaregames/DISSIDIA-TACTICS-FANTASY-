@@ -749,6 +749,12 @@ Imported.TacticsBattleSys = true;
 
     //WTカウント
     Game_System.prototype.countWt = function () {
+        if($gameSwitches.value(19)){
+            this.syncWtList();
+            $gameTemp._countWtTime = false;
+            $gameSwitches.setValue(19, false);
+            return;
+        }
         //以下が平常時の動作
         for (var i = 0; i < this.unitList().length; i++) {
             var character = this.unitList()[i];
@@ -767,7 +773,10 @@ Imported.TacticsBattleSys = true;
                 $gameTemp._cameraWait = true;
                 $gameTemp._countWtTime = false;
 
-                if ($gameSwitches.value(15)) $gameSystem.sendInfo();
+                if ($gameSwitches.value(15)) {
+                    $gameSystem.sendInfo();
+                    $gameSwitches.setValue(19, true);
+                }
                 return;
             }
         }
@@ -776,23 +785,8 @@ Imported.TacticsBattleSys = true;
         for (var i = 0; i < this.unitList().length; i++) {
             var character = this.unitList()[i];
             var battler = character.isActor();
-            
-            //以下、必要？
-            if ($gameSwitches.value(15)){
-                var id; //変数
-                var allyId = character.allyNumber();
-                var enemyId = character.enemyNumber();
-                if (allyId) id = 31 + parseInt(allyId);
-                else if (enemyId) id = 36 + parseInt(enemyId);
-                if (this.isAllyTeam()) {
-                    $gameVariables.setValue(id, this._wt); //イベントIDに依存している
-                } else if(this.isEnemyTeam()) {
-                    if (!battler.matchWt()) battler.countWt(); //WT数を加算する
-                    battler.setWt($gameVariables.value(id));
-                }
-            }else{
-                if (!battler.matchWt()) battler.countWt(); //WT数を加算する
-            }
+
+            if (!battler.matchWt()) battler.countWt(); //WT数を加算する
         }
     };
 
