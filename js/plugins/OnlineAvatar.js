@@ -305,6 +305,7 @@ function Game_Avatar() {
                 send[i] = {
                     x: $._x, y: $._y, direction: $.direction(), toX: $.toX(), toY: $.toY(), target: $._target, useSkill: $._useSkill, hp: $.isActor()._hp, mp: $.isActor()._mp, tp: $.isActor()._tp, wt: $.isActor()._wt, states: $.isActor()._states, stateTurns: $.isActor()._stateTurns, stateGrantors: $.isActor()._stateGrantors
                 };
+                /*
                 //以下action
                 //var action = $.isActor().currentAction();
                 var result = $.isActor().result();
@@ -316,6 +317,7 @@ function Game_Avatar() {
                     send[i].addedStates = result.addedStates;
                     send[i].removedStates = result.removedStates;
                 }
+                */
             }
             this.unitRef.update(send);
         }
@@ -878,13 +880,10 @@ function Game_Avatar() {
                 $gameSystem.unitList()[i].isActor()._tp = data.child(i).child("tp").val();
                 $gameSystem.unitList()[i].isActor()._wt = data.child(i).child("wt").val();
                 $gameSystem.unitList()[i].setToXy(data.child(i).child("toX").val(), data.child(i).child("toY").val());
-                unit.isActor()._states = data.child(i).child("states").val();
+                unit.isActor()._states = data.child(i).child("states").val(); //反映はされているが同期する側（受け手）の効果が適用される
                 unit.isActor()._stateTurns = data.child(i).child("stateTurns").val();
                 unit.isActor()._stateGrantors = data.child(i).child("stateGrantors").val();
                 if(!unit.isActor()._states) unit.isActor().clearStates();
-                console.log(unit.isActor()._states); //付与後すぐに消されたため、どっかの同期タイミングで上書きし反映されなくなった
-                console.log(unit.isActor()._stateTurns);
-                console.log(unit.isActor()._stateGrantors);
             }
         });
 
