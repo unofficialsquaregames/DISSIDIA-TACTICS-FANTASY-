@@ -749,12 +749,14 @@ Imported.TacticsBattleSys = true;
 
     //WTカウント
     Game_System.prototype.countWt = function () {
+        /*
         if($gameSwitches.value(19)){
             this.syncWtList();
             $gameTemp._countWtTime = false;
             $gameSwitches.setValue(19, false);
             return;
         }
+        */
         //以下が平常時の動作
         for (var i = 0; i < this.unitList().length; i++) {
             var character = this.unitList()[i];
@@ -775,7 +777,7 @@ Imported.TacticsBattleSys = true;
 
                 if ($gameSwitches.value(15)) {
                     $gameSystem.sendInfo();
-                    $gameSwitches.setValue(19, true);
+                    //$gameSwitches.setValue(19, true);
                 }
                 return;
             }
