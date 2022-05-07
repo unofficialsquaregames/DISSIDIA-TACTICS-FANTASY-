@@ -268,13 +268,6 @@ function Game_Avatar() {
 
         //this.mapRef.once('value', parent => alert('Count: ' + parent.numChildren())); //要素数を取得
 
-        /*
-        var avatarTemplate = this.avatarTemplate;
-        var avatarsInThisMap = this.avatarsInThisMap = {};
-        if (!avatarTemplate.pages[0].list) {
-            avatarTemplate.pages[0].list = $dataCommonEvents[this.parameters['avatarEvent']].list;
-        }
-        */
         //他プレイヤーが同マップに入場(gameSystem._allyTeamIDに直接割り振った方がいい？、プレイヤー自体をマップから独立させて)
         this.mapRef.on('child_added', function (data) {
             //avatarsInThisMap[data.key] = new Game_Avatar(avatarTemplate, data.val());
@@ -315,22 +308,12 @@ function Game_Avatar() {
             //var send = $gameSystem;
             var $ = $gameSystem;
             var send = {
-                //_allyTeamID: $._allyTeamID, _enemyTeamID: $._enemyTeamID, _isAllyTurn: $._isAllyTurn, _isEnemyTurn: $._isEnemyTurn
                 allyTeamID: $._allyTeamID, enemyTeamID: $._enemyTeamID, isAllyTurn: $._isAllyTurn, isEnemyTurn: $._isEnemyTurn, wtTurnList: $._wtTurnList, turnUnit: $._turnUnit
                 ,moveTargetPointFlag: $._moveTargetPointFlag, moveTargetPointX: $._moveTargetPointX, moveTargetPointY: $._moveTargetPointY, resurrectionFlag: $._resurrectionFlag, resurrectionUnit: $._resurrectionUnit
             }
             this.sysRef.update(send);
         }
     };
-    /*
-    //添付情報を送信
-    OnlineManager.sendTempInfo = function () {
-        if (this.tempRef && !this.syncBusy) {
-            var send = $gameTemp;
-            this.tempRef.update(send);
-        }
-    };
-    */
     //プラグインコマンドで指定した情報とプレイヤー情報をオンライン上に送信
     OnlineManager.sendCustomInfo = function (key, value) {
         var info = this.playerInfo();
@@ -506,27 +489,6 @@ function Game_Avatar() {
         _Game_Switches_initialize.apply(this, arguments);
         OnlineManager.startSync();
     };
-    /*
-    //ユニット同期
-    var _Scene_Map_endTurn = Scene_Map.prototype.endTurn;
-    Scene_Map.prototype.endTurn = function () {
-        _Scene_Map_endTurn.call(this);
-        if ($gameSwitches.value(15)) {
-            if ($gameSwitches.value(21) && $gameSystem._allyTeamID == OnlineManager.user.uid) {
-                OnlineManager.sendUnitInfo();
-                OnlineManager.sendSysInfo();
-                $gameSwitches.setValue(21, false);
-            } else if ($gameSwitches.value(22) && $gameSystem._enemyTeamID == OnlineManager.user.uid) {
-                OnlineManager.sendUnitInfo();
-                OnlineManager.sendSysInfo();
-                $gameSwitches.setValue(22, false);
-            } else {
-                $gameSystem.syncVariable();
-            }
-            //OnlineManager.sendTempInfo();
-        }
-    };
-    */
 
     //ユニット同期
     var _Scene_Map_startBattle = Scene_Map.prototype.startBattle;
@@ -546,61 +508,6 @@ function Game_Avatar() {
         _Window_DebugEdit_update.apply(this, arguments);
         this.refresh();
     };
-
-    //Game_Avatar
-    //アバターとして使用するマップイベントを定義
-    Game_Avatar.prototype = Object.create(Game_Event.prototype);
-    Game_Avatar.prototype.constructor = Game_Avatar;
-
-    Game_Avatar.prototype.initialize = function (eventData, onlineData) {
-        var mapId = $gameMap.mapId();
-        var eventId = $gameMap.getEventIdSequence ? $gameMap.getEventIdSequence() : $gameMap._events.length;
-
-        ['A', 'B', 'C', 'D'].forEach(function (switchId) {
-            var key = [mapId, eventId, switchId];
-            $gameSelfSwitches.setValue(key, false);
-        });
-
-        this.eventData = eventData;
-        Game_Event.prototype.initialize.call(this, mapId, eventId);
-        this.locate(onlineData.x, onlineData.y);
-        this.setDirection(onlineData.direction);
-        this.setMoveSpeed(onlineData.speed);
-        this.setImage(onlineData.charaName, onlineData.charaIndex);
-        this.setOnlineData(onlineData);
-        $gameMap._events.push(this);
-
-        var scene = SceneManager._scene;
-        if (scene instanceof Scene_Map) {
-            var sprite = new Sprite_Character(this);
-            scene._spriteset._characterSprites.push(sprite);
-            scene._spriteset._tilemap.addChild(sprite);
-        }
-    };
-
-    Game_Avatar.prototype.event = function () {
-        return this.eventData;
-    };
-
-    Game_Avatar.prototype.setOnlineData = function (onlineData) {
-        this.online = onlineData;
-    };
-
-    //オンライン座標と同じ位置まで歩く（avatarTemplateのカスタムルートに設定されています）
-    Game_Avatar.prototype.moveOnlineXy = function () {
-        this.setMoveSpeed(this.online.speed);
-        this.setImage(this.online.charaName, this.online.charaIndex);
-        var distance = $gameMap.distance(this.x, this.y, this.online.x, this.online.y);
-        if (distance === 0) {	//座標に到達しているなら方向転換のみ
-            this.setDirection(this.online.direction);
-        } else if (distance > 5) {	//座標まで５歩を超えて離れているならワープ
-            this.locate(this.online.x, this.online.y);
-            this.setDirection(this.online.direction);
-        } else {	//座標まで１～５歩ならその座標へ歩く
-            this.moveTowardCharacter(this.online);
-        }
-    };
-
     // SRPGバトラー設定（オンライン用）
     Game_System.prototype.setMatchingOnline = function () {
         OnlineManager.sysRef.once("value").then(function (data) {
@@ -620,7 +527,6 @@ function Game_Avatar() {
     };
     //バトラーセット用
     Game_System.prototype.setBattlerOnline = function () {
-
         var id1;
         var id2;
         var id3;

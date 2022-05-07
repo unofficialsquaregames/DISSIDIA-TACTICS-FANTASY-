@@ -402,6 +402,7 @@ Imported.TacticsBattleSys = true;
         this._startBattleFlag = false; //戦闘開始フラグ
         this._commandTime = false; //コマンド選択中
         this._cameraWait = false; //カメラ待ちフラグ
+        this._countWtTime = false; //行動順計算中か
         this._attacktime = false; //攻撃中か
         this._deadUnitIds = []; //ユニット退場予約用
         this._selfState = []; //自身がそのターンに付与したバフリスト
@@ -764,7 +765,7 @@ Imported.TacticsBattleSys = true;
                 var target = this.turnUnit();
                 $gamePlayer.setCameraEvent(target); //カメラをターンが回ったキャラへ回す
                 $gameTemp._cameraWait = true;
-                $gameSwitches.setValue(19, false);
+                $gameTemp._countWtTime = false;
 
                 if ($gameSwitches.value(15)) $gameSystem.sendInfo();
                 return;
@@ -2173,7 +2174,7 @@ Imported.TacticsBattleSys = true;
 
 
         //if ($gameSwitches.value(15)) return;
-        $gameSwitches.setValue(19, true); //WT計算中フラグ
+        $gameTemp._countWtTime = true; //WT計算中フラグ
         //this.battleActivate();
         this.initColorArea();
         this.setupTilePassableTable();        // 地形通行判定テーブルのセットアップ
@@ -7816,7 +7817,7 @@ Imported.TacticsBattleSys = true;
             return;
         }
         //WTカウント中状態であった場合
-        if ($gameSwitches.value(19)) {
+        if ($gameTemp._countWtTime) {
             $gameSystem.countWt();
             return;
         }
@@ -8555,7 +8556,7 @@ Imported.TacticsBattleSys = true;
         $gameSystem._resurrectionFlag = false
         $gameSystem.resetResurrectionUnit();
         $gameSystem.endTurn();
-        $gameSwitches.setValue(19, true);
+        $gameTemp._countWtTime = true;
         $gameSystem.setWtTurnList();//行動順調整
         $gameSystem._phaseState = 0; //カメラ移動完了後コマンド表示
     };
