@@ -776,20 +776,28 @@ Imported.TacticsBattleSys = true;
         for (var i = 0; i < this.unitList().length; i++) {
             var character = this.unitList()[i];
             var battler = character.isActor();
-
-            if (!battler.matchWt()) battler.countWt(); //WT数を加算する
             
+            //以下、必要？
             if ($gameSwitches.value(15)){
-                var allyId = character.allyNumber();
-                var enemyId = character.enemyNumber();
-                var id;
-                if (allyId) id = 31 + parseInt(allyId);
-                else if (enemyId) id = 36 + parseInt(enemyId);
-                if ($gameSystem.isSyncTurn()) {
-                    battler.setWt($gameVariables.value(id));
-                } else {
-                    $gameVariables.setValue(id, this._wt); //イベントIDに依存している
+                var id; //変数
+                var id2; //スイッチ
+                if (allyId) {
+                    id = 31 + parseInt(allyId);
+                    id2 = 51 + parseInt(allyId);
+                }else if (enemyId){
+                    id = 36 + parseInt(enemyId);
+                    id2 = 56 + parseInt(enemyId);
                 }
+                if ($gameSwitches.value(id2)) {
+                    $gameVariables.setValue(id, this._wt); //イベントIDに依存している
+                    $gameSwitches.setValue(id2, true);
+                } else {
+                    if (!battler.matchWt()) battler.countWt(); //WT数を加算する
+                    battler.setWt($gameVariables.value(id));
+                    $gameSwitches.setValue(id2, false);
+                }
+            }else{
+                if (!battler.matchWt()) battler.countWt(); //WT数を加算する
             }
         }
     };
