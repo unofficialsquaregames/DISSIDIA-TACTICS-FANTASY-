@@ -1499,7 +1499,17 @@ Imported.TacticsBattleSys = true;
         var max = rate + 10;
         var min = rate - 10;
         var distributed = Math.floor(Math.random() * (max - min) + min);
-        this._wt = Math.round(this.wtTurn() * distributed / 100);//0;
+        //オンライン対戦中WTリスト同期中
+        if ($gameSwitches.value(15)) {
+            if ($gameSystem.isSyncTurn()) {
+                this._wt = $gameVariables.value(10);
+            } else {
+                this._wt = Math.round(this.wtTurn() * distributed / 100);//0;
+                $gameVariables.setValue(10, this._wt); //イベントIDに依存している
+            }
+        }else{
+            this._wt = Math.round(this.wtTurn() * distributed / 100);//0;
+        }
     };
 
     // 自身のターンが回るWT数を返す
@@ -7738,12 +7748,13 @@ Imported.TacticsBattleSys = true;
     Scene_Map.prototype.updateMain = function () {
         _Scene_Map_updateMain.call(this);
 
-        
+        /*
         //オンライン対戦中WTリスト同期中
         if ($gameSwitches.value(15) && $gameSystem.isSyncVariableTime()) {
             $gameSystem.sendWtTurnList();
             return;
         }
+        */
 
         //戦闘不能者がいる場合
         if ($gameTemp.isDeadUnit()) {//ここでこの関数使うのはNG
