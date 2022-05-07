@@ -892,8 +892,6 @@ function Game_Avatar() {
             //$gameSystem = data.val();
             $gameSystem._allyTeamID = data.child("allyTeamID").val();
             $gameSystem._enemyTeamID = data.child("enemyTeamID").val();
-            //$gameSystem._turnUnit = data.child("turnUnit").val();
-            //$gameSystem._wtTurnList = data.child("wtTurnList").val();
         });
 
     };

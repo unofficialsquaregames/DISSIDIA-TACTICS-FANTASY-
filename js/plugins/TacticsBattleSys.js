@@ -591,7 +591,7 @@ Imported.TacticsBattleSys = true;
         }
         $gamePlayer.setTransparent(false); //透明化OFF
         $gamePlayer.refresh(); //カーソル化
-        if ($gameSwitches.value(15)) $gameSystem.syncWtList();
+        //if ($gameSwitches.value(15)) $gameSystem.syncWtList();
     };
 
     // SRPG機能を無効にします
@@ -5197,6 +5197,9 @@ Imported.TacticsBattleSys = true;
     Spriteset_Map.prototype.updateWtTurnList = function () {
         if (!this._wtTurnListSprite) {
             this._wtTurnListSprite = [];
+        }
+        if($gameSwitches.value(15) && $gameSystem) {
+            if(!$gameSystem._wtTurnList) $gameSystem.syncWtList();
         }
         for (var i = 0; i < wtTurnListMax; i++) {
             if (!this._wtTurnListSprite[i]) {
