@@ -304,20 +304,8 @@ function Game_Avatar() {
                 if (eventId && eventId != $gameSystem.unitList()[i].event().id) continue;
                 send[i] = {
                     x: $._x, y: $._y, direction: $.direction(), toX: $.toX(), toY: $.toY(), target: $._target, useSkill: $._useSkill, hp: $.isActor()._hp, mp: $.isActor()._mp, tp: $.isActor()._tp, wt: $.isActor()._wt, states: $.isActor()._states, stateTurns: $.isActor()._stateTurns, stateGrantors: $.isActor()._stateGrantors
+                    ,moveTargetPointFlag: $._moveTargetPointFlag, moveTargetPointX: $._moveTargetPointX, moveTargetPointY: $._moveTargetPointY, resurrectionFlag: $._resurrectionFlag, resurrectionUnit: $._resurrectionUnit
                 };
-                /*
-                //以下action
-                //var action = $.isActor().currentAction();
-                var result = $.isActor().result();
-                if (result) {
-                    send[i].missed = result.missed;
-                    send[i].evaded = result.evaded;
-                    send[i].critical = result.critical;
-                    if (result.hpAffected) send[i].hpDamage = result.hpDamage;
-                    send[i].addedStates = result.addedStates;
-                    send[i].removedStates = result.removedStates;
-                }
-                */
             }
             this.unitRef.update(send);
         }
@@ -682,7 +670,7 @@ function Game_Avatar() {
     Scene_Map.prototype.updateOnline = function () {
         //敵のターン
         if ($gameSystem.isEnemyTurn()) {
-            /*
+            
             if ($gameSystem.turnUnit().isActor().checkHateState() || $gameSystem.turnUnit().isActor().checkHateGrantor() || $gameSystem.turnUnit().isActor().checkCtrlGrantor() || $gameSystem.turnUnit().isActor().checkNoCtrlState()) {
                 if ($gameSystem._allyTeamID == OnlineManager.user.uid) this.updateAllyTurn();
                 else this.updateSyncTurn();
@@ -690,14 +678,14 @@ function Game_Avatar() {
                 if ($gameSystem._enemyTeamID == OnlineManager.user.uid) this.updateAllyTurn();
                 else this.updateSyncTurn();
             }
-            */
-            if ($gameSystem._enemyTeamID == OnlineManager.user.uid) this.updateAllyTurn();
-            else this.updateSyncTurn();
+            
+            //if ($gameSystem._enemyTeamID == OnlineManager.user.uid) this.updateAllyTurn();
+            //else this.updateSyncTurn();
             return;
         }
         //味方のターン
         if ($gameSystem.isAllyTurn()) {
-            /*
+            
             if ($gameSystem.turnUnit().isActor().checkHateState() || $gameSystem.turnUnit().isActor().checkHateGrantor() || $gameSystem.turnUnit().isActor().checkCtrlGrantor() || $gameSystem.turnUnit().isActor().checkNoCtrlState()) {
                 if ($gameSystem._enemyTeamID == OnlineManager.user.uid) this.updateAllyTurn();
                 else this.updateSyncTurn();
@@ -705,9 +693,9 @@ function Game_Avatar() {
                 if ($gameSystem._allyTeamID == OnlineManager.user.uid) this.updateAllyTurn();
                 else this.updateSyncTurn();
             }
-            */
-            if ($gameSystem._allyTeamID == OnlineManager.user.uid) this.updateAllyTurn();
-            else this.updateSyncTurn();
+            
+            //if ($gameSystem._allyTeamID == OnlineManager.user.uid) this.updateAllyTurn();
+            //else this.updateSyncTurn();
             return;
         }
     };
@@ -797,14 +785,14 @@ function Game_Avatar() {
             case 7: //コマンド実行処理(詠唱アニメーション)
                 if (!this.isYesNoWaitingMode()) return;//待ち時間
                 //移動しながら攻撃の場合
-                if ($gameTemp._moveTargetPointFlag) {
-                    var xPlus = $gameTemp._moveTargetPointX - turnUnit.x;
-                    var yPlus = $gameTemp._moveTargetPointY - turnUnit.y;
+                if ($gameSystem._moveTargetPointFlag) {
+                    var xPlus = $gameSystem._moveTargetPointX - turnUnit.x;
+                    var yPlus = $gameSystem._moveTargetPointY - turnUnit.y;
                     turnUnit.jump(xPlus, yPlus); //移動しながらの攻撃はジャンプで行う
                 }
                 //蘇生の場合
-                if ($gameTemp._resurrectionFlag) {
-                    $gameTemp.isResurrectionUnit().resurrectionUnit();
+                if ($gameSystem._resurrectionFlag) {
+                    $gameSystem.isResurrectionUnit().resurrectionUnit();
                 }
                 //自身に攻撃アニメーション
                 this.showActionMotion(turnUnit);
@@ -892,6 +880,12 @@ function Game_Avatar() {
             //$gameSystem = data.val();
             $gameSystem._allyTeamID = data.child("allyTeamID").val();
             $gameSystem._enemyTeamID = data.child("enemyTeamID").val();
+            $gameSystem._moveTargetPointFlag = data.child("moveTargetPointFlag").val();
+            $gameSystem._moveTargetPointX = data.child("moveTargetPointX").val();
+            $gameSystem._moveTargetPointY = data.child("moveTargetPointY").val();
+            $gameSystem._resurrectionFlag = data.child("resurrectionFlag").val();
+            $gameSystem._resurrectionUnit = data.child("resurrectionUnit").val();
+            if(!$gameSystem._resurrectionUnit) $gameSystem._resurrectionUnit = [];
         });
 
     };

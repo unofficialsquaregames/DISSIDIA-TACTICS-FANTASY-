@@ -405,17 +405,11 @@ Imported.TacticsBattleSys = true;
         this._countWtTime = false; //行動順計算中か
         this._attacktime = false; //攻撃中か
         this._deadUnitIds = []; //ユニット退場予約用
-        this._resurrectionUnit = []; //蘇生ユニット予約用
         this._selfState = []; //自身がそのターンに付与したバフリスト
         this._arrangePattern = 0; //配置パターン
         this._quickTurnUnit = null;//[]; //WT0でも誰を優先的に配置させるか決める
         this._isReservationActionTurn = false;
 
-        this._moveTargetPointFlag = false; //攻撃時移動のフラグ
-        this._moveTargetPointX = 0; //攻撃時移動の場合の移動座標X
-        this._moveTargetPointY = 0; //攻撃時移動の場合の移動座標X
-
-        this._resurrectionFlag = false; //蘇生フラグ
         this._multiHitCount = 0; //多段ヒット時のカウント用
         this._selectUnit = []; //ユニットリストからのステータス画面で使用する
         //以下トラップやカウンター用の変数設定
@@ -461,20 +455,6 @@ Imported.TacticsBattleSys = true;
         } else {
             return false;
         }
-    };
-
-    // 蘇生ユニットの予約
-    Game_Temp.prototype.setResurrectionUnit = function (unit) {
-        this._resurrectionUnit = unit;
-    };
-
-    // 蘇生ユニット
-    Game_Temp.prototype.isResurrectionUnit = function () {
-        return this._resurrectionUnit;
-    };
-    // 蘇生ユニットのリセット
-    Game_Temp.prototype.resetResurrectionUnit = function (unit) {
-        this._resurrectionUnit = null;
     };
     /*
      予約アクション系-----------------------------------------------------------------------------
@@ -569,6 +549,12 @@ Imported.TacticsBattleSys = true;
         this._wtTurnList = []; //行動順リスト
         this._turnUnit = 0; //ターンが回ったユニット
         this.ActorTurn = false; //敵ターンに操作不能にするため(必要ない？)
+        
+        this._moveTargetPointFlag = false; //攻撃時移動のフラグ
+        this._moveTargetPointX = 0; //攻撃時移動の場合の移動座標X
+        this._moveTargetPointY = 0; //攻撃時移動の場合の移動座標X
+        this._resurrectionFlag = false; //蘇生フラグ
+        this._resurrectionUnit = []; //蘇生ユニット予約用
         //以下オンライン時
         this._uids = [];
         this._allyTeamID = ""; //味方チームのID
@@ -638,6 +624,19 @@ Imported.TacticsBattleSys = true;
     // ターンが回ってるユニットをセットする
     Game_System.prototype.setTurnUnit = function (unit) {
         this._turnUnit = unit.event().id;
+    };
+    // 蘇生ユニットの予約
+    Game_System.prototype.setResurrectionUnit = function (unit) {
+        this._resurrectionUnit = unit;
+    };
+
+    // 蘇生ユニット
+    Game_System.prototype.isResurrectionUnit = function () {
+        return this._resurrectionUnit;
+    };
+    // 蘇生ユニットのリセット
+    Game_System.prototype.resetResurrectionUnit = function (unit) {
+        this._resurrectionUnit = null;
     };
     /*
     行動順系-----------------------------------------------------------------------------
@@ -2396,14 +2395,14 @@ Imported.TacticsBattleSys = true;
         }
         //移動しながらの攻撃の場合
         if (skill.meta.move) {
-            x = $gameTemp._moveTargetPointX;
-            y = $gameTemp._moveTargetPointY;
+            x = $gameSystem._moveTargetPointX;
+            y = $gameSystem._moveTargetPointY;
         }
 
         //蘇生の場合
         if (skill.meta.resurrection) {
-            x = $gameTemp.isResurrectionUnit()._x;
-            y = $gameTemp.isResurrectionUnit()._y;
+            x = $gameSystem.isResurrectionUnit()._x;
+            y = $gameSystem.isResurrectionUnit()._y;
         }
         //このあたりに効果延長ステートを反映させる
         for (var id = 1; id < $dataStates.length; id++) {
@@ -4342,30 +4341,30 @@ Imported.TacticsBattleSys = true;
                         this.setTarget(target);
                         //alert(target.isActor().name() + "の座標x：" + target.x +"、座標y：" + target.y);
                         this.setUseSkill(skill);
-                        $gameTemp._moveTargetPointFlag = true;
+                        $gameSystem._moveTargetPointFlag = true;
                         $gameMap.showRangeArea(this, null);
                         targetpos = this.setMovePoint(parseInt(effect[1]));
                         this.setTarget(this);
                         if (targetpos) {
-                            $gameTemp._moveTargetPointX = targetpos.x;
-                            $gameTemp._moveTargetPointY = targetpos.y;
+                            $gameSystem._moveTargetPointX = targetpos.x;
+                            $gameSystem._moveTargetPointY = targetpos.y;
                         } else {
-                            $gameTemp._moveTargetPointX = this.x;
-                            $gameTemp._moveTargetPointY = this.y;
+                            $gameSystem._moveTargetPointX = this.x;
+                            $gameSystem._moveTargetPointY = this.y;
                         }
                     } else if (command[2] == "resurrection" && target) {
                         var effect = (skill.meta.effect || 'diamond 1').split(' ');
                         if (parseInt(effect[1]) == "self") continue;
-                        $gameTemp.setResurrectionUnit(target);
-                        this.setTarget($gameTemp.isResurrectionUnit());
+                        $gameSystem.setResurrectionUnit(target);
+                        this.setTarget($gameSystem.isResurrectionUnit());
                         this.setUseSkill(skill);
-                        $gameTemp._resurrectionFlag = true;
+                        $gameSystem._resurrectionFlag = true;
                         $gameMap.showRangeArea(this, null);
                         targetpos = this.setMovePoint(parseInt(effect[1]));
 
-                        $gameTemp._resurrectionFlag = true;
-                        $gameTemp.isResurrectionUnit()._x = targetpos.x;
-                        $gameTemp.isResurrectionUnit()._y = targetpos.y;
+                        $gameSystem._resurrectionFlag = true;
+                        $gameSystem.isResurrectionUnit()._x = targetpos.x;
+                        $gameSystem.isResurrectionUnit()._y = targetpos.y;
                     }
                 }
             } else if (command[0] == "round") {
@@ -4440,7 +4439,7 @@ Imported.TacticsBattleSys = true;
                     this.setUseSkill(null);
                 }
             }
-            if (this.target() && this.useSkill() || $gameTemp._moveTargetPointFlag) break; //移動しながら攻撃の場合ターゲットの代わりに移動する座標をフラグにするべきか
+            if (this.target() && this.useSkill() || $gameSystem._moveTargetPointFlag) break; //移動しながら攻撃の場合ターゲットの代わりに移動する座標をフラグにするべきか
         }
     };
     /*
@@ -7879,14 +7878,14 @@ Imported.TacticsBattleSys = true;
                 //this.showActionAnimation(turnUnit);
 
                 //移動しながら攻撃の場合
-                if ($gameTemp._moveTargetPointFlag) {
-                    var xPlus = $gameTemp._moveTargetPointX - turnUnit.x;
-                    var yPlus = $gameTemp._moveTargetPointY - turnUnit.y;
+                if ($gameSystem._moveTargetPointFlag) {
+                    var xPlus = $gameSystem._moveTargetPointX - turnUnit.x;
+                    var yPlus = $gameSystem._moveTargetPointY - turnUnit.y;
                     turnUnit.jump(xPlus, yPlus); //移動しながらの攻撃はジャンプで行う
                 }
                 //蘇生の場合
-                if ($gameTemp._resurrectionFlag) {
-                    $gameTemp.isResurrectionUnit().resurrectionUnit();
+                if ($gameSystem._resurrectionFlag) {
+                    $gameSystem.isResurrectionUnit().resurrectionUnit();
                 }
                 this.showActionMotion(turnUnit);
                 $gameSystem._phaseState = 8;
@@ -8022,7 +8021,7 @@ Imported.TacticsBattleSys = true;
                     return;
                 }
                 //対象が範囲内にいた場合行動開始、そうでない場合待機
-                if ($gameTemp._moveTargetPointFlag || $gameMap.isInsideArea(turnUnit.target().x, turnUnit.target().y)) {
+                if ($gameSystem._moveTargetPointFlag || $gameMap.isInsideArea(turnUnit.target().x, turnUnit.target().y)) {
                     this.targetBattleStatusWindow(turnUnit.useSkill(), turnUnit.target());//ターゲットを表示
                     $gameMap.showEffectArea(turnUnit);//効果範囲表示
                     $gamePlayer.setCameraEvent(turnUnit.target()); //カメラを選択した対象へ回す
@@ -8035,14 +8034,14 @@ Imported.TacticsBattleSys = true;
             case 7: //コマンド実行処理(詠唱アニメーション)
                 if (!this.isYesNoWaitingMode()) return;//待ち時間
                 //移動しながら攻撃の場合
-                if ($gameTemp._moveTargetPointFlag) {
-                    var xPlus = $gameTemp._moveTargetPointX - turnUnit.x;
-                    var yPlus = $gameTemp._moveTargetPointY - turnUnit.y;
+                if ($gameSystem._moveTargetPointFlag) {
+                    var xPlus = $gameSystem._moveTargetPointX - turnUnit.x;
+                    var yPlus = $gameSystem._moveTargetPointY - turnUnit.y;
                     turnUnit.jump(xPlus, yPlus); //移動しながらの攻撃はジャンプで行う
                 }
                 //蘇生の場合
-                if ($gameTemp._resurrectionFlag) {
-                    $gameTemp.isResurrectionUnit().resurrectionUnit();
+                if ($gameSystem._resurrectionFlag) {
+                    $gameSystem.isResurrectionUnit().resurrectionUnit();
                 }
                 //自身に攻撃アニメーション
                 this.showActionMotion(turnUnit);
@@ -8378,9 +8377,9 @@ Imported.TacticsBattleSys = true;
                     if (turnUnit.useSkill().meta.move == "targetPoint") {
                         if ($gameMap.unitEnemyXy(x, y) == null && $gameMap.unitAllyXy(x, y) == null) {
                             turnUnit.setTarget(turnUnit);//あえて自身をターゲットに設定する(自身へのダメージは入らない)
-                            $gameTemp._moveTargetPointFlag = true;
-                            $gameTemp._moveTargetPointX = x;
-                            $gameTemp._moveTargetPointY = y;
+                            $gameSystem._moveTargetPointFlag = true;
+                            $gameSystem._moveTargetPointX = x;
+                            $gameSystem._moveTargetPointY = y;
                         } else {
                             turnUnit.setTarget(null);
                         }
@@ -8412,10 +8411,10 @@ Imported.TacticsBattleSys = true;
                 //蘇生の場合
                 if (turnUnit.useSkill().meta.resurrection) {
                     if ($gameMap.unitEnemyXy(x, y) == null && $gameMap.unitAllyXy(x, y) == null) {
-                        turnUnit.setTarget($gameTemp.isResurrectionUnit());//あえて自身をターゲットに設定する(自身へのダメージは入らない)
-                        $gameTemp._resurrectionFlag = true;
-                        $gameTemp.isResurrectionUnit()._x = x;
-                        $gameTemp.isResurrectionUnit()._y = y;
+                        turnUnit.setTarget($gameSystem.isResurrectionUnit());//あえて自身をターゲットに設定する(自身へのダメージは入らない)
+                        $gameSystem._resurrectionFlag = true;
+                        $gameSystem.isResurrectionUnit()._x = x;
+                        $gameSystem.isResurrectionUnit()._y = y;
                     } else {
                         turnUnit.setTarget(null);
                     }
@@ -8468,9 +8467,9 @@ Imported.TacticsBattleSys = true;
     Scene_Map.prototype.commandNo = function () {
         var turnUnit = $gameSystem.turnUnit();
         //攻撃後移動の場合、リセットする
-        $gameTemp._moveTargetPointFlag = false;
-        $gameTemp._moveTargetPointX = 0;
-        $gameTemp._moveTargetPointY = 0;
+        $gameSystem._moveTargetPointFlag = false;
+        $gameSystem._moveTargetPointX = 0;
+        $gameSystem._moveTargetPointY = 0;
         $gameTemp_resurrectionFlag = false;
         //YesNoウインドウを閉じる
         this.closeYesNoWindow();
@@ -8492,7 +8491,7 @@ Imported.TacticsBattleSys = true;
         var target = unit.target();
         var battler = unit.isActor();
         battler.performAttack(); //武器アニメーション動作実行
-        if (!$gameTemp._moveTargetPointFlag) {
+        if (!$gameSystem._moveTargetPointFlag) {
             unit.turnTowardCharacter(target);// 向き
         }
         unit.setBattlerAttack();
@@ -8507,13 +8506,11 @@ Imported.TacticsBattleSys = true;
         this.closeBattleStatusWindow();
         $gameSystem.stateAction();
         $gameTemp._selfState = [];//このターンで付けたバフを初期化
-        $gameTemp._moveTargetPointFlag = false
-        $gameTemp._moveTargetPointX = 0;
-        $gameTemp._moveTargetPointY = 0;
-        $gameTemp._resurrectionFlag = false
-        $gameTemp._resurrectionX = 0;
-        $gameTemp._resurrectionY = 0;
-        $gameTemp.resetResurrectionUnit();
+        $gameSystem._moveTargetPointFlag = false
+        $gameSystem._moveTargetPointX = 0;
+        $gameSystem._moveTargetPointY = 0;
+        $gameSystem._resurrectionFlag = false
+        $gameSystem.resetResurrectionUnit();
         $gameSystem.endTurn();
         $gameTemp._countWtTime = true;
         $gameSystem.setWtTurnList();//行動順調整
@@ -8547,7 +8544,7 @@ Imported.TacticsBattleSys = true;
         var turnUnit = $gameSystem.turnUnit();
         var resurrectionUnit = this._deadUnitListWindow.item();
         if (resurrectionUnit) {
-            $gameTemp.setResurrectionUnit(resurrectionUnit);//ステータス画面に遷移するため、どのユニットを選択したか記憶したい
+            $gameSystem.setResurrectionUnit(resurrectionUnit);//ステータス画面に遷移するため、どのユニットを選択したか記憶したい
             this.closeDeadUnitListWindow();
             this._battleStatusWindow.setUnit(null);
             $gameSystem._phaseState = 5;//対象選択画面へ移行する
@@ -8646,6 +8643,7 @@ Imported.TacticsBattleSys = true;
     // 戦闘開始処理
     Scene_Map.prototype.startBattle = function () {
         $gameSystem.battleActivate();
+        this._spriteset.update(); //効果なし
         $gameSwitches.setValue(2, true);
     };
 
