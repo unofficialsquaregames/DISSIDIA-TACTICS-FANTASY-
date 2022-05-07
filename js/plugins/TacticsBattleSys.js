@@ -1402,7 +1402,8 @@ Imported.TacticsBattleSys = true;
     var _Game_BattlerBase_initialize = Game_BattlerBase.prototype.initialize;
     Game_BattlerBase.prototype.initialize = function () {
         _Game_BattlerBase_initialize.call(this);
-        this._wt = Math.floor(Math.random() * 50); //自身のウェイトターン到達でターンが回り、行動終了後リセットされるような
+        //this._wt = 0;
+        this.setWt();
         this._eventId = null; //バトラーと紐づいてるイベントをセットする
     }
     //rpg_object.jsより
@@ -1493,7 +1494,36 @@ Imported.TacticsBattleSys = true;
         this._wt++;
         //this._wt+= Math.floor(Math.random() * 2) + 1;
     };
-
+    // WTをセットする
+    Game_BattlerBase.prototype.setWt = function () {
+        //オンライン対戦中WTリスト同期中
+        if ($gameSwitches.value(15)) {
+            //if ($gameSystem.isSyncTurn()) {
+            
+            var tunit = $gameMap.event(this.eventId());
+            var allyId = tunit.allyNumber();
+            var enemyId = tunit.enemyNumber();
+            var id; //変数
+            var id2; //スイッチ
+            if (allyId) {
+                id = 31 + parseInt(allyId);
+                id2 = 51 + parseInt(allyId);
+            }else if (enemyId){
+                id = 36 + parseInt(enemyId);
+                id2 = 56 + parseInt(enemyId);
+            }
+            if ($gameSwitches.value(id2)) {
+                this._wt = $gameVariables.value(id);
+                $gameSwitches.setValue(id2, false);
+            } else {
+                this._wt = Math.floor(Math.random() * 50);
+                $gameSwitches.setValue(id2, true);
+                $gameVariables.setValue(id, this._wt); //イベントIDに依存している
+            }
+        }else{
+            this._wt = Math.floor(Math.random() * 50); //自身のウェイトターン到達でターンが回り、行動終了後リセットされるような
+        }
+    };
     // WTをリセットする
     Game_BattlerBase.prototype.resetWt = function (rate) {
         var max = rate + 10;
@@ -1501,11 +1531,17 @@ Imported.TacticsBattleSys = true;
         var distributed = Math.floor(Math.random() * (max - min) + min);
         //オンライン対戦中WTリスト同期中
         if ($gameSwitches.value(15)) {
+            var tunit = $gameMap.event(this.eventId());
+            var allyId = tunit.allyNumber();
+            var enemyId = tunit.enemyNumber();
+            var id;
+            if (allyId) id = 31 + parseInt(allyId);
+            else if (enemyId) id = 36 + parseInt(enemyId);
             if ($gameSystem.isSyncTurn()) {
-                this._wt = $gameVariables.value(10);
+                this._wt = $gameVariables.value(id);
             } else {
                 this._wt = Math.round(this.wtTurn() * distributed / 100);//0;
-                $gameVariables.setValue(10, this._wt); //イベントIDに依存している
+                $gameVariables.setValue(id, this._wt); //イベントIDに依存している
             }
         }else{
             this._wt = Math.round(this.wtTurn() * distributed / 100);//0;

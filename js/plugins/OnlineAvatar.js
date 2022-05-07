@@ -609,7 +609,7 @@ function Game_Avatar() {
                 $gameSystem._enemyTeamID = data.child("enemyTeamID").val();
                 $gameSwitches.setValue(17, true);
                 OnlineManager.sendSysInfo();
-            } else if (!$gameSwitches.value(18) && $gameSystem._allyTeamID != OnlineManager.user.uid) {
+            } else if (!$gameSwitches.value(18) && !$gameSystem.isAllyTeam()) {
                 $gameSystem._allyTeamID = data.child("allyTeamID").val();
                 $gameSystem._enemyTeamID = OnlineManager.user.uid;
                 $gameSwitches.setValue(18, true);
@@ -625,12 +625,12 @@ function Game_Avatar() {
         var id2;
         var id3;
         var id4;
-        if ($gameSystem._allyTeamID == OnlineManager.user.uid) {
+        if ($gameSystem.isAllyTeam()) {
             id1 = 11;//ally1Id;
             id2 = 12;//ally2Id;
             id3 = 13;//ally3Id;
             id4 = 14;//ally4Id;
-        } else if ($gameSystem._enemyTeamID == OnlineManager.user.uid) {
+        } else if ($gameSystem.isEnemyTeam()) {
             id1 = 16;//enemy1Id;
             id2 = 17;//enemy2Id;
             id3 = 18;//enemy3Id;
@@ -672,30 +672,26 @@ function Game_Avatar() {
         if ($gameSystem.isEnemyTurn()) {
             
             if ($gameSystem.turnUnit().isActor().checkHateState() || $gameSystem.turnUnit().isActor().checkHateGrantor() || $gameSystem.turnUnit().isActor().checkCtrlGrantor() || $gameSystem.turnUnit().isActor().checkNoCtrlState()) {
-                if ($gameSystem._allyTeamID == OnlineManager.user.uid) this.updateAllyTurn();
+                if ($gameSystem.isAllyTeam()) this.updateAllyTurn();
                 else this.updateSyncTurn();
             } else {
-                if ($gameSystem._enemyTeamID == OnlineManager.user.uid) this.updateAllyTurn();
+                if ($gameSystem.isEnemyTeam()) this.updateAllyTurn();
                 else this.updateSyncTurn();
             }
             
-            //if ($gameSystem._enemyTeamID == OnlineManager.user.uid) this.updateAllyTurn();
-            //else this.updateSyncTurn();
             return;
         }
         //味方のターン
         if ($gameSystem.isAllyTurn()) {
             
             if ($gameSystem.turnUnit().isActor().checkHateState() || $gameSystem.turnUnit().isActor().checkHateGrantor() || $gameSystem.turnUnit().isActor().checkCtrlGrantor() || $gameSystem.turnUnit().isActor().checkNoCtrlState()) {
-                if ($gameSystem._enemyTeamID == OnlineManager.user.uid) this.updateAllyTurn();
+                if ($gameSystem.isEnemyTeam()) this.updateAllyTurn();
                 else this.updateSyncTurn();
             } else {
-                if ($gameSystem._allyTeamID == OnlineManager.user.uid) this.updateAllyTurn();
+                if ($gameSystem.isAllyTeam()) this.updateAllyTurn();
                 else this.updateSyncTurn();
             }
             
-            //if ($gameSystem._allyTeamID == OnlineManager.user.uid) this.updateAllyTurn();
-            //else this.updateSyncTurn();
             return;
         }
     };
@@ -843,7 +839,8 @@ function Game_Avatar() {
     };
     //行動順調整用スクリプトの同期
     Game_System.prototype.sendWtTurnList = function () {
-        //if (this._allyTeamID == OnlineManager.user.uid && $gameSwitches.value(19)) {
+        //if (this.isAllyTeam() && $gameSwitches.value(19)) {
+        /*
         if (!$gameSwitches.value(19)) {
             OnlineManager.sendUnitInfo();
             OnlineManager.sendSysInfo();
@@ -853,6 +850,7 @@ function Game_Avatar() {
             $gameSwitches.setValue(19, false);
         }
         //this.receiveWtTurnList();
+        */
     };
     //同期用
     Game_System.prototype.syncVariable = function (eventId) {
@@ -914,12 +912,22 @@ function Game_Avatar() {
     };
     //同期中のターンか
     Game_System.prototype.isSyncTurn = function () {
-        if ($gameSystem.isEnemyTurn()) {
-            if ($gameSystem._enemyTeamID == OnlineManager.user.uid) return false;
+        if (this.isEnemyTurn()) {
+            if (this.isEnemyTeam()) return false;
             else return true;
-        } else if ($gameSystem.isAllyTurn()) {
-            if ($gameSystem._allyTeamID == OnlineManager.user.uid) return false;
+        } else if (this.isAllyTurn()) {
+            if (this.isAllyTeam()) return false;
             else return true;
         }
+    };
+    //味方ターンか
+    Game_System.prototype.isAllyTeam = function () {
+        if (this._allyTeamID == OnlineManager.user.uid) return true;
+        else return false;
+    };
+    //敵ターンか
+    Game_System.prototype.isEnemyTeam = function () {
+        if (this._enemyTeamID == OnlineManager.user.uid) return true;
+        else return false;
     };
 })();
