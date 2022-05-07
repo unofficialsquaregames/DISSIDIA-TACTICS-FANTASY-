@@ -769,8 +769,6 @@ Imported.TacticsBattleSys = true;
 
                 if ($gameSwitches.value(15)) $gameSystem.sendInfo();
                 return;
-                //}else{
-                //  battler.countWt(); //WT数を加算する
             }
         }
 
@@ -780,6 +778,19 @@ Imported.TacticsBattleSys = true;
             var battler = character.isActor();
 
             if (!battler.matchWt()) battler.countWt(); //WT数を加算する
+            
+            if ($gameSwitches.value(15)){
+                var allyId = character.allyNumber();
+                var enemyId = character.enemyNumber();
+                var id;
+                if (allyId) id = 31 + parseInt(allyId);
+                else if (enemyId) id = 36 + parseInt(enemyId);
+                if ($gameSystem.isSyncTurn()) {
+                    battler.setWt($gameVariables.value(id));
+                } else {
+                    $gameVariables.setValue(id, this._wt); //イベントIDに依存している
+                }
+            }
         }
     };
 
@@ -1481,6 +1492,11 @@ Imported.TacticsBattleSys = true;
     Game_BattlerBase.prototype.unitEvent = function () {
         return $gameMap.event(this.unitEventId());
     };
+    
+    // WTを代入
+    Game_BattlerBase.prototype.setWt = function (wt) {
+        this._wt = wt;
+    };
 
     // WTを返す
     Game_BattlerBase.prototype.wt = function () {
@@ -1492,8 +1508,8 @@ Imported.TacticsBattleSys = true;
         this._wt++;
         //this._wt+= Math.floor(Math.random() * 2) + 1;
     };
-    // WTをセットする
-    Game_BattlerBase.prototype.setWt = function (allyId, enemyId) {
+    // WT初期化
+    Game_BattlerBase.prototype.initWt = function (allyId, enemyId) {
         //オンライン対戦中WTリスト同期中
         if ($gameSwitches.value(15)) {
             var id; //変数
@@ -2942,7 +2958,7 @@ Imported.TacticsBattleSys = true;
                 this.setActor(new Game_Actor(this._allyId));
 
                 this.isActor().setEventId(this.eventId()); //イベントと紐づける用
-                this.isActor().setWt(allyId, enemyId);
+                this.isActor().initWt(allyId, enemyId);
                 this._move = $dataClasses[this._actor._classId].meta.move; //移動力
                 this.setImage(this._actor.characterName(), this._actor.characterIndex());
                 //向きの設定
@@ -2969,7 +2985,7 @@ Imported.TacticsBattleSys = true;
                 this.setActor(new Game_Actor(this._enemyId));
 
                 this.isActor().setEventId(this.eventId()); //イベントと紐づける用
-                this.isActor().setWt(allyId, enemyId);
+                this.isActor().initWt(allyId, enemyId);
                 this._move = $dataClasses[this._actor._classId].meta.move; //移動力
                 this.setImage(this._actor.characterName(), this._actor.characterIndex());
                 //向きの設定
@@ -3007,7 +3023,7 @@ Imported.TacticsBattleSys = true;
                 this.setActor(new Game_Actor(this._allyId));
 
                 this.isActor().setEventId(this.eventId()); //イベントと紐づける用
-                this.isActor().setWt(allyId, enemyId);
+                this.isActor().initWt(allyId, enemyId);
                 this._move = $dataClasses[this._actor._classId].meta.move; //移動力
                 this.setImage(this._actor.characterName(), this._actor.characterIndex());
                 //向きの設定
@@ -3045,7 +3061,7 @@ Imported.TacticsBattleSys = true;
                 this.setActor(new Game_Actor(this._enemyId));
 
                 this.isActor().setEventId(this.eventId()); //イベントと紐づける用
-                this.isActor().setWt(allyId, enemyId);
+                this.isActor().initWt(allyId, enemyId);
                 this._move = $dataClasses[this._actor._classId].meta.move; //移動力
                 this.setImage(this._actor.characterName(), this._actor.characterIndex());
                 //向きの設定
