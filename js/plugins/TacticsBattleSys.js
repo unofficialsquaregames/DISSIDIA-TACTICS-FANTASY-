@@ -781,6 +781,8 @@ Imported.TacticsBattleSys = true;
             if ($gameSwitches.value(15)){
                 var id; //変数
                 var id2; //スイッチ
+                var allyId = character.allyNumber();
+                var enemyId = character.enemyNumber();
                 if (allyId) {
                     id = 31 + parseInt(allyId);
                     id2 = 51 + parseInt(allyId);
