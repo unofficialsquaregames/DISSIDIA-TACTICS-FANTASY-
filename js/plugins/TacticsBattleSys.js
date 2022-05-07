@@ -780,23 +780,15 @@ Imported.TacticsBattleSys = true;
             //以下、必要？
             if ($gameSwitches.value(15)){
                 var id; //変数
-                var id2; //スイッチ
                 var allyId = character.allyNumber();
                 var enemyId = character.enemyNumber();
-                if (allyId) {
-                    id = 31 + parseInt(allyId);
-                    id2 = 51 + parseInt(allyId);
-                }else if (enemyId){
-                    id = 36 + parseInt(enemyId);
-                    id2 = 56 + parseInt(enemyId);
-                }
-                if ($gameSwitches.value(id2)) {
+                if (allyId) id = 31 + parseInt(allyId);
+                else if (enemyId) id = 36 + parseInt(enemyId);
+                if (this.isAllyTeam()) {
                     $gameVariables.setValue(id, this._wt); //イベントIDに依存している
-                    $gameSwitches.setValue(id2, true);
-                } else {
+                } else if(this.isEnemyTeam()) {
                     if (!battler.matchWt()) battler.countWt(); //WT数を加算する
                     battler.setWt($gameVariables.value(id));
-                    $gameSwitches.setValue(id2, false);
                 }
             }else{
                 if (!battler.matchWt()) battler.countWt(); //WT数を加算する
