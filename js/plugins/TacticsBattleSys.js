@@ -719,12 +719,6 @@ Imported.TacticsBattleSys = true;
             }
         }
         this.wtTurnListSort();
-        /*
-        if ($gameSwitches.value(15)) {
-            //this.setSyncVariableTime();
-            this.sendWtTurnList();
-        }
-        */
     };
 
     //ターンリストを行動順にソート
@@ -7800,14 +7794,6 @@ Imported.TacticsBattleSys = true;
     var _Scene_Map_updateMain = Scene_Map.prototype.updateMain;
     Scene_Map.prototype.updateMain = function () {
         _Scene_Map_updateMain.call(this);
-
-        /*
-        //オンライン対戦中WTリスト同期中
-        if ($gameSwitches.value(15) && $gameSystem.isSyncVariableTime()) {
-            $gameSystem.sendWtTurnList();
-            return;
-        }
-        */
 
         //戦闘不能者がいる場合
         if ($gameTemp.isDeadUnit()) {//ここでこの関数使うのはNG

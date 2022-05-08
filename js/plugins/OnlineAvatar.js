@@ -490,16 +490,6 @@ function Game_Avatar() {
         OnlineManager.startSync();
     };
 
-    //ユニット同期
-    var _Scene_Map_startBattle = Scene_Map.prototype.startBattle;
-    Scene_Map.prototype.startBattle = function () {
-        _Scene_Map_startBattle.call(this);
-        if ($gameSwitches.value(15)) {
-            //$gameSystem.setSyncVariableTime();
-            $gameSystem.sendWtTurnList();
-        }
-    };
-
 
     //オンライン経由でスイッチ・変数が変更された時、デバッグウィンドウ(F9)に反映
     //やや重い処理だが、F9はスマホやブラウザで実行されることはないためこれで大丈夫
@@ -729,33 +719,9 @@ function Game_Avatar() {
                 break;
             case 12: //事後処理
                 if($gameSwitches.value(20)) this.endTurn();
-                //$gameSystem.syncVariable(); //phaseStateの同期(ここで行うと色々と不具合が怒るためコメントアウト)
-                break;
-            case 13: //ユニットリスト選択フェーズ
-                this.updateUnitListWindow();
-                break;
-            case 14: //蘇生ユニット選択フェーズ
-                this.updateDeadUnitListWindow();
-                break;
-            case 15: //ステート確認フェーズ
-                this.updateBattleStatusWindow();
+                else $gameSystem.syncWtList(); //phaseStateの同期(ここで行うと色々と不具合が怒るためコメントアウト)
                 break;
         }
-    };
-    //行動順調整用スクリプトの同期
-    Game_System.prototype.sendWtTurnList = function () {
-        //if (this.isAllyTeam() && $gameSwitches.value(19)) {
-        /*
-        if (!$gameSwitches.value(19)) {
-            OnlineManager.sendUnitInfo();
-            OnlineManager.sendSysInfo();
-            $gameSwitches.setValue(19, true);
-        } else {
-            this.syncVariable();
-            $gameSwitches.setValue(19, false);
-        }
-        //this.receiveWtTurnList();
-        */
     };
     //同期用
     Game_System.prototype.syncVariable = function (eventId) {
@@ -806,11 +772,7 @@ function Game_Avatar() {
             }
         });
     };
-    //WTリスト設定中か
-    Game_System.prototype.isSyncVariableTime = function () {
-        if ($gameSwitches.value(19)) return true;
-        else return false;
-    };
+    
     Game_System.prototype.sendInfo = function (eventId = null) {
         OnlineManager.sendUnitInfo(eventId);
         OnlineManager.sendSysInfo();
