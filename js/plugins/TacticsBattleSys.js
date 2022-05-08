@@ -789,7 +789,10 @@ Imported.TacticsBattleSys = true;
             var character = this.unitList()[i];
             var battler = character.isActor();
 
-            if (!battler.matchWt()) battler.countWt(); //WT数を加算する
+            if (!battler.matchWt()) {
+                battler.countWt(); //WT数を加算する
+                if ($gameSwitches.value(15)) $gameSystem.sendInfo();
+            }
         }
     };
 
