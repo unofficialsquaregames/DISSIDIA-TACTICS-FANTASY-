@@ -3113,6 +3113,12 @@ Imported.TacticsBattleSys = true;
     Game_Event.prototype.returnFromXy = function () {
         this.setPosition(this.fromX(), this.fromY());
         this.setDirection(this.fromD());
+        //以下オンライン用
+        if ($gameSwitches.value(15)) {
+            this.setToXy(this.fromX(), this.fromY());
+            $gameSystem.sendInfo(); //オンライン時の処理(送信は間開けた方がいい？)
+            $gameSwitches.setValue(23, true);//移動選択フラグ
+        }
     };
     // 移動先座標を記憶する
     Game_Event.prototype.setToXy = function (x, y) {
@@ -8688,10 +8694,9 @@ Imported.TacticsBattleSys = true;
         $gamePlayer.setPriorityType(0);
         //$gamePlayer.refresh(); //カーソル化
         $gameTemp._startBattleFlag = false;
-        //this._phaseState = 0;
-        //移動先座標
-        //$gameTemp._toX = 0;
-        //$gameTemp._toY = 0;
+        $gameSwitches.setValue(23, false);
+        $gameSwitches.setValue(24, false);
+        $gameSwitches.setValue(25, false);
         //メニューを禁止
         $gameSystem.disableMenu();
         //テスト用(ここで入れるべきではない)
