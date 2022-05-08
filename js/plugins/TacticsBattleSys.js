@@ -7794,6 +7794,13 @@ Imported.TacticsBattleSys = true;
     var _Scene_Map_updateMain = Scene_Map.prototype.updateMain;
     Scene_Map.prototype.updateMain = function () {
         _Scene_Map_updateMain.call(this);
+        
+        /*
+        //スイッチ20OFFの時詰んでるときの調査用
+        if(!$gameSwitches.value(20)){
+            console.log($gameTemp._countWtTime);
+        }
+        */
 
         //戦闘不能者がいる場合
         if ($gameTemp.isDeadUnit()) {//ここでこの関数使うのはNG
@@ -7825,7 +7832,6 @@ Imported.TacticsBattleSys = true;
         //WTカウント中状態であった場合
         if ($gameTemp._countWtTime) {
             $gameSystem.countWt();
-            console.log("通ってる");
             return;
         }
         //オンライン対戦の場合
