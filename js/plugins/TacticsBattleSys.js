@@ -7804,13 +7804,6 @@ Imported.TacticsBattleSys = true;
     var _Scene_Map_updateMain = Scene_Map.prototype.updateMain;
     Scene_Map.prototype.updateMain = function () {
         _Scene_Map_updateMain.call(this);
-        
-        /*
-        //スイッチ20OFFの時詰んでるときの調査用
-        if(!$gameSwitches.value(20)){
-            console.log($gameTemp._countWtTime);
-        }
-        */
 
         //戦闘不能者がいる場合
         if ($gameTemp.isDeadUnit()) {//ここでこの関数使うのはNG
