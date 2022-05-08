@@ -386,30 +386,6 @@ function Game_Avatar() {
             this.variableRef.update(send);
         }
     };
-    
-    //ダメージを送信
-    OnlineManager.sendDamage = function (damage, value) {
-        if (this.unitRef && !this.syncBusy) {
-            var send = damage;
-            this.unitRef.update(send);
-        }
-    };
-    
-    //ヒットフラグを送信
-    OnlineManager.sendIsHit = function (isHit, value) {
-        if (this.unitRef && !this.syncBusy) {
-            var send = isHit;
-            this.unitRef.update(send);
-        }
-    };
-    
-    //クリティカルフラグを送信
-    OnlineManager.sendCritical = function (critical, value) {
-        if (this.unitRef && !this.syncBusy) {
-            var send = critical;
-            this.unitRef.update(send);
-        }
-    };
 
     //OnlineManagerを起動
     var _SceneManager_initialize = SceneManager.initialize;
@@ -505,45 +481,6 @@ function Game_Avatar() {
     Game_Variables.prototype.setValue = function (variableId, value, byOnline) {
         _Game_Variables_setValue.call(this, variableId, value);
         if (!byOnline) OnlineManager.sendVariable(variableId, this.value(variableId));
-    };
-    
-    //ダメージ同期
-    Game_Battler.prototype.setDamage = function (damage) {
-        this._damage.push(damage);
-        OnlineManager.sendDamage(this._damage);
-    };
-    
-    //ヒットフラグ同期
-    Game_Battler.prototype.setIsHit = function (isHit) {
-        this._isHit.push(isHit);
-        OnlineManager.sendIsHit(this._isHit);
-    };
-    
-    //クリティカル同期
-    Game_Battler.prototype.setCritical = function (critical) {
-        this._critical.push(critical);
-        OnlineManager.sendCritical(this._critical);
-    };
-
-    //ダメージ引き出し
-    Game_Battler.prototype.pullDamage = function () {
-        var damage = this._damage.shift();
-        OnlineManager.sendDamage(this._damage);
-        return damage;
-    };
-    
-    //ヒットフラグ引き出し
-    Game_Battler.prototype.pullIsHit = function () {
-        var isHit = this._isHit.shift();
-        OnlineManager.sendIsHit(this._isHit);
-        return isHit;
-    };
-    
-    //クリティカル引き出し
-    Game_Battler.prototype.pullCritical = function () {
-        var critical = this._critical.shift();
-        OnlineManager.sendCritical(critical);
-        return critical;
     };
 
     //スイッチ・変数の初期化時に、再同期処理（タイミングはスイッチが代表する）
@@ -791,6 +728,7 @@ function Game_Avatar() {
                 $gameSystem._phaseState = 12;//事後処理
                 break;
             case 12: //事後処理
+                if(!$gameSwitches.value(20)) return;
                 this.endTurn(); //
                 //$gameSystem.syncVariable(); //phaseStateの同期(ここで行うと色々と不具合が怒るためコメントアウト)
                 break;
@@ -866,20 +804,6 @@ function Game_Avatar() {
         OnlineManager.unitRef.once("value").then(function (data) {
             for (var i = 0; i < $gameSystem.unitList().length; i++) {
                 $gameSystem.unitList()[i].isActor()._wt = data.child(i).child("wt").val();
-            }
-        });
-    };
-    //同期用
-    Game_System.prototype.syncDamage = function () {
-        OnlineManager.unitRef.once("value").then(function (data) {
-            //var unit = $gameMap.event(eventId).isActor();
-            for (var i = 0; i < $gameSystem.unitList().length; i++) {
-                $gameSystem.unitList()[i].isActor()._damage = data.child(i).child("damage").val();
-                $gameSystem.unitList()[i].isActor()._isHit = data.child(i).child("isHit").val();
-                $gameSystem.unitList()[i].isActor()._critical = data.child(i).child("critical").val();
-                if(!$gameSystem.unitList()[i].isActor()._damage) $gameSystem.unitList()[i].isActor()._damage = [];
-                if(!$gameSystem.unitList()[i].isActor()._isHit) $gameSystem.unitList()[i].isActor()._isHit = [];
-                if(!$gameSystem.unitList()[i].isActor()._critical) $gameSystem.unitList()[i].isActor()._critical = [];
             }
         });
     };
