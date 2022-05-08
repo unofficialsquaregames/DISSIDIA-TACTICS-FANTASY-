@@ -778,7 +778,7 @@ Imported.TacticsBattleSys = true;
             }
         }
         if ($gameSwitches.value(15)) {
-            if(($gameSwitches.value(21) && this.isEnemyTeam()) || ($gameSwitches.value(22) && this.isAllyTeam())){
+            if(($gameSwitches.value(21) && this.isEnemyTeam()) || ($gameSwitches.value(22) && this.isAllyTeam()) || (!$gameSwitches.value(21) && !$gameSwitches.value(22) && this.isEnemyTeam())){
                 this.syncWtList();
                 return;
             }
