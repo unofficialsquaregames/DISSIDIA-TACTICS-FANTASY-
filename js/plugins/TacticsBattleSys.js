@@ -749,14 +749,14 @@ Imported.TacticsBattleSys = true;
 
     //WTカウント
     Game_System.prototype.countWt = function () {
-        /*
+        
         if($gameSwitches.value(19)){
             this.syncWtList();
             $gameTemp._countWtTime = false;
             $gameSwitches.setValue(19, false);
             return;
         }
-        */
+        
         //以下が平常時の動作
         for (var i = 0; i < this.unitList().length; i++) {
             var character = this.unitList()[i];
@@ -777,7 +777,7 @@ Imported.TacticsBattleSys = true;
 
                 if ($gameSwitches.value(15)) {
                     $gameSystem.sendInfo();
-                    //$gameSwitches.setValue(19, true);
+                    $gameSwitches.setValue(19, true);
                 }
                 return;
             }
@@ -8694,6 +8694,7 @@ Imported.TacticsBattleSys = true;
         $gamePlayer.setPriorityType(0);
         //$gamePlayer.refresh(); //カーソル化
         $gameTemp._startBattleFlag = false;
+        $gameSwitches.setValue(19, false);
         $gameSwitches.setValue(23, false);
         $gameSwitches.setValue(24, false);
         $gameSwitches.setValue(25, false);
