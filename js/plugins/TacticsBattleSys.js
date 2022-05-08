@@ -750,12 +750,7 @@ Imported.TacticsBattleSys = true;
     //WTカウント
     Game_System.prototype.countWt = function () {
         
-        if($gameSwitches.value(19)){
-            this.syncWtList();
-            $gameTemp._countWtTime = false;
-            $gameSwitches.setValue(19, false);
-            return;
-        }
+        if($gameSwitches.value(19)) this.syncWtList();
         
         //以下が平常時の動作
         for (var i = 0; i < this.unitList().length; i++) {
@@ -777,7 +772,8 @@ Imported.TacticsBattleSys = true;
 
                 if ($gameSwitches.value(15)) {
                     $gameSystem.sendInfo();
-                    $gameSwitches.setValue(19, true);
+                    if($gameSwitches.value(19)) $gameSwitches.setValue(19, false);
+                    else $gameSwitches.setValue(19, true);
                 }
                 return;
             }
@@ -8698,6 +8694,36 @@ Imported.TacticsBattleSys = true;
         $gameSwitches.setValue(23, false);
         $gameSwitches.setValue(24, false);
         $gameSwitches.setValue(25, false);
+        $gameSwitches.setValue(31, false);
+        $gameSwitches.setValue(32, false);
+        $gameSwitches.setValue(33, false);
+        $gameSwitches.setValue(34, false);
+        $gameSwitches.setValue(35, false);
+        $gameSwitches.setValue(36, false);
+        $gameSwitches.setValue(37, false);
+        $gameSwitches.setValue(38, false);
+        $gameSwitches.setValue(39, false);
+        $gameSwitches.setValue(40, false);
+        $gameSwitches.setValue(41, false);
+        $gameSwitches.setValue(42, false);
+        $gameSwitches.setValue(43, false);
+        $gameSwitches.setValue(44, false);
+        $gameSwitches.setValue(45, false);
+        $gameSwitches.setValue(46, false);
+        $gameSwitches.setValue(47, false);
+        $gameSwitches.setValue(48, false);
+        $gameSwitches.setValue(49, false);
+        $gameSwitches.setValue(50, false);
+        $gameSwitches.setValue(51, false);
+        $gameSwitches.setValue(52, false);
+        $gameSwitches.setValue(53, false);
+        $gameSwitches.setValue(54, false);
+        $gameSwitches.setValue(55, false);
+        $gameSwitches.setValue(56, false);
+        $gameSwitches.setValue(57, false);
+        $gameSwitches.setValue(58, false);
+        $gameSwitches.setValue(59, false);
+        $gameSwitches.setValue(60, false);
         //メニューを禁止
         $gameSystem.disableMenu();
         //テスト用(ここで入れるべきではない)
