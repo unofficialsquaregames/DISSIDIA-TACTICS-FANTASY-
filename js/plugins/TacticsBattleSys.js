@@ -661,6 +661,10 @@ Imported.TacticsBattleSys = true;
     };
     // ターンを終了する
     Game_System.prototype.endTurn = function () {
+        if($gameSwitches.value(15)){
+            if($gameSystem.isSyncTurn()) $gameSwitches.setValue(20, false);
+            else $gameSwitches.setValue(20, true);
+        }
         this._isAllyTurn = false;
         this._isEnemyTurn = false;
 
@@ -8581,10 +8585,6 @@ Imported.TacticsBattleSys = true;
         $gameTemp._countWtTime = true;
         $gameSystem.setWtTurnList();//行動順調整
         $gameSystem._phaseState = 0; //カメラ移動完了後コマンド表示
-        if($gameSwitches.value(15)){
-            if($gameSystem.isSyncTurn()) $gameSwitches.setValue(20, false);
-            else $gameSwitches.setValue(20, true);
-        }
     };
 
 

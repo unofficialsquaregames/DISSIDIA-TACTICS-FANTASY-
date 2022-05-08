@@ -728,8 +728,7 @@ function Game_Avatar() {
                 $gameSystem._phaseState = 12;//事後処理
                 break;
             case 12: //事後処理
-                if(!$gameSwitches.value(20)) return;
-                this.endTurn(); //
+                if($gameSwitches.value(20)) this.endTurn();
                 //$gameSystem.syncVariable(); //phaseStateの同期(ここで行うと色々と不具合が怒るためコメントアウト)
                 break;
             case 13: //ユニットリスト選択フェーズ
