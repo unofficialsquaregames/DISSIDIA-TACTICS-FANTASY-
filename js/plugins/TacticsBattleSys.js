@@ -8155,7 +8155,11 @@ Imported.TacticsBattleSys = true;
     // 予約ターンの更新
     Scene_Map.prototype.updateReservationTurn = function () {
         if($gameSwitches.value(15)){
-            if($gameSwitches.value(20)) return;
+            if($gameSystem.isSyncTurn()){
+                if(!$gameSwitches.value(20)) return;
+            }else{
+                if($gameSwitches.value(20)) return;
+            }
         }
         var turnUnit = $gameTemp.loadReservationAttackUnit();//予約ターンでは攻撃者のこと
         if ($gameTemp.loadReservationTargetUnit().isActor().isDead() && $gameSystem._phaseState == 0) $gameSystem._phaseState = 11; //追撃前に死亡していた場合、予約ターンを終わらせる(複数ヒットの影響で不具合発生)
