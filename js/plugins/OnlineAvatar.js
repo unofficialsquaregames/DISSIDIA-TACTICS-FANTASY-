@@ -563,35 +563,6 @@ function Game_Avatar() {
         }
     };
 
-    Scene_Map.prototype.updateOnline = function () {
-        //敵のターン
-        if ($gameSystem.isEnemyTurn()) {
-            
-            if ($gameSystem.turnUnit().isActor().checkHateState() || $gameSystem.turnUnit().isActor().checkHateGrantor() || $gameSystem.turnUnit().isActor().checkCtrlGrantor() || $gameSystem.turnUnit().isActor().checkNoCtrlState()) {
-                if ($gameSystem.isAllyTeam()) this.updateAllyTurn();
-                else this.updateSyncTurn();
-            } else {
-                if ($gameSystem.isEnemyTeam()) this.updateAllyTurn();
-                else this.updateSyncTurn();
-            }
-            
-            return;
-        }
-        //味方のターン
-        if ($gameSystem.isAllyTurn()) {
-            
-            if ($gameSystem.turnUnit().isActor().checkHateState() || $gameSystem.turnUnit().isActor().checkHateGrantor() || $gameSystem.turnUnit().isActor().checkCtrlGrantor() || $gameSystem.turnUnit().isActor().checkNoCtrlState()) {
-                if ($gameSystem.isEnemyTeam()) this.updateAllyTurn();
-                else this.updateSyncTurn();
-            } else {
-                if ($gameSystem.isAllyTeam()) this.updateAllyTurn();
-                else this.updateSyncTurn();
-            }
-            
-            return;
-        }
-    };
-
     //同期ターンの更新(呼び出されない不具合あり)
     Scene_Map.prototype.updateSyncTurn = function () {
         var turnUnit = $gameSystem.turnUnit();
@@ -719,7 +690,7 @@ function Game_Avatar() {
                 break;
             case 12: //事後処理
                 if($gameSwitches.value(20)) this.endTurn();
-                else $gameSystem.syncWtList(); //phaseStateの同期(ここで行うと色々と不具合が怒るためコメントアウト)
+                $gameSystem.syncVariable();
                 break;
         }
     };
@@ -735,7 +706,7 @@ function Game_Avatar() {
                 $gameSystem.unitList()[i].isActor()._hp = data.child(i).child("hp").val();
                 $gameSystem.unitList()[i].isActor()._mp = data.child(i).child("mp").val();
                 $gameSystem.unitList()[i].isActor()._tp = data.child(i).child("tp").val();
-                //$gameSystem.unitList()[i].isActor()._wt = data.child(i).child("wt").val();
+                $gameSystem.unitList()[i].isActor()._wt = data.child(i).child("wt").val(); //コメントアウトすべき？
                 $gameSystem.unitList()[i].setToXy(data.child(i).child("toX").val(), data.child(i).child("toY").val());
                 unit.isActor()._states = data.child(i).child("states").val(); //反映はされているが同期する側（受け手）の効果が適用される
                 unit.isActor()._stateTurns = data.child(i).child("stateTurns").val();

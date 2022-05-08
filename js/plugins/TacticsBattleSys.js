@@ -7829,7 +7829,29 @@ Imported.TacticsBattleSys = true;
         }
         //オンライン対戦の場合
         if ($gameSwitches.value(15)) {
-            this.updateOnline();
+            //敵のターン
+            if ($gameSystem.isEnemyTurn()) {
+                if ($gameSystem.turnUnit().isActor().checkHateState() || $gameSystem.turnUnit().isActor().checkHateGrantor() || $gameSystem.turnUnit().isActor().checkCtrlGrantor() || $gameSystem.turnUnit().isActor().checkNoCtrlState()) {
+                    if ($gameSystem.isAllyTeam()) this.updateAllyTurn();
+                    else this.updateSyncTurn();
+                } else {
+                    if ($gameSystem.isEnemyTeam()) this.updateAllyTurn();
+                    else this.updateSyncTurn();
+                }
+                return;
+            }
+            //味方のターン
+            if ($gameSystem.isAllyTurn()) {
+            
+                if ($gameSystem.turnUnit().isActor().checkHateState() || $gameSystem.turnUnit().isActor().checkHateGrantor() || $gameSystem.turnUnit().isActor().checkCtrlGrantor() || $gameSystem.turnUnit().isActor().checkNoCtrlState()) {
+                    if ($gameSystem.isEnemyTeam()) this.updateAllyTurn();
+                    else this.updateSyncTurn();
+                } else {
+                    if ($gameSystem.isAllyTeam()) this.updateAllyTurn();
+                    else this.updateSyncTurn();
+                }
+                return;
+            }
         } else {
             //敵のターン
             if ($gameSystem.isEnemyTurn()) {
