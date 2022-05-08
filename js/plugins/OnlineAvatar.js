@@ -760,6 +760,8 @@ function Game_Avatar() {
         } else if (this.isAllyTurn()) {
             if (this.isAllyTeam()) return false;
             else return true;
+        } else {
+            return false;
         }
     };
     //味方ターンか

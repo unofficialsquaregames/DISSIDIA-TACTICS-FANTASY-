@@ -748,8 +748,7 @@ Imported.TacticsBattleSys = true;
     //WTカウント
     Game_System.prototype.countWt = function () {
         
-        if($gameSwitches.value(19)) this.syncWtList();
-        
+        //if($gameSwitches.value(19)) this.syncWtList();
         //以下が平常時の動作
         for (var i = 0; i < this.unitList().length; i++) {
             var character = this.unitList()[i];
@@ -770,9 +769,17 @@ Imported.TacticsBattleSys = true;
 
                 if ($gameSwitches.value(15)) {
                     $gameSystem.sendInfo();
-                    if($gameSwitches.value(19)) $gameSwitches.setValue(19, false);
-                    else $gameSwitches.setValue(19, true);
+                    $gameSwitches.setValue(21, false);
+                    $gameSwitches.setValue(22, false);
+                    //if($gameSwitches.value(19)) $gameSwitches.setValue(19, false);
+                    //else $gameSwitches.setValue(19, true);
                 }
+                return;
+            }
+        }
+        if ($gameSwitches.value(15)) {
+            if(($gameSwitches.value(21) && this.isEnemyTeam()) || ($gameSwitches.value(22) && this.isAllyTeam())){
+                this.syncWtList();
                 return;
             }
         }
@@ -8003,7 +8010,11 @@ Imported.TacticsBattleSys = true;
                 break;
             case 12: //事後処理
                 this.endTurn(); //
-                if ($gameSwitches.value(15)) $gameSystem.sendInfo();
+                if ($gameSwitches.value(15)){
+                    $gameSystem.sendInfo();
+                    if($gameSystem.isAllyTeam()) $gameSwitches.setValue(21, true);
+                    else if($gameSystem.isEnemyTeam()) $gameSwitches.setValue(22, true);
+                }
                 break;
             case 13: //ユニットリスト選択フェーズ
                 this.updateUnitListWindow();
@@ -8015,7 +8026,6 @@ Imported.TacticsBattleSys = true;
                 this.updateBattleStatusWindow();
                 break;
         }
-        //if ($gameSwitches.value(15)) $gameSystem.sendInfo(); //オンライン時の処理
     };
 
 
@@ -8721,6 +8731,8 @@ Imported.TacticsBattleSys = true;
         $gameTemp._startBattleFlag = false;
         $gameSwitches.setValue(19, false);
         $gameSwitches.setValue(20, false);
+        $gameSwitches.setValue(21, false);
+        $gameSwitches.setValue(22, false);
         $gameSwitches.setValue(23, false);
         $gameSwitches.setValue(24, false);
         $gameSwitches.setValue(25, false);
