@@ -1057,6 +1057,8 @@ Imported.TacticsBattleSys = true;
 
         var isHit = result.isHit();
         if ($gameSwitches.value(15)) {
+            $gameSystem.syncDamage();
+        
             var tunit = $gameMap.event(target.eventId());
             var allyId = tunit.allyNumber();
             var enemyId = tunit.enemyNumber();
@@ -1064,9 +1066,11 @@ Imported.TacticsBattleSys = true;
             if (allyId) id = 31 + parseInt(allyId);
             else if (enemyId) id = 36 + parseInt(enemyId);
             if ($gameSystem.isSyncTurn()) {
-                isHit = $gameSwitches.value(id);
+                //isHit = $gameSwitches.value(id);
+                isHit = target.pullIsHit();
             } else {
-                $gameSwitches.setValue(id, result.isHit()); //イベントIDに依存している
+                //$gameSwitches.setValue(id, result.isHit()); //イベントIDに依存している
+                target.setIsHit(isHit);
             }
         }
         //ヒット時の挙動
@@ -1193,16 +1197,20 @@ Imported.TacticsBattleSys = true;
                     if (allyId) id = 21 + parseInt(allyId);
                     else if (enemyId) id = 26 + parseInt(enemyId);
                     if ($gameSystem.isSyncTurn()) {
-                        value = $gameVariables.value(id);
+                        //value = $gameVariables.value(id);
+                        value = target.pullDamage();
                     } else {
-                        $gameVariables.setValue(id, value); //イベントIDに依存している
+                        //$gameVariables.setValue(id, value); //イベントIDに依存している
+                        target.setDamage(value);
                     }
                     if (allyId) id = 41 + parseInt(allyId);
                     else if (enemyId) id = 46 + parseInt(enemyId);
                     if ($gameSystem.isSyncTurn()) {
-                        result.critical = $gameSwitches.value(id);
+                        //result.critical = $gameSwitches.value(id);
+                        result.critical = target.pullCritical();
                     } else {
-                        $gameSwitches.setValue(id, result.critical); //イベントIDに依存している
+                        //$gameSwitches.setValue(id, result.critical); //イベントIDに依存している
+                        target.setCritical(result.critical);
                     }
                 }
                 this.executeDamage(target, value);
@@ -1679,7 +1687,16 @@ Imported.TacticsBattleSys = true;
     //-----------------------------------------------------------------------------
     // Game_Battler
     //
-
+    
+    // 初期化処理(オンライン時ダメージ処理用)
+    var _Game_Battler_initialize = Game_Battler.prototype.initialize;
+    Game_Battler.prototype.initialize = function () {
+        _Game_Battler_initialize.call(this);
+        this._damage = [];
+        this._isHit = [];
+        this._critical = [];
+    };
+    
     Game_Battler.prototype.clearMessagePopup = function () {
         this._messagePopup = false;
     };
@@ -7864,6 +7881,9 @@ Imported.TacticsBattleSys = true;
 
     // 味方ターンの更新
     Scene_Map.prototype.updateAllyTurn = function () {
+        if($gameSwitches.value(15)){
+            if($gameSwitches.value(20)) return;
+        }
         var turnUnit = $gameSystem.turnUnit();
         switch ($gameSystem._phaseState) {
             case 0: //カメラ移動完了後コマンド表示
@@ -8139,6 +8159,9 @@ Imported.TacticsBattleSys = true;
 
     // 予約ターンの更新
     Scene_Map.prototype.updateReservationTurn = function () {
+        if($gameSwitches.value(15)){
+            if($gameSwitches.value(20)) return;
+        }
         var turnUnit = $gameTemp.loadReservationAttackUnit();//予約ターンでは攻撃者のこと
         if ($gameTemp.loadReservationTargetUnit().isActor().isDead() && $gameSystem._phaseState == 0) $gameSystem._phaseState = 11; //追撃前に死亡していた場合、予約ターンを終わらせる(複数ヒットの影響で不具合発生)
         switch ($gameSystem._phaseState) {
@@ -8575,6 +8598,10 @@ Imported.TacticsBattleSys = true;
         $gameTemp._countWtTime = true;
         $gameSystem.setWtTurnList();//行動順調整
         $gameSystem._phaseState = 0; //カメラ移動完了後コマンド表示
+        if($gameSwitches.value(15)){
+            if($gameSystem.isSyncTurn()) $gameSwitches.setValue(20, false);
+            else $gameSwitches.setValue(20, true);
+        }
     };
 
 
@@ -8691,6 +8718,7 @@ Imported.TacticsBattleSys = true;
         //$gamePlayer.refresh(); //カーソル化
         $gameTemp._startBattleFlag = false;
         $gameSwitches.setValue(19, false);
+        $gameSwitches.setValue(20, false);
         $gameSwitches.setValue(23, false);
         $gameSwitches.setValue(24, false);
         $gameSwitches.setValue(25, false);
