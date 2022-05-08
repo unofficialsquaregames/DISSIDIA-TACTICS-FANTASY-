@@ -7825,6 +7825,7 @@ Imported.TacticsBattleSys = true;
         //WTカウント中状態であった場合
         if ($gameTemp._countWtTime) {
             $gameSystem.countWt();
+            console.log("通ってる");
             return;
         }
         //オンライン対戦の場合
