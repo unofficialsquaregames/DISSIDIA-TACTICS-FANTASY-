@@ -522,7 +522,7 @@ function Game_Avatar() {
     //クリティカル同期
     Game_Battler.prototype.setCritical = function (critical) {
         this._critical.push(critical);
-        OnlineManager.sendCritical(critical);
+        OnlineManager.sendCritical(this._critical);
     };
 
     //ダメージ引き出し
