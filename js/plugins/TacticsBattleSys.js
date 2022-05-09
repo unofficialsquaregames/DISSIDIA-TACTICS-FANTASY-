@@ -662,7 +662,7 @@ Imported.TacticsBattleSys = true;
     // ターンを終了する
     Game_System.prototype.endTurn = function () {
         if($gameSwitches.value(15)){
-            if($gameSystem.isSyncTurn()) $gameSwitches.setValue(20, false);
+            if($gameSystem.isSyncTurn(this.turnUnit())) $gameSwitches.setValue(20, false);
             else $gameSwitches.setValue(20, true);
         }
         this._isAllyTurn = false;
@@ -1075,7 +1075,7 @@ Imported.TacticsBattleSys = true;
             var id;
             if (allyId) id = 31 + parseInt(allyId);
             else if (enemyId) id = 36 + parseInt(enemyId);
-            if ($gameSystem.isSyncTurn()) {
+            if ($gameSystem.isSyncTurn(turnUnit)) {
                 isHit = $gameSwitches.value(id);
             } else {
                 $gameSwitches.setValue(id, result.isHit()); //イベントIDに依存している
@@ -1204,14 +1204,14 @@ Imported.TacticsBattleSys = true;
                     var id;
                     if (allyId) id = 21 + parseInt(allyId);
                     else if (enemyId) id = 26 + parseInt(enemyId);
-                    if ($gameSystem.isSyncTurn()) {
+                    if ($gameSystem.isSyncTurn(turnUnit)) {
                         value = $gameVariables.value(id);
                     } else {
                         $gameVariables.setValue(id, value); //イベントIDに依存している
                     }
                     if (allyId) id = 41 + parseInt(allyId);
                     else if (enemyId) id = 46 + parseInt(enemyId);
-                    if ($gameSystem.isSyncTurn()) {
+                    if ($gameSystem.isSyncTurn(turnUnit)) {
                         result.critical = $gameSwitches.value(id);
                     } else {
                         $gameSwitches.setValue(id, result.critical); //イベントIDに依存している
@@ -1552,7 +1552,7 @@ Imported.TacticsBattleSys = true;
             var id;
             if (allyId) id = 31 + parseInt(allyId);
             else if (enemyId) id = 36 + parseInt(enemyId);
-            if ($gameSystem.isSyncTurn()) {
+            if ($gameSystem.isSyncTurn(tunit)) {
                 this._wt = $gameVariables.value(id);
             } else {
                 this._wt = Math.round(this.wtTurn() * distributed / 100);//0;
@@ -8171,14 +8171,14 @@ Imported.TacticsBattleSys = true;
 
     // 予約ターンの更新
     Scene_Map.prototype.updateReservationTurn = function () {
+        var turnUnit = $gameTemp.loadReservationAttackUnit();//予約ターンでは攻撃者のこと
         if($gameSwitches.value(15)){
-            if($gameSystem.isSyncTurn()){
+            if($gameSystem.isSyncTurn(turnUnit)){
                 if(!$gameSwitches.value(20)) return;
             }else{
                 if($gameSwitches.value(20)) return;
             }
         }
-        var turnUnit = $gameTemp.loadReservationAttackUnit();//予約ターンでは攻撃者のこと
         if ($gameTemp.loadReservationTargetUnit().isActor().isDead() && $gameSystem._phaseState == 0) $gameSystem._phaseState = 11; //追撃前に死亡していた場合、予約ターンを終わらせる(複数ヒットの影響で不具合発生)
         switch ($gameSystem._phaseState) {
             case 0: //カメラ移動完了後コマンド表示
