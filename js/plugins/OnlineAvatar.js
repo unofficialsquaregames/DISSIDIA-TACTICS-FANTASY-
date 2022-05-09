@@ -749,12 +749,15 @@ function Game_Avatar() {
         OnlineManager.sendSysInfo();
     };
     //同期中のターンか
-    Game_System.prototype.isSyncTurn = function () {
+    Game_System.prototype.isSyncTurn = function (unit = null) {
         if (this.isEnemyTurn()) {
             if (this.isEnemyTeam()) return false;
             else return true;
         } else if (this.isAllyTurn()) {
             if (this.isAllyTeam()) return false;
+            else return true;
+        } else if (this.isReservationAction()) {
+            if ((unit.isAlly() && this.isAllyTeam()) || (unit.isEnemy() && this.isEnemyTeam())) return false;
             else return true;
         } else {
             return false;
