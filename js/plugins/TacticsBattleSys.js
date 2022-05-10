@@ -8175,7 +8175,7 @@ Imported.TacticsBattleSys = true;
     Scene_Map.prototype.updateReservationTurn = function () {
         var turnUnit = $gameTemp.loadReservationAttackUnit();//予約ターンでは攻撃者のこと
         if($gameSwitches.value(15)){
-            if($gameSystem.isSyncTurn(turnUnit)){
+            if($gameSystem.isSyncTurn(turnUnit) && $gameSystem._phaseState < 12){
                 if(!$gameSwitches.value(20)) return;
             }else{
                 if($gameSwitches.value(20)) return;
@@ -8246,12 +8246,9 @@ Imported.TacticsBattleSys = true;
 
                 this.updateBattleStatusWindow();//戦闘用ステータスウインドウを更新
                 $gameMap.initColorArea();
-                $gameSystem._phaseState = 12;//ターン終了後処理へ移行
+                $gameSystem._phaseState = 11;//ターン終了後処理へ移行
                 break;
             case 11: //ターン終了後処理(アニメーションを取り扱う)
-                $gameSystem._phaseState = 12;//事後処理
-                break;
-            case 12: //事後処理
                 //ターン終了後の処理
                 if($gameSwitches.value(15)){
                     if($gameSystem.isSyncTurn(turnUnit)) {
@@ -8261,6 +8258,9 @@ Imported.TacticsBattleSys = true;
                 }
                 $gameTemp.endReservationActionTurn();
                 $gameTemp.removeReservationActionList();//ターン終了前にこのバトルの予約を消さないとループするの削除処理を行う
+                $gameSystem._phaseState = 12;//事後処理
+                break;
+            case 12: //事後処理
                 this.endTurn(); //
                 break;
         }
