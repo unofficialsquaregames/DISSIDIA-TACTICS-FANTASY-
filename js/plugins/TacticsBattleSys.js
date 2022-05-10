@@ -8246,7 +8246,7 @@ Imported.TacticsBattleSys = true;
 
                 this.updateBattleStatusWindow();//戦闘用ステータスウインドウを更新
                 $gameMap.initColorArea();
-                $gameSystem._phaseState = 11;//ターン終了後処理へ移行
+                $gameSystem._phaseState = 12;//ターン終了後処理へ移行
                 break;
             case 11: //ターン終了後処理(アニメーションを取り扱う)
                 $gameSystem._phaseState = 12;//事後処理
