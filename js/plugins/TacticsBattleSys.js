@@ -8251,7 +8251,7 @@ Imported.TacticsBattleSys = true;
             case 11: //ターン終了後処理(アニメーションを取り扱う)
                 //ターン終了後の処理
                 if($gameSwitches.value(15)){
-                    if($gameSystem.isSyncTurn(this.turnUnit())) {
+                    if($gameSystem.isSyncTurn(turnUnit)) {
                         if($gameSwitches.value(20)) $gameSwitches.setValue(20, false);
                         else return;
                     }else $gameSwitches.setValue(20, true);
