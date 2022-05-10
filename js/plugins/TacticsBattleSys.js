@@ -8175,8 +8175,8 @@ Imported.TacticsBattleSys = true;
     Scene_Map.prototype.updateReservationTurn = function () {
         var turnUnit = $gameTemp.loadReservationAttackUnit();//予約ターンでは攻撃者のこと
         if($gameSwitches.value(15)){
-            if($gameSystem.isSyncTurn(turnUnit) && $gameSystem._phaseState < 12){
-                if(!$gameSwitches.value(20)) return;
+            if($gameSystem.isSyncTurn(turnUnit)){
+                if(!$gameSwitches.value(20) && $gameSystem._phaseState < 12) return;
             }else{
                 if($gameSwitches.value(20)) return;
             }
