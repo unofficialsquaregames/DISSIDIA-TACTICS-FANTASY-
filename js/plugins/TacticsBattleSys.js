@@ -661,16 +661,18 @@ Imported.TacticsBattleSys = true;
     };
     // ターンを終了する
     Game_System.prototype.endTurn = function () {
-        if($gameSwitches.value(15)){
+        if($gameSwitches.value(15) && !$gameTemp.isReservationAction()){
             if($gameSystem.isSyncTurn(this.turnUnit())) $gameSwitches.setValue(20, false);
             else $gameSwitches.setValue(20, true);
         }
         this._isAllyTurn = false;
         this._isEnemyTurn = false;
+        /*
         if($gameTemp.isReservationAction()){
             $gameTemp.endReservationActionTurn();
             $gameTemp.removeReservationActionList();//ターン終了前にこのバトルの予約を消さないとループするの削除処理を行う
         }
+        */
 
         //マップ上にいるユニットのすり抜け設定
         for (var i = 0; i < this.unitList().length; i++) {
@@ -8248,9 +8250,14 @@ Imported.TacticsBattleSys = true;
                 break;
             case 11: //ターン終了後処理(アニメーションを取り扱う)
                 //ターン終了後の処理
-                //turnUnit.afterTurnReservationEnd();//予約ターン終了後
-                //$gameTemp.endReservationActionTurn();
-                //$gameTemp.removeReservationActionList();//ターン終了前にこのバトルの予約を消さないとループするの削除処理を行う
+                if($gameSwitches.value(15)){
+                    if($gameSystem.isSyncTurn(this.turnUnit())) {
+                        if($gameSwitches.value(20)) $gameSwitches.setValue(20, false);
+                        else return;
+                    }else $gameSwitches.setValue(20, true);
+                }
+                $gameTemp.endReservationActionTurn();
+                $gameTemp.removeReservationActionList();//ターン終了前にこのバトルの予約を消さないとループするの削除処理を行う
                 $gameSystem._phaseState = 12;//事後処理
                 break;
             case 12: //事後処理
