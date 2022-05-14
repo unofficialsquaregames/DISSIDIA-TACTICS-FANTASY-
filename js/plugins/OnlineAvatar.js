@@ -296,7 +296,7 @@ function Game_Avatar() {
                 var $ = $gameSystem.unitList()[i];
                 if (eventId && eventId != $gameSystem.unitList()[i].event().id) continue;
                 send[i] = {
-                    x: $._x, y: $._y, direction: $.direction(), toX: $.toX(), toY: $.toY(), target: $._target, useSkill: $._useSkill, hp: $.isActor()._hp, mp: $.isActor()._mp, tp: $.isActor()._tp, wt: $.isActor()._wt, states: $.isActor()._states, stateTurns: $.isActor()._stateTurns, stateGrantors: $.isActor()._stateGrantors
+                    toX: $.toX(), toY: $.toY(), target: $._target, useSkill: $._useSkill, wt: $.isActor()._wt, states: $.isActor()._states, stateTurns: $.isActor()._stateTurns, stateGrantors: $.isActor()._stateGrantors
                 };
             }
             this.unitRef.update(send);
@@ -708,10 +708,6 @@ function Game_Avatar() {
                 var unit = $gameSystem.unitList()[i];
                 $gameSystem.unitList()[i]._target = data.child(i).child("target").val();
                 $gameSystem.unitList()[i]._useSkill = data.child(i).child("useSkill").val();
-                //$gameSystem.unitList()[i].isActor()._hp = data.child(i).child("hp").val();
-                //$gameSystem.unitList()[i].isActor()._mp = data.child(i).child("mp").val();
-                //$gameSystem.unitList()[i].isActor()._tp = data.child(i).child("tp").val();
-                //$gameSystem.unitList()[i].isActor()._wt = data.child(i).child("wt").val(); //コメントアウトすべき？
                 $gameSystem.unitList()[i].setToXy(data.child(i).child("toX").val(), data.child(i).child("toY").val());
             }
         });
