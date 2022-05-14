@@ -1235,11 +1235,17 @@ Imported.TacticsBattleSys = true;
                 }
             }
             //バフデバフの反映
-            this.item().effects.forEach(function (effect) {
-                this.applyItemEffect(target, effect); //指定対象にエフェクトを適用。
-            }, this);
             if ($gameSwitches.value(15)) {
                 if ($gameSystem.isSyncTurn(turnUnit)) $gameSystem.syncState();
+                else {
+                    this.item().effects.forEach(function (effect) {
+                        this.applyItemEffect(target, effect); //指定対象にエフェクトを適用。
+                    }, this);
+                }
+            } else {
+                this.item().effects.forEach(function (effect) {
+                    this.applyItemEffect(target, effect); //指定対象にエフェクトを適用。
+                }, this);
             }
             //バフ延長
             if (turnUnit.useSkill().meta.extend) {
