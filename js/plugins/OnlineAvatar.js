@@ -611,7 +611,7 @@ function Game_Avatar() {
                     $gameSystem._phaseState = 5; //状況によっては5に移行
                     $gameSwitches.setValue(24, false);
                 }
-                if ($gameSwitches.value(25)) {
+                if ($gameSwitches.value(25) && $gameSwitches.value(20)) {
                     this.commandWait();
                     $gameSwitches.setValue(25, false);
                 }
