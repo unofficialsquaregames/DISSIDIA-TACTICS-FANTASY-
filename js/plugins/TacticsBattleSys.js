@@ -1238,6 +1238,9 @@ Imported.TacticsBattleSys = true;
             this.item().effects.forEach(function (effect) {
                 this.applyItemEffect(target, effect); //指定対象にエフェクトを適用。
             }, this);
+            if ($gameSwitches.value(15)) {
+                if ($gameSystem.isSyncTurn(turnUnit)) $gameSystem.syncState();
+            }
             //バフ延長
             if (turnUnit.useSkill().meta.extend) {
                 if (turnUnit.useSkill().meta.extend == "buffTurn") target.extendBuffStateTurns();
@@ -8252,9 +8255,11 @@ Imported.TacticsBattleSys = true;
             case 10: //コマンド実行処理(ダメージ表示)
                 if (!this.isMultiHitPopWaitingMode()) return;//待ち時間
                 turnUnit.executeAction();
+                /*
                 if ($gameSwitches.value(15)) {
                     if ($gameSystem.isSyncTurn(turnUnit)) $gameSystem.syncState(); //ここに宣言すると片方カウンターしてきて片方カウンターしない状況が発生するかも
                 }
+                */
                 $gameTemp.countMultiHit();
                 if (!$gameTemp.endMultiHit()) return;//ヒットが終わってない場合やり直し
 
