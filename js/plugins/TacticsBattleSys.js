@@ -8174,6 +8174,7 @@ Imported.TacticsBattleSys = true;
     // 予約ターンの更新
     Scene_Map.prototype.updateReservationTurn = function () {
         var turnUnit = $gameTemp.loadReservationAttackUnit();//予約ターンでは攻撃者のこと
+        /*
         if($gameSwitches.value(15)){
             if($gameSystem.isSyncTurn(turnUnit)){
                 if(!$gameSwitches.value(20)) return;
@@ -8181,9 +8182,17 @@ Imported.TacticsBattleSys = true;
                 if($gameSwitches.value(20)) return;
             }
         }
+        */
         if ($gameTemp.loadReservationTargetUnit().isActor().isDead() && $gameSystem._phaseState == 0) $gameSystem._phaseState = 11; //追撃前に死亡していた場合、予約ターンを終わらせる(複数ヒットの影響で不具合発生)
         switch ($gameSystem._phaseState) {
             case 0: //カメラ移動完了後コマンド表示
+                if ($gameSwitches.value(15)) {
+                    if ($gameSystem.isSyncTurn(turnUnit)) {
+                        if (!$gameSwitches.value(20)) return;
+                    } else {
+                        if ($gameSwitches.value(20)) return;
+                    }
+                }
                 $gameMap.initColorArea();
                 //カメラが移動中かどうか
                 this.openBattleStatusWindow(turnUnit); //自身のステータスを表示
@@ -8255,10 +8264,8 @@ Imported.TacticsBattleSys = true;
             case 12: //事後処理
                 //ターン終了後の処理
                 if($gameSwitches.value(15)){
-                    if($gameSystem.isSyncTurn(turnUnit)) {
-                        if($gameSwitches.value(20)) $gameSwitches.setValue(20, false);
-                        else return;
-                    }else $gameSwitches.setValue(20, true);
+                    if($gameSystem.isSyncTurn(turnUnit)) $gameSwitches.setValue(20, false);
+                    else $gameSwitches.setValue(20, true);
                 }
                 $gameTemp.endReservationActionTurn();
                 $gameTemp.removeReservationActionList();//ターン終了前にこのバトルの予約を消さないとループするの削除処理を行う
