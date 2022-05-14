@@ -679,7 +679,6 @@ function Game_Avatar() {
             case 10: //コマンド実行処理(ダメージ表示)
                 if (!this.isMultiHitPopWaitingMode()) return;//待ち時間
                 turnUnit.executeAction();
-                //$gameSystem.syncState();
                 $gameTemp.countMultiHit();
                 if (!$gameTemp.endMultiHit()) return;//ヒットが終わってない場合やり直し
                 this.updateBattleStatusWindow();//戦闘用ステータスウインドウを更新
