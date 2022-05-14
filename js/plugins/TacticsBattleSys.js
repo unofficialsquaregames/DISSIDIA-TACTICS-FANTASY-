@@ -8366,8 +8366,10 @@ Imported.TacticsBattleSys = true;
         this.closeCommandWindow();
         //オンライン
         if ($gameSwitches.value(15)) {
-            $gameSystem.sendInfo(); //オンライン時の処理
-            $gameSwitches.setValue(25, true);
+            if (!$gameSystem.isSyncTurn()) {
+                $gameSystem.sendInfo(); //オンライン時の処理
+                $gameSwitches.setValue(25, true);
+            }
         }
         //待機エリア表示しようか検討中(事後処理にいれる？)
         $gameSystem._phaseState = 11;//ターン終了後処理
