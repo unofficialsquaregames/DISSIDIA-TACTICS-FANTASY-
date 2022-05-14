@@ -772,7 +772,7 @@ function Game_Avatar() {
         } else if (this.isAllyTurn()) {
             if (this.isAllyTeam()) return false;
             else return true;
-        } else if ($gameTemp.isReservationAction()) {
+        } else if ($gameTemp.isReservationAction() && unit) {
             if ((unit.isAlly() && this.isAllyTeam()) || (unit.isEnemy() && this.isEnemyTeam())) return false;
             else return true;
         } else {

@@ -8201,6 +8201,7 @@ Imported.TacticsBattleSys = true;
                     if ($gameSystem.isSyncTurn(turnUnit)) {
                         if (!$gameSwitches.value(20)) return;
                     } else {
+                        console.log("通ってる");
                         if ($gameSwitches.value(20)) return;
                     }
                 }
@@ -8638,15 +8639,26 @@ Imported.TacticsBattleSys = true;
         this.closeBattleStatusWindow();
         $gameSystem.stateAction();
         $gameTemp._selfState = [];//このターンで付けたバフを初期化
-        $gameSystem._moveTargetPointFlag = false
-        $gameSystem._moveTargetPointX = 0;
-        $gameSystem._moveTargetPointY = 0;
-        $gameSystem._resurrectionFlag = false
-        $gameSystem.resetResurrectionUnit();
+
+        
         $gameSystem.endTurn();
         $gameTemp._countWtTime = true;
         $gameSystem.setWtTurnList();//行動順調整
         $gameSystem._phaseState = 0; //カメラ移動完了後コマンド表示
+
+        if ($gameSwitches.value(15)) {
+            if (!$gameSystem.isSyncTurn()) return;
+        }
+        //以下はスイッチ変数で管理した方が良いのでは？
+        $gameSystem._moveTargetPointFlag = false
+        $gameSystem._moveTargetPointX = 0;
+        $gameSystem._moveTargetPointY = 0;
+
+        //$gameVariables.setValue(8, 0);
+        //$gameVariables.setValue(9, 0);
+
+        $gameSystem._resurrectionFlag = false
+        $gameSystem.resetResurrectionUnit();
     };
 
 
