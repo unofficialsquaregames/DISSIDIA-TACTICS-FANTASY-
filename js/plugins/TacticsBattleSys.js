@@ -1983,31 +1983,13 @@ Imported.TacticsBattleSys = true;
         return false;
     };
     //ヘイトステートが付与されているか
-    Game_Battler.prototype.checkHateId = function () {
+    Game_Battler.prototype.checkHateState = function () {
         for (var stateId = 1; stateId < $dataStates.length; stateId++) {
             if (this.isStateAffected(stateId)) {
                 if ($dataStates[stateId].meta.hateGrantor) return stateId;
             }
         }
-        return false;
-    };
-    //ヘイトステートが付与されているか
-    Game_Battler.prototype.checkHateGrantor = function () {
-        for (var stateId = 1; stateId < $dataStates.length; stateId++) {
-            if (this.isStateAffected(stateId)) {
-                if ($dataStates[stateId].meta.hateGrantor) return $dataStates[stateId].meta.hateGrantor;
-            }
-        }
-        return false;
-    };
-    //ヘイトステートが付与されているか
-    Game_Battler.prototype.checkHateState = function () {
-        for (var stateId = 1; stateId < $dataStates.length; stateId++) {
-            if (this.isStateAffected(stateId)) {
-                if ($dataStates[stateId].meta.hateState) return $dataStates[stateId].meta.hateState;
-            }
-        }
-        return false;
+        return null;
     };
     //操作不能ステートが付与されているか
     Game_Battler.prototype.checkNoCtrlState = function () {
@@ -2410,6 +2392,8 @@ Imported.TacticsBattleSys = true;
         var x = turnUnit.x;
         var y = turnUnit.y;
         var skill = turnUnit.useSkill();
+        console.log(turnUnit);
+        console.log(skill);
         var a = (skill.meta.range || 'diamond 1').split(' ');
         a[1] = parseInt(a[1]);
         if (a[0] == "weapon") {
@@ -4198,7 +4182,7 @@ Imported.TacticsBattleSys = true;
         var hateSkill;
         if ($dataClasses[this.isActor()._classId].meta.hateSkill) hateSkill = ($dataClasses[this.isActor()._classId].meta.hateSkill).split(',');
         //ターゲット固定されてた場合
-        if ((this.isActor().checkHateGrantor() || this.isActor().checkHateState()) && hateSkill) {
+        if ((this.isActor().checkHateState()) && hateSkill) {
             if (this.target()) {
                 for (var i = 0; i < hateSkill.length; i++) {
                     var skill = $dataSkills[parseInt(hateSkill[i])];
@@ -4534,25 +4518,14 @@ Imported.TacticsBattleSys = true;
         this.setTarget(null);
         //var searchRange = $dataClasses[this.isActor()._classId].meta.searchRange;
         //ターゲット固定されてた場合
-        var hateGrantor = this.isActor().checkHateGrantor();
         var hateState = this.isActor().checkHateState();
-        var hateId = this.isActor().checkHateId();
-        if (hateGrantor || hateState) {
+        if (hateState) {
             for (var j = 0; j < $gameSystem.unitList().length; j++) {
                 var unit = $gameSystem.unitList()[j];
-                if (hateGrantor) {
-                    //if (hateGrantor == parseInt(unit.isActor()._classId)) {
-                    if (this.isActor().checkStateGrantorId(unit.isActor().eventId(), hateId)) {
-                        this.setTarget(unit);
-                        targetpos = this.setMovePoint(1);
-                        return targetpos;
-                    }
-                } else if (hateState) {
-                    if (unit.isActor().isStateAffected(parseInt(hateState))) {
-                        this.setTarget(unit);
-                        targetpos = this.setMovePoint(1);
-                        return targetpos;
-                    }
+                if (this.isActor().checkStateGrantorId(unit.event().id, parseInt(hateState))) {
+                    this.setTarget(unit);
+                    targetpos = this.setMovePoint(1);
+                    return targetpos;
                 }
             }
         }
@@ -7857,9 +7830,11 @@ Imported.TacticsBattleSys = true;
         if ($gameSwitches.value(15)) {
             //敵のターン
             if ($gameSystem.isEnemyTurn()) {
-                if ($gameSystem.turnUnit().isActor().checkHateState() || $gameSystem.turnUnit().isActor().checkHateGrantor() || $gameSystem.turnUnit().isActor().checkCtrlGrantor() || $gameSystem.turnUnit().isActor().checkNoCtrlState()) {
+                if ($gameSystem.turnUnit().isActor().checkCtrlGrantor() || $gameSystem.turnUnit().isActor().checkNoCtrlState()) {
                     if ($gameSystem.isAllyTeam()) this.updateAllyTurn();
                     else this.updateSyncTurn();
+                } else if ($gameSystem.turnUnit().isActor().checkHateState()) {
+                    this.updateEnemyTurn();
                 } else {
                     if ($gameSystem.isEnemyTeam()) this.updateAllyTurn();
                     else this.updateSyncTurn();
@@ -7868,10 +7843,12 @@ Imported.TacticsBattleSys = true;
             }
             //味方のターン
             if ($gameSystem.isAllyTurn()) {
-            
-                if ($gameSystem.turnUnit().isActor().checkHateState() || $gameSystem.turnUnit().isActor().checkHateGrantor() || $gameSystem.turnUnit().isActor().checkCtrlGrantor() || $gameSystem.turnUnit().isActor().checkNoCtrlState()) {
+
+                if ($gameSystem.turnUnit().isActor().checkCtrlGrantor() || $gameSystem.turnUnit().isActor().checkNoCtrlState()) {
                     if ($gameSystem.isEnemyTeam()) this.updateAllyTurn();
                     else this.updateSyncTurn();
+                } else if ($gameSystem.turnUnit().isActor().checkHateState()) {
+                    this.updateEnemyTurn();
                 } else {
                     if ($gameSystem.isAllyTeam()) this.updateAllyTurn();
                     else this.updateSyncTurn();
@@ -7890,7 +7867,7 @@ Imported.TacticsBattleSys = true;
             }
             //味方のターン
             if ($gameSystem.isAllyTurn()) {
-                if ($gameSystem.turnUnit().isActor().checkHateState() || $gameSystem.turnUnit().isActor().checkHateGrantor() || $gameSystem.turnUnit().isActor().checkCtrlGrantor() || $gameSystem.turnUnit().isActor().checkNoCtrlState()) {
+                if ($gameSystem.turnUnit().isActor().checkHateState() || $gameSystem.turnUnit().isActor().checkCtrlGrantor() || $gameSystem.turnUnit().isActor().checkNoCtrlState()) {
                     this.updateEnemyTurn();
                 } else {
                     this.updateAllyTurn();
@@ -8044,6 +8021,9 @@ Imported.TacticsBattleSys = true;
 
     // 敵ターンの更新
     Scene_Map.prototype.updateEnemyTurn = function () {
+        if ($gameSwitches.value(15)) {
+            if ($gameSwitches.value(20)) return;
+        }
         var turnUnit = $gameSystem.turnUnit();
         switch ($gameSystem._phaseState) {
             case 0: //カメラ移動完了後コマンド表示
@@ -8068,7 +8048,6 @@ Imported.TacticsBattleSys = true;
                 $gameMap.setInvisibleArea($gameSystem.unitList());
                 $gameMap.showInvisibleArea(turnUnit);
                 //クラス設定されたタグに合わせてターゲットを変更する
-                //turnUnit.targetSearch();
                 if (!turnUnit.isActor().canMove()) {
                     //$gameMessage.add("行動不能");
                     SoundManager.playBuzzer();//ブザー
@@ -8076,12 +8055,8 @@ Imported.TacticsBattleSys = true;
                     $gameSystem._phaseState = 11; //麻痺とかであれば以降の処理は行わず次のターンへ
                     return;
                 }
-                //if (turnUnit.target()){
                 //この時点でコマンドもセットする
                 $gameSystem._phaseState = 3; //状況によっては5に移行
-                //}else{
-                // $gameMap._phaseState = 11; //ターンエンド
-                //}
                 break;
             case 3: //移動先選択
                 //移動タイルを表示し
@@ -8096,6 +8071,11 @@ Imported.TacticsBattleSys = true;
                 $gamePlayer.setCameraXy(targetPos.x, targetPos.y);
 
                 turnUnit.setToXy(targetPos.x, targetPos.y);
+
+                if ($gameSwitches.value(15)) {
+                    $gameSystem.sendInfo(); //オンライン時の処理
+                    $gameSwitches.setValue(23, true);
+                }
                 $gameSystem._phaseState = 4;
                 break;
             case 4: //移動処理(移動完了したらphaseStateを上げる)
@@ -8167,6 +8147,11 @@ Imported.TacticsBattleSys = true;
                 turnUnit.executeAction();
                 $gameTemp.countMultiHit();
                 if (!$gameTemp.endMultiHit()) return;//ヒットが終わってない場合やり直し
+
+                if ($gameSwitches.value(15)) {
+                    $gameSystem.sendInfo(); //オンライン時の処理
+                    $gameSwitches.setValue(24, true);
+                }
                 this.updateBattleStatusWindow();//戦闘用ステータスウインドウを更新
                 $gameMap.initColorArea();
                 $gameSystem._phaseState = 11;//ターン終了後処理へ移行
@@ -8177,7 +8162,13 @@ Imported.TacticsBattleSys = true;
                 $gameSystem._phaseState = 12;//事後処理
                 break;
             case 12: //事後処理
-                this.endTurn(); //
+                //ターン終了後の処理
+                this.endTurn(); 
+                if ($gameSwitches.value(15)) {
+                    $gameSystem.sendInfo();
+                    if ($gameSystem.isAllyTeam()) $gameSwitches.setValue(21, true);
+                    else if ($gameSystem.isEnemyTeam()) $gameSwitches.setValue(22, true);
+                }
                 break;
         }
     };
