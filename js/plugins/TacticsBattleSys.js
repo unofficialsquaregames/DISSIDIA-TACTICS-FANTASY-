@@ -2370,6 +2370,7 @@ Imported.TacticsBattleSys = true;
     // 射程範囲を表示する
     Game_Map.prototype.showRangeArea = function (turnUnit, weapon) {
         var skill = turnUnit.useSkill();
+        console.log(skill);
         this.initColorArea();
         this._area = this.createRangeArea(turnUnit, weapon);
         //この辺りに自身の座標を基に対象エリアを削除していく(実装が難しいためコメントアウト)
@@ -2392,8 +2393,6 @@ Imported.TacticsBattleSys = true;
         var x = turnUnit.x;
         var y = turnUnit.y;
         var skill = turnUnit.useSkill();
-        console.log(turnUnit);
-        console.log(skill);
         var a = (skill.meta.range || 'diamond 1').split(' ');
         a[1] = parseInt(a[1]);
         if (a[0] == "weapon") {
@@ -7844,7 +7843,6 @@ Imported.TacticsBattleSys = true;
             }
             //味方のターン
             if ($gameSystem.isAllyTurn()) {
-
                 if ($gameSystem.turnUnit().isActor().checkCtrlGrantor() || $gameSystem.turnUnit().isActor().checkNoCtrlState()) {
                     if ($gameSystem.isEnemyTeam()) this.updateAllyTurn();
                     else this.updateSyncTurn();
@@ -8619,6 +8617,8 @@ Imported.TacticsBattleSys = true;
     // 12,事後処理
     Scene_Map.prototype.endTurn = function () {
         var turnUnit = $gameSystem.turnUnit();
+        console.log(turnUnit.target());
+        console.log(turnUnit.useSkill());
         var battler = turnUnit.isActor();
         this.closeBattleStatusWindow();
         $gameSystem.stateAction();
