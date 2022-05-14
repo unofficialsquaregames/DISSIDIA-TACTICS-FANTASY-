@@ -661,10 +661,12 @@ Imported.TacticsBattleSys = true;
     };
     // ターンを終了する
     Game_System.prototype.endTurn = function () {
-        if($gameSwitches.value(15) && !$gameTemp.isReservationAction()){
+        /*
+        if($gameSwitches.value(15) && s){
             if($gameSystem.isSyncTurn(this.turnUnit())) $gameSwitches.setValue(20, false);
             else $gameSwitches.setValue(20, true);
         }
+        */
         this._isAllyTurn = false;
         this._isEnemyTurn = false;
         /*
@@ -754,7 +756,6 @@ Imported.TacticsBattleSys = true;
     //WTカウント
     Game_System.prototype.countWt = function () {
         
-        //if($gameSwitches.value(19)) this.syncWtList();
         //以下が平常時の動作
         for (var i = 0; i < this.unitList().length; i++) {
             var character = this.unitList()[i];
@@ -777,8 +778,6 @@ Imported.TacticsBattleSys = true;
                     $gameSystem.sendInfo();
                     $gameSwitches.setValue(21, false);
                     $gameSwitches.setValue(22, false);
-                    //if($gameSwitches.value(19)) $gameSwitches.setValue(19, false);
-                    //else $gameSwitches.setValue(19, true);
                 }
                 return;
             }
@@ -8011,6 +8010,7 @@ Imported.TacticsBattleSys = true;
                 $gameSystem._phaseState = 12;//事後処理
                 break;
             case 12: //事後処理
+                if ($gameSwitches.value(15))  $gameSwitches.setValue(20, true);
                 this.endTurn(); //
                 if ($gameSwitches.value(15)){
                     $gameSystem.sendInfo();

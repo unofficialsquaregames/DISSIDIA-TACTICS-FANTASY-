@@ -689,7 +689,10 @@ function Game_Avatar() {
                 $gameSystem._phaseState = 12;//事後処理
                 break;
             case 12: //事後処理
-                if($gameSwitches.value(20)) this.endTurn();
+                if ($gameSwitches.value(20)) {
+                    $gameSwitches.setValue(20, false);
+                    this.endTurn();
+                }
                 $gameSystem.syncVariable();
                 break;
         }
