@@ -679,6 +679,7 @@ function Game_Avatar() {
             case 10: //コマンド実行処理(ダメージ表示)
                 if (!this.isMultiHitPopWaitingMode()) return;//待ち時間
                 turnUnit.executeAction();
+                $gameSystem.syncState();
                 $gameTemp.countMultiHit();
                 if (!$gameTemp.endMultiHit()) return;//ヒットが終わってない場合やり直し
                 this.updateBattleStatusWindow();//戦闘用ステータスウインドウを更新
@@ -708,15 +709,11 @@ function Game_Avatar() {
                 var unit = $gameSystem.unitList()[i];
                 $gameSystem.unitList()[i]._target = data.child(i).child("target").val();
                 $gameSystem.unitList()[i]._useSkill = data.child(i).child("useSkill").val();
-                $gameSystem.unitList()[i].isActor()._hp = data.child(i).child("hp").val();
-                $gameSystem.unitList()[i].isActor()._mp = data.child(i).child("mp").val();
-                $gameSystem.unitList()[i].isActor()._tp = data.child(i).child("tp").val();
+                //$gameSystem.unitList()[i].isActor()._hp = data.child(i).child("hp").val();
+                //$gameSystem.unitList()[i].isActor()._mp = data.child(i).child("mp").val();
+                //$gameSystem.unitList()[i].isActor()._tp = data.child(i).child("tp").val();
                 //$gameSystem.unitList()[i].isActor()._wt = data.child(i).child("wt").val(); //コメントアウトすべき？
                 $gameSystem.unitList()[i].setToXy(data.child(i).child("toX").val(), data.child(i).child("toY").val());
-                unit.isActor()._states = data.child(i).child("states").val(); //反映はされているが同期する側（受け手）の効果が適用される
-                unit.isActor()._stateTurns = data.child(i).child("stateTurns").val();
-                unit.isActor()._stateGrantors = data.child(i).child("stateGrantors").val();
-                if(!unit.isActor()._states) unit.isActor().clearStates();
             }
         });
 
@@ -733,6 +730,20 @@ function Game_Avatar() {
             if(!$gameSystem._resurrectionUnit) $gameSystem._resurrectionUnit = [];
         });
 
+    };
+    //同期用
+    Game_System.prototype.syncState = function (eventId) {
+        OnlineManager.unitRef.once("value").then(function (data) {
+            //ユニット更新用、行動順更新用などで分けた方が良い
+            for (var i = 0; i < $gameSystem.unitList().length; i++) {
+                if (eventId && eventId != $gameSystem.unitList()[i].event().id) continue;
+                var unit = $gameSystem.unitList()[i];
+                unit.isActor()._states = data.child(i).child("states").val(); //反映はされているが同期する側（受け手）の効果が適用される
+                unit.isActor()._stateTurns = data.child(i).child("stateTurns").val();
+                unit.isActor()._stateGrantors = data.child(i).child("stateGrantors").val();
+                if (!unit.isActor()._states) unit.isActor().clearStates();
+            }
+        });
     };
     //同期用
     Game_System.prototype.syncWtList = function () {
