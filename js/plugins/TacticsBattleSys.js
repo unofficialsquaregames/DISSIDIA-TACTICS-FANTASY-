@@ -7834,7 +7834,7 @@ Imported.TacticsBattleSys = true;
                     if ($gameSystem.isAllyTeam()) this.updateAllyTurn();
                     else this.updateSyncTurn();
                 } else if ($gameSystem.turnUnit().isActor().checkHateState()) {
-                    if ($gameSystem.isAllyTeam()) this.updateEnemyTurn();
+                    if ($gameSystem.isEnemyTeam()) this.updateEnemyTurn();
                     else this.updateSyncTurn();
                 } else {
                     if ($gameSystem.isEnemyTeam()) this.updateAllyTurn();
@@ -7849,7 +7849,7 @@ Imported.TacticsBattleSys = true;
                     if ($gameSystem.isEnemyTeam()) this.updateAllyTurn();
                     else this.updateSyncTurn();
                 } else if ($gameSystem.turnUnit().isActor().checkHateState()) {
-                    if ($gameSystem.isEnemyTeam()) this.updateEnemyTurn();
+                    if ($gameSystem.isAllyTeam()) this.updateEnemyTurn();
                     else this.updateSyncTurn();
                 } else {
                     if ($gameSystem.isAllyTeam()) this.updateAllyTurn();
