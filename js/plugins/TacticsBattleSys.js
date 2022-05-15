@@ -7797,16 +7797,43 @@ Imported.TacticsBattleSys = true;
         }
         if ($gameMap.isUnitAnimationPlaying() || !$gameSystem.isBattleActivate() || $gameMap.isEventRunning()) return; //戦闘中以外、イベント実行中は処理をしない
         
-        //ゲームオーバー判定
-        if ($gameMap.updateAllyUnitNums() == 0) {
-            this.gameOver();
-            return;
+        if ($gameSwitches.value(15)) {
+            if ($gameSystem.isAllyTeam()) {
+                //ゲームオーバー判定
+                if ($gameMap.updateAllyUnitNums() == 0) {
+                    if (!$gameSwitches.value(20)) this.gameOver();
+                    return;
+                }
+                //戦闘終了判定
+                if ($gameMap.updateEnemyUnitNums() == 0) {
+                    if (!$gameSwitches.value(20)) this.endBattle();
+                    return;
+                }
+            } else if ($gameSystem.isEnemyTeam()) {
+                //ゲームオーバー判定
+                if ($gameMap.updateEnemyUnitNums() == 0) {
+                    if (!$gameSwitches.value(20)) this.gameOver();
+                    return;
+                }
+                //戦闘終了判定
+                if ($gameMap.updateAllyUnitNums() == 0) {
+                    if (!$gameSwitches.value(20)) this.endBattle();
+                    return;
+                }
+            }
+        } else {
+            //ゲームオーバー判定
+            if ($gameMap.updateAllyUnitNums() == 0) {
+                this.gameOver();
+                return;
+            }
+            //戦闘終了判定
+            if ($gameMap.updateEnemyUnitNums() == 0) {
+                this.endBattle();
+                return;
+            }
         }
-        //戦闘終了判定
-        if ($gameMap.updateEnemyUnitNums() == 0) {
-            this.endBattle();
-            return;
-        }
+        
         //予約ターン
         if ($gameTemp.isReservationAction() && !$gameSystem.isAllyTurn() && !$gameSystem.isEnemyTurn()) {
             this.updateReservationTurn(); //予約ターンの更新
@@ -8244,7 +8271,7 @@ Imported.TacticsBattleSys = true;
                 $gameSystem._phaseState = 12;//ターン終了後処理へ移行
                 break;
             case 11: //ターン終了後処理(アニメーションを取り扱う)
-                //追撃時に付与されるデバフが同期側で反映されていなかったため、ここで処理
+                //迎撃カウンター時に付与されるデバフが同期側で反映されていなかったため、ここで処理
                 if ($gameSwitches.value(15)) {
                     if ($gameSystem.isSyncTurn()) $gameSystem.syncState();
                     else $gameSystem.sendInfo(); //ここで処理すると不具合発生する可能性
