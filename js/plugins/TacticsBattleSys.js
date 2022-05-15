@@ -3747,6 +3747,9 @@ Imported.TacticsBattleSys = true;
             actor.addState(this.event().id, 1);
             this.checkDead();
         }
+        if ($gameSwitches.value(15)) {
+            if ($gameSystem.isSyncTurn()) return;
+        }
         actor.updateStateTurns(); //バフ期間1act減少
     };
 
@@ -8616,8 +8619,7 @@ Imported.TacticsBattleSys = true;
         $gameSystem._phaseState = 0; //カメラ移動完了後コマンド表示
 
         if ($gameSwitches.value(15)) {
-            if ($gameSystem.isSyncTurn(turnUnit)) $gameSystem.syncState(); //バフデバフ付与時のステート期間減少対策用
-            else return;
+            if (!$gameSystem.isSyncTurn()) return;
         }
         //以下はスイッチ変数で管理した方が良いのでは？
         $gameSystem._moveTargetPointFlag = false
