@@ -6274,7 +6274,12 @@ Imported.TacticsBattleSys = true;
     //表示されるユニットリストの作成
     Window_DeadUnitList.prototype.makeItemList = function () {
         //this._data = $gameMap.allyDeadUnitList();
-        this._data = $gameSystem.allyList();
+        if ($gameSwitches.value(15)) {
+            if ($gameSystem.isAllyTeam()) this._data = $gameSystem.allyList();
+            else if ($gameSystem.isEnemyTeam()) this._data = $gameSystem.enemyList();
+        } else {
+            this._data = $gameSystem.allyList();
+        }
     };
 
     //
