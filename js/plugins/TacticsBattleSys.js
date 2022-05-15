@@ -296,6 +296,11 @@
  * @desc 敵5の変数
  * @default 20
  *
+ * @param testMode
+ * @desc テスト環境か
+ * @default false
+ * @type boolean
+ *
  * @noteParam faceName
  * @noteRequire 1
  * @noteDir img/faces/
@@ -368,6 +373,7 @@ Imported.TacticsBattleSys = true;
     var enemy3Id = +parameters['enemy3Id'];
     var enemy4Id = +parameters['enemy4Id'];
     var enemy5Id = +parameters['enemy5Id'];
+    var testMode = +parameters['testMode'];
     'use strict';
 
     //プラグインコマンド設定
@@ -2950,7 +2956,7 @@ Imported.TacticsBattleSys = true;
                 //向きの設定
                 var d = this.event().meta.Direction;
                 if (d) this.setDirection(d);
-                if (Utils.isOptionValid('test')) this._actor.gainTp(100);//テスト用
+                if (testMode) this._actor.gainTp(100);//テスト用
             }
             else if (enemyId) {
                 this.initTacticsUnitSetting();
@@ -2977,7 +2983,7 @@ Imported.TacticsBattleSys = true;
                 //向きの設定
                 var d = this.event().meta.Direction;
                 if (d) this.setDirection(d);
-                if (Utils.isOptionValid('test')) this._actor.gainTp(100);//テスト用
+                if (testMode) this._actor.gainTp(100);//テスト用
             }
         } else {
             //味方の配置
@@ -3015,8 +3021,7 @@ Imported.TacticsBattleSys = true;
                 //向きの設定
                 var d = this.event().meta.Direction;
                 if (d) this.setDirection(d);
-                //if (Utils.isOptionValid('test')) this._actor.gainTp(100);//テスト用
-                this._actor.gainTp(100);//テスト用
+                if (Utils.isOptionValid('test')) this._actor.gainTp(100);//テスト用
             }
             //敵の配置
             else if (enemyId) {
@@ -3054,8 +3059,7 @@ Imported.TacticsBattleSys = true;
                 //向きの設定
                 var d = this.event().meta.Direction;
                 if (d) this.setDirection(d);
-                //if (Utils.isOptionValid('test')) this._actor.gainTp(100);//テスト用
-                this._actor.gainTp(100);//テスト用
+                if (Utils.isOptionValid('test')) this._actor.gainTp(100);//テスト用
             }
         }
     };
@@ -7310,7 +7314,7 @@ Imported.TacticsBattleSys = true;
     //
     Window_TitleCommand.prototype.makeCommandList = function () {
         this.addCommand("トレーニング", 'training');
-        this.addCommand("オンライン", 'online');
+        if (testMode) this.addCommand("オンライン", 'online');
     };
 
     //-----------------------------------------------------------------------------
@@ -8886,7 +8890,7 @@ Imported.TacticsBattleSys = true;
     Scene_Title.prototype.createCommandWindow = function () {
         this._commandWindow = new Window_TitleCommand();
         this._commandWindow.setHandler('training', this.commandTrainingMode.bind(this));
-        this._commandWindow.setHandler('online', this.commandOnlineMode.bind(this));
+        if (testMode) this._commandWindow.setHandler('online', this.commandOnlineMode.bind(this));
         this.addWindow(this._commandWindow);
     };
     //トレーニングモード(スタートから流用)
