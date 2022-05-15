@@ -3747,9 +3747,11 @@ Imported.TacticsBattleSys = true;
             actor.addState(this.event().id, 1);
             this.checkDead();
         }
+        /*
         if ($gameSwitches.value(15)) {
             if ($gameSystem.isSyncTurn()) return;
         }
+        */
         actor.updateStateTurns(); //バフ期間1act減少
     };
 
