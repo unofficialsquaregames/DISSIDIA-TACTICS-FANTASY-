@@ -661,20 +661,8 @@ Imported.TacticsBattleSys = true;
     };
     // ターンを終了する
     Game_System.prototype.endTurn = function () {
-        /*
-        if($gameSwitches.value(15) && s){
-            if($gameSystem.isSyncTurn(this.turnUnit())) $gameSwitches.setValue(20, false);
-            else $gameSwitches.setValue(20, true);
-        }
-        */
         this._isAllyTurn = false;
         this._isEnemyTurn = false;
-        /*
-        if($gameTemp.isReservationAction()){
-            $gameTemp.endReservationActionTurn();
-            $gameTemp.removeReservationActionList();//ターン終了前にこのバトルの予約を消さないとループするの削除処理を行う
-        }
-        */
 
         //マップ上にいるユニットのすり抜け設定
         for (var i = 0; i < this.unitList().length; i++) {
@@ -2370,7 +2358,6 @@ Imported.TacticsBattleSys = true;
     // 射程範囲を表示する
     Game_Map.prototype.showRangeArea = function (turnUnit, weapon) {
         var skill = turnUnit.useSkill();
-        console.log(skill);
         this.initColorArea();
         this._area = this.createRangeArea(turnUnit, weapon);
         //この辺りに自身の座標を基に対象エリアを削除していく(実装が難しいためコメントアウト)
@@ -8617,8 +8604,6 @@ Imported.TacticsBattleSys = true;
     // 12,事後処理
     Scene_Map.prototype.endTurn = function () {
         var turnUnit = $gameSystem.turnUnit();
-        console.log(turnUnit.target());
-        console.log(turnUnit.useSkill());
         var battler = turnUnit.isActor();
         this.closeBattleStatusWindow();
         $gameSystem.stateAction();
@@ -8631,7 +8616,8 @@ Imported.TacticsBattleSys = true;
         $gameSystem._phaseState = 0; //カメラ移動完了後コマンド表示
 
         if ($gameSwitches.value(15)) {
-            if (!$gameSystem.isSyncTurn()) return;
+            if ($gameSystem.isSyncTurn(turnUnit)) $gameSystem.syncState(); //バフデバフ付与時のステート期間減少対策用
+            else return;
         }
         //以下はスイッチ変数で管理した方が良いのでは？
         $gameSystem._moveTargetPointFlag = false
