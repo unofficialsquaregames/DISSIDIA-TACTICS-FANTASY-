@@ -1209,11 +1209,11 @@ Imported.TacticsBattleSys = true;
                 this.executeDamage(target, value);
                 //バフ奪取(クリティカル発生時のみ)
                 if (turnUnit.useSkill().meta.steal) {
-                    if ((turnUnit.useSkill().meta.steal == "buff" && result.critical) || turnUnit.useSkill().meta.steal == "burst") {
+                    if (turnUnit.useSkill().meta.steal == "buff" || turnUnit.useSkill().meta.steal == "burst") {
                         var states = target._states; //ステータスIDの配列
                         for (var id = 0; id < states.length; id++) {
                             if ($dataStates[states[id]].meta.type == "buff") {
-                                if ($dataStates[states[id]].meta.buffFixed && !result.critical) continue; //フレーム付きの場合、クリティカルヒット時にダッシュ可能
+                                if ($dataStates[states[id]].meta.buffFixed && (turnUnit.useSkill().meta.steal == "buff" || !result.critical)) continue; //フレーム付きの場合、クリティカルヒット時にダッシュ可能
                                 this.subject().addState(this.subject().eventId(), states[id]);
                                 target.removeState(states[id]);
                                 break;
@@ -8244,7 +8244,11 @@ Imported.TacticsBattleSys = true;
                 $gameSystem._phaseState = 12;//ターン終了後処理へ移行
                 break;
             case 11: //ターン終了後処理(アニメーションを取り扱う)
-                
+                //追撃時に付与されるデバフが同期側で反映されていなかったため、ここで処理
+                if ($gameSwitches.value(15)) {
+                    if ($gameSystem.isSyncTurn()) $gameSystem.syncState();
+                    else $gameSystem.sendInfo(); //ここで処理すると不具合発生する可能性
+                }
                 $gameSystem._phaseState = 12;//事後処理
                 break;
             case 12: //事後処理
