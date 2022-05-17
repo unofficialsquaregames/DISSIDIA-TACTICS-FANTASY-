@@ -600,7 +600,7 @@ function Game_Avatar() {
                     $gameSystem._phaseState = 11; //麻痺とかであれば以降の処理は行わず次のターンへ
                     return;
                 }
-                $gameSystem.syncVariable(); //phaseStateの同期
+                if (!$gameSwitches.value(27)) $gameSystem.syncVariable(); //phaseStateの同期(戦闘不能者が出た場合エラー回避のため変数で条件分岐)
                 //この時点でコマンドもセットする
                 //$gameSystem._phaseState = 3; //状況によっては5に移行
                 if ($gameSwitches.value(23)) {
