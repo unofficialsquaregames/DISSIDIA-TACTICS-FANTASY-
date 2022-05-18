@@ -8194,7 +8194,7 @@ Imported.TacticsBattleSys = true;
                 //ターン終了後の処理
                 this.endTurn(); 
                 if ($gameSwitches.value(15)) {
-                    //$gameSystem.sendInfo();
+                    $gameSystem.sendInfo();
                     if ($gameSystem.isAllyTeam()) $gameSwitches.setValue(21, true);
                     else if ($gameSystem.isEnemyTeam()) $gameSwitches.setValue(22, true);
                 }
@@ -8872,8 +8872,10 @@ Imported.TacticsBattleSys = true;
             event.setDeadBattler();
             $gameSystem.setUnitList($gameMap.events());
             if ($gameSwitches.value(15)) {
-                if ($gameSwitches.value(27)) $gameSwitches.setValue(27, false);
-                else {
+                if ($gameSwitches.value(27)) {
+                    $gameSystem.syncWtList();
+                    $gameSwitches.setValue(27, false);
+                }else {
                     $gameSystem.sendInfo(); //戦闘不能時はサーバーに送信
                     $gameSwitches.setValue(27, true);
                 }
