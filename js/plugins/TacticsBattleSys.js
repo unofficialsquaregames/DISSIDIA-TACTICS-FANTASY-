@@ -7315,7 +7315,7 @@ Imported.TacticsBattleSys = true;
     //
     Window_TitleCommand.prototype.makeCommandList = function () {
         this.addCommand("トレーニング", 'training');
-        this.addCommand("オンライン", 'online');
+        //this.addCommand("オンライン", 'online');
     };
 
     //-----------------------------------------------------------------------------
