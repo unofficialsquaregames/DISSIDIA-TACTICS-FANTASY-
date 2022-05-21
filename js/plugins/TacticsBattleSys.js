@@ -2160,6 +2160,13 @@ Imported.TacticsBattleSys = true;
                                 value -= Math.round((value + this.paramBase(paramId)) * 20 / 100);
                             }
                         }
+                        //親征の檄(領域内の味方ユニットのステータスをアップ)
+                        var conquest = $dataStates[id].meta.conquest;
+                        if (field && conquest && robbedUnit.isCoverTarget($gameMap.event(this.eventId()))) {
+                            if (robbedUnit.targetRange($gameMap.event(this.eventId())) <= parseInt(field)) {
+                                value += Math.round((value + this.paramBase(paramId)) * 10 / 100);
+                            }
+                        }
                     }
                 }
             }
@@ -8904,7 +8911,7 @@ Imported.TacticsBattleSys = true;
     Scene_Title.prototype.createCommandWindow = function () {
         this._commandWindow = new Window_TitleCommand();
         this._commandWindow.setHandler('training', this.commandTrainingMode.bind(this));
-        this._commandWindow.setHandler('online', this.commandOnlineMode.bind(this));
+        //this._commandWindow.setHandler('online', this.commandOnlineMode.bind(this));
         this.addWindow(this._commandWindow);
     };
     //トレーニングモード(スタートから流用)
