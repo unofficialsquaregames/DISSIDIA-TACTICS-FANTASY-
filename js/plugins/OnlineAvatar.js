@@ -428,10 +428,8 @@ function Game_Avatar() {
         var rect = this.itemRect(index);
         var id = index + 1;
         this.contents.drawText("ルーム" + id, rect.x, rect.y + 8, rect.width, 32, "left");
-        console.log(OnlineManager.selfRef);
         console.log(OnlineManager.userRef);
         console.log(OnlineManager.userRef.child(OnlineManager.user.uid));
-        console.log(OnlineManager.userRef.child(OnlineManager.user.uid).val());
         for (var i = 0; i < $gameSystem.allyMembers().length; i++) {
             var id = $gameSystem.allyMembers()[i];
             if (id > 0) {
