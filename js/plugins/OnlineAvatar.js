@@ -166,12 +166,16 @@ function Game_Avatar() {
         });
 
         this.userRef = firebase.database().ref('users');
+        OnlineManager.userRef.once("value").then(function (data) {
+            this.userRef = data;
+        });
         var count = 0;
         this.userRef.once('value', parent => count = parent.numChildren()); //要素数を取得
+
         this.selfRef = this.userRef.child(count); //配列にpushする感じで宣言したい
+        this.sendPlayerInfo();
 
         this.selfRef.onDisconnect().remove();	//切断時にキャラ座標をリムーブ
-        this.sendPlayerInfo();
         //this.sysRef.onDisconnect().remove();
 
 
@@ -276,7 +280,7 @@ function Game_Avatar() {
             //avatarsInThisMap[data.key] = new Game_Avatar(avatarTemplate, data.val());
         });
 
-        this.sendPlayerInfo();
+        //this.sendPlayerInfo();
     };
 
     //送信するプレイヤー情報(ユニットの情報もここで送信するか？)
