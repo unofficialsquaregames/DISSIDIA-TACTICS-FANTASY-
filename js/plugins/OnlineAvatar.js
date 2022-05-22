@@ -115,6 +115,7 @@ function Game_Avatar() {
     OnlineManager.user = null;
     OnlineManager.syncBusy = false;	//同期接続する瞬間、送信が受信を上書きするのを阻止
 
+
     //ネット上からfirebaseファイルを読み込む
     OnlineManager.initialize = function () {
         var script = document.createElement('script');
@@ -165,7 +166,7 @@ function Game_Avatar() {
         });
 
         this.userRef = firebase.database().ref('users');
-        this.selfRef = this.userRef.child(this.user.uid);
+        this.selfRef = this.userRef.child(this.user.uid); //配列にpushする感じで宣言したい
         this.selfRef.onDisconnect().remove();	//切断時にキャラ座標をリムーブ
         this.sendPlayerInfo();
         //this.sysRef.onDisconnect().remove();
@@ -402,6 +403,96 @@ function Game_Avatar() {
         }
     };
 
+    //ルーム画面
+    function Window_RoomSelect() {
+        this.initialize.apply(this, arguments);
+    }
+    Window_RoomSelect.prototype = Object.create(Window_Selectable.prototype);
+    Window_RoomSelect.prototype.constructor = Window_RoomSelect;
+
+    Window_RoomSelect.prototype.initialize = function () {
+        var w = Graphics.boxWidth, h = Graphics.boxHeight,
+            a = eval("[0, 96, w, h - 96]");
+        Window_Selectable.prototype.initialize.call(this, a[0], a[1], a[2], a[3]);
+        this.refresh();
+    }
+
+    Window_RoomSelect.prototype.maxItems = function () {
+        return 6; //ルームの最大数(後にグローバル変数から指定予定)
+    };
+    Window_RoomSelect.prototype.maxCols = function () {
+        return 2;
+    };
+
+    Window_RoomSelect.prototype.drawItem = function (index) {
+        var rect = this.itemRect(index);
+        var id = index + 1;
+        this.contents.drawText("ルーム" + id, rect.x, rect.y + 8, rect.width, 32, "left");
+        console.log(OnlineManager.selfRef);
+        for (var i = 0; i < $gameSystem.allyMembers().length; i++) {
+            var id = $gameSystem.allyMembers()[i];
+            if (id > 0) {
+                var actor = $gameActors.actor(id);
+                this.drawActorCharacter(actor, rect.x + 24 + 32 * i, rect.y + rect.height / 2, rect.width, rect.height / 2);
+            }
+        }
+        //対戦中、待機中、空きの3種に分けたい
+    }
+
+    Window_RoomSelect.prototype.drawCharacter = function (characterName, characterIndex, x, y) {
+        var bitmap = ImageManager.loadCharacter(characterName);
+        var big = ImageManager.isBigCharacter(characterName);
+        var pw = bitmap.width / (big ? 3 : 12);
+        var ph = bitmap.height / (big ? 4 : 8);
+        var n = characterIndex;
+        var sx = (n % 4 * 3 + 1) * pw;
+        var sy = (Math.floor(n / 4) * 4) * ph + 8;//param.wwRowTop;
+        this.contents.blt(bitmap, sx, sy, pw, this.itemHeight()/2, x - pw / 2, y);
+    };
+
+    Window_RoomSelect.prototype.lineHeight = function () {
+        return 128; //param.wwRowHeight;
+    }
+
+    // Scene_RoomSelect
+
+    function Scene_RoomSelect() {
+        return this.initialize.apply(this, arguments);
+    }
+
+    Scene_RoomSelect.prototype = Object.create(Scene_MenuBase.prototype);
+    Scene_RoomSelect.prototype.constructor = Scene_RoomSelect;
+
+    Scene_RoomSelect.prototype.create = function () {
+        Scene_MenuBase.prototype.create.call(this);
+        //ssBitmap = null;
+        this.createRoomSelectWindow();
+    }
+
+    Scene_RoomSelect.prototype.createRoomSelectWindow = function () {
+        this.createRoomSelectWindow = new Window_RoomSelect();
+        this.createRoomSelectWindow.setHandler('ok', this.commandOkRoomSelect.bind(this));
+        this.createRoomSelectWindow.setHandler('cancel', this.commandCancelRoomSelect.bind(this));
+        this.createRoomSelectWindow.activate();
+        this.addWindow(this.createRoomSelectWindow);
+    }
+
+    Scene_RoomSelect.prototype.commandOkRoomSelect = function () {
+        var id = this.createRoomSelectWindow._index + 1;
+        $gameVariables.setValue(8, id);
+        $gameSwitches.setValue(12, false); //エリア選択スイッチOFF(スイッチNoはいずれプラグインの変数設定から行えるようにする)
+        $gameSwitches.setValue(16, true); //マッチングスイッチOFF(スイッチNoはいずれプラグインの変数設定から行えるようにする)
+        $gamePlayer.refresh();
+        this.popScene();
+    }
+
+    Scene_RoomSelect.prototype.commandCancelRoomSelect = function () {
+        $gameSwitches.setValue(12, false); //エリア選択スイッチOFF(スイッチNoはいずれプラグインの変数設定から行えるようにする)
+        $gameSwitches.setValue(11, true); //キャラクター選択スイッチON(スイッチNoはいずれプラグインの変数設定から行えるようにする)
+        $gamePlayer.refresh();
+        this.popScene();
+    }
+
     //歩行時
     var _Game_Player_moveStraight = Game_Player.prototype.moveStraight;
     Game_Player.prototype.moveStraight = function (d) {
@@ -462,6 +553,17 @@ function Game_Avatar() {
                     break;
                 case 'to':
                     OnlineManager.sendCustomInfo(args[2], $gameVariables.value(+args[0]));
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        if (command === 'roomSelect') {
+            switch (args[0]) {
+                case 'start':
+                    //ssBitmap = Bitmap.snap(SceneManager._scene);
+                    SceneManager.push(Scene_RoomSelect);
                     break;
                 default:
                     break;
