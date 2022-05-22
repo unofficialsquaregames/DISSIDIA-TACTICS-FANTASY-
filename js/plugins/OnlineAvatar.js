@@ -166,7 +166,10 @@ function Game_Avatar() {
         });
 
         this.userRef = firebase.database().ref('users');
-        this.selfRef = this.userRef.child(this.user.uid); //配列にpushする感じで宣言したい
+        var count = 0;
+        this.userRef.once('value', parent => count = parent.numChildren()); //要素数を取得
+        this.selfRef = this.userRef.child(count); //配列にpushする感じで宣言したい
+
         this.selfRef.onDisconnect().remove();	//切断時にキャラ座標をリムーブ
         this.sendPlayerInfo();
         //this.sysRef.onDisconnect().remove();
@@ -267,8 +270,7 @@ function Game_Avatar() {
 
         this.mapRef = firebase.database().ref('map' + $gameMap.mapId().padZero(3));
 
-        //this.mapRef.once('value', parent => alert('Count: ' + parent.numChildren())); //要素数を取得
-
+        
         //他プレイヤーが同マップに入場(gameSystem._allyTeamIDに直接割り振った方がいい？、プレイヤー自体をマップから独立させて)
         this.mapRef.on('child_added', function (data) {
             //avatarsInThisMap[data.key] = new Game_Avatar(avatarTemplate, data.val());
@@ -280,7 +282,7 @@ function Game_Avatar() {
     //送信するプレイヤー情報(ユニットの情報もここで送信するか？)
     OnlineManager.playerInfo = function () {
         var $ = $gamePlayer;
-        return { x: $.x, y: $.y, direction: $.direction(), speed: $.realMoveSpeed(), charaName: $.characterName(), charaIndex: $.characterIndex() };
+        return { uid: this.user.uid, unit: $gameSystem.allyMembers()};
     };
 
     //プレイヤー情報をオンライン上に送信
@@ -430,6 +432,7 @@ function Game_Avatar() {
         this.contents.drawText("ルーム" + id, rect.x, rect.y + 8, rect.width, 32, "left");
         console.log(OnlineManager.userRef);
         console.log(OnlineManager.userRef.child(OnlineManager.user.uid));
+        //console.log(OnlineManager.auth());
         for (var i = 0; i < $gameSystem.allyMembers().length; i++) {
             var id = $gameSystem.allyMembers()[i];
             if (id > 0) {
