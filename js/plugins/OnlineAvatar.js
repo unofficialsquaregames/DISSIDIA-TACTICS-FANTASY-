@@ -165,19 +165,18 @@ function Game_Avatar() {
             if (data.val() && OnlineManager.selfRef) OnlineManager.selfRef.onDisconnect().remove();
         });
 
-        var count = 0;
         this.userRef = firebase.database().ref('users');
-        this.userRef.once("value").then(function (data) {
-            this.userRef = data;
-        });
-        this.userRef.once('value', parent => count = parent.numChildren()); //要素数を取得
-        console.log(count);
+        var count = $gameSystem.countUser();
+        //this.userRef.once('value', parent => count = parent.numChildren()); //要素数を取得
 
         this.selfRef = this.userRef.child(count); //配列にpushする感じで宣言したい
-        this.sendPlayerInfo();
 
         this.selfRef.onDisconnect().remove();	//切断時にキャラ座標をリムーブ
-        //this.sysRef.onDisconnect().remove();
+
+
+        this.userRef.on('child_added', function (data) {
+            OnlineManager.sendUserInfo();
+        });
 
 
         //this.tempRef.onDisconnect().remove();
@@ -280,19 +279,15 @@ function Game_Avatar() {
         this.mapRef.on('child_added', function (data) {
             //avatarsInThisMap[data.key] = new Game_Avatar(avatarTemplate, data.val());
         });
-
-        //this.sendPlayerInfo();
-    };
-
-    //送信するプレイヤー情報(ユニットの情報もここで送信するか？)
-    OnlineManager.playerInfo = function () {
-        var $ = $gamePlayer;
-        return { uid: this.user.uid, unit: $gameSystem.allyMembers()};
     };
 
     //プレイヤー情報をオンライン上に送信
-    OnlineManager.sendPlayerInfo = function () {
-        if (this.selfRef) this.selfRef.update(this.playerInfo());
+    OnlineManager.sendUserInfo = function () {
+        if (this.selfRef) {
+            var send = {};
+            send = { uid: this.user.uid, unit: $gameSystem.allyMembers() };
+            this.selfRef.update(send);
+        }
     };
 
     //ユニット情報を送信(unitsはプレイヤーごとにわけて4体4体で編成させた方がいいか)
@@ -502,6 +497,7 @@ function Game_Avatar() {
         this.popScene();
     }
 
+    /*
     //歩行時
     var _Game_Player_moveStraight = Game_Player.prototype.moveStraight;
     Game_Player.prototype.moveStraight = function (d) {
@@ -519,7 +515,6 @@ function Game_Avatar() {
         _Game_Player_setImage.apply(this, arguments);
         if (!this.isTransferring()) OnlineManager.sendPlayerInfo();	//場所移動した時は不要
     };
-
     //マップ切り替え時
     var _Game_Player_performTransfer = Game_Player.prototype.performTransfer;
     Game_Player.prototype.performTransfer = function () {
@@ -540,6 +535,7 @@ function Game_Avatar() {
             OnlineManager.connectNewMap();
         }
     };
+    */
 
     //タイトルに戻った時にもキャラ座標をリムーブ
     var _Scene_Title_start = Scene_Title.prototype.start;
@@ -809,6 +805,16 @@ function Game_Avatar() {
                 $gameSystem.syncVariable();
                 break;
         }
+    };
+    //同期用(ユーザー情報を引っ張りたい)
+    Game_System.prototype.countUser = function () {
+        OnlineManager.userRef.once("value").then(function (data) {
+            var i = 0;
+            do {
+                i++;
+            } while (data.child(i));
+            return i;
+        });
     };
     //同期用
     Game_System.prototype.syncVariable = function (eventId) {
