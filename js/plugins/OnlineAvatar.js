@@ -810,10 +810,10 @@ function Game_Avatar() {
     Game_System.prototype.countUser = function () {
         OnlineManager.userRef.once("value").then(function (data) {
             var i = 0;
-            do {
+            while (data.child(i)) {
                 i++;
-            } while (data.child(i));
-            return i;
+            }
+            return i + 1;
         });
     };
     //同期用
