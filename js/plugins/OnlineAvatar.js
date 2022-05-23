@@ -165,12 +165,13 @@ function Game_Avatar() {
             if (data.val() && OnlineManager.selfRef) OnlineManager.selfRef.onDisconnect().remove();
         });
 
+        var count = 0;
         this.userRef = firebase.database().ref('users');
-        OnlineManager.userRef.once("value").then(function (data) {
+        this.userRef.once("value").then(function (data) {
             this.userRef = data;
         });
-        var count = 0;
         this.userRef.once('value', parent => count = parent.numChildren()); //要素数を取得
+        console.log(count);
 
         this.selfRef = this.userRef.child(count); //配列にpushする感じで宣言したい
         this.sendPlayerInfo();
