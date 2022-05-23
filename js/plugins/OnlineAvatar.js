@@ -166,8 +166,9 @@ function Game_Avatar() {
         });
 
         this.userRef = firebase.database().ref('users');
-        var count = $gameSystem.countUser();
-        //this.userRef.once('value', parent => count = parent.numChildren()); //要素数を取得
+        var count = 0;
+        //var count = $gameSystem.countUser();
+        this.userRef.once('value', parent => count = parent.numChildren()); //要素数を取得
 
         this.selfRef = this.userRef.child(count); //配列にpushする感じで宣言したい
 
