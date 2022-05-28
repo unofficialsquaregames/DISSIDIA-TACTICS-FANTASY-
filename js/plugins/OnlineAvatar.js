@@ -166,19 +166,22 @@ function Game_Avatar() {
         });
 
         this.userRef = firebase.database().ref('users');
+        /*
         var count = 0;
         //var count = $gameSystem.countUser();
         this.userRef.once('value', parent => count = parent.numChildren()); //要素数を取得
+        */
 
-        this.selfRef = this.userRef.child(count); //配列にpushする感じで宣言したい
+        //this.selfRef = this.userRef.child(count); //配列にpushする感じで宣言したい
+        this.userRef.push({ uid: this.user.uid, unit: $gameSystem.allyMembers()});
 
         this.selfRef.onDisconnect().remove();	//切断時にキャラ座標をリムーブ
 
-
+        /*
         this.userRef.on('child_added', function (data) {
             OnlineManager.sendUserInfo();
         });
-
+        */
 
         //this.tempRef.onDisconnect().remove();
         //OnlineManager.sendTempInfo();
