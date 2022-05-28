@@ -171,7 +171,8 @@ function Game_Avatar() {
         //this.userRef.push({ uid: this.user.uid }); //これがないとなぜかusersが生成されない
         var count = 0;
         OnlineManager.userRef.once('value', parent => count = parent.numChildren()); //要素数を取得
-        this.selfRef = this.userRef.child(count); //配列にpushする感じで宣言したい
+        //this.selfRef = this.userRef.child(count); //配列にpushする感じで宣言したい
+        this.selfRef = this.userRef.child(this.user.uid); //配列にpushする感じで宣言したい
         this.selfRef.onDisconnect().remove();	//切断時にキャラ座標をリムーブ
         
         this.userRef.on('child_added', function (data) {
@@ -279,9 +280,9 @@ function Game_Avatar() {
     OnlineManager.sendUserInfo = function () {
         if (this.selfRef) {
             var send = {};
-            //var count = 0;
-            //OnlineManager.userRef.once('value', parent => count = parent.numChildren()); //要素数を取得
-            send = { uid: this.user.uid, unit: $gameSystem.allyMembers() };
+            var count = 0;
+            OnlineManager.userRef.once('value', parent => count = parent.numChildren()); //要素数を取得
+            send = { uid: this.user.uid, unit: $gameSystem.allyMembers(), number: count };
             //send = { number: count, unit: $gameSystem.allyMembers() };
             this.selfRef.update(send);
         }
