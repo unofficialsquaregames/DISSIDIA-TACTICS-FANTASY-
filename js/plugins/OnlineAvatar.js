@@ -173,7 +173,7 @@ function Game_Avatar() {
         */
 
         //this.selfRef = this.userRef.child(count); //配列にpushする感じで宣言したい
-        this.userRef.push({ uid: this.user.uid, unit: $gameSystem.allyMembers()});
+        this.userRef.push({ uid: this.user.uid });
 
         this.selfRef.onDisconnect().remove();	//切断時にキャラ座標をリムーブ
 
