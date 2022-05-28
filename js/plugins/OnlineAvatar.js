@@ -172,22 +172,15 @@ function Game_Avatar() {
         this.userRef.once('value', parent => count = parent.numChildren()); //要素数を取得
         */
 
-        //this.selfRef = this.userRef.child(count); //配列にpushする感じで宣言したい
-        this.userRef.push({ uid: this.user.uid });
+        //this.userRef.push({ uid: this.user.uid });
+        this.selfRef = this.userRef.child(this.user.uid); //配列にpushする感じで宣言したい
+        this.selfRef.onDisconnect().remove();	//切断時にキャラ座標をリムーブ
 
-        //this.selfRef.onDisconnect().remove();	//切断時にキャラ座標をリムーブ
-
-        /*
+        
         this.userRef.on('child_added', function (data) {
             OnlineManager.sendUserInfo();
         });
-        */
-
-        //this.tempRef.onDisconnect().remove();
-        //OnlineManager.sendTempInfo();
-        //this.tempRef = firebase.database().ref('temps');
-        //this.tempRef.onDisconnect().remove();
-        //OnlineManager.sendTempInfo();
+        
 
         //ユーザーが退場
         this.userRef.on('child_removed', function (data) {
@@ -289,7 +282,10 @@ function Game_Avatar() {
     OnlineManager.sendUserInfo = function () {
         if (this.selfRef) {
             var send = {};
-            send = { uid: this.user.uid, unit: $gameSystem.allyMembers() };
+            var count = 0;
+            this.userRef.once('value', parent => count = parent.numChildren()); //要素数を取得
+            //send = { uid: this.user.uid, unit: $gameSystem.allyMembers() };
+            send = { number: count, unit: $gameSystem.allyMembers() };
             this.selfRef.update(send);
         }
     };
