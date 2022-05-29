@@ -168,10 +168,6 @@ function Game_Avatar() {
         if (this.userRef) this.userRef.off();
         else this.userRef = firebase.database().ref('users');
         
-        //this.userRef.push({ uid: this.user.uid }); //これがないとなぜかusersが生成されない
-        var count = 0;
-        OnlineManager.userRef.once('value', parent => count = parent.numChildren()); //要素数を取得
-        //this.selfRef = this.userRef.child(count); //配列にpushする感じで宣言したい
         this.selfRef = this.userRef.child(this.user.uid); //配列にpushする感じで宣言したい
         this.selfRef.onDisconnect().remove();	//切断時にキャラ座標をリムーブ
 
@@ -279,10 +275,7 @@ function Game_Avatar() {
     OnlineManager.sendUserInfo = function () {
         if (this.selfRef) {
             var send = {};
-            var count = 0;
-            OnlineManager.userRef.once('value', parent => count = parent.numChildren()); //要素数を取得
-            send = { uid: this.user.uid, unit: $gameSystem.allyMembers(), number: count };
-            //send = { number: count, unit: $gameSystem.allyMembers() };
+            send = { uid: this.user.uid,unit: $gameSystem.allyMembers()};
             this.selfRef.update(send);
         }
     };
@@ -427,9 +420,23 @@ function Game_Avatar() {
         var rect = this.itemRect(index);
         var id = index + 1;
         this.contents.drawText("ルーム" + id, rect.x, rect.y + 8, rect.width, 32, "left");
-        console.log(OnlineManager.userRef);
-        console.log(OnlineManager.userRef.child(OnlineManager.user.uid));
-        //console.log(OnlineManager.auth());
+        //データベースから検索したい
+        OnlineManager.userRef.on("value", (data) => {
+            if (data) {
+                const rootList = data.val();
+                const key = data.key;
+                let list = [];
+                // データオブジェクトを配列に変更する
+                if (rootList != null) {
+                    Object.keys(rootList).forEach((val, key) => {
+                        rootList[val].id = val;
+                        list.push(rootList[val]);
+                    })
+                }
+                console.log(list);
+            }
+        });
+
         for (var i = 0; i < $gameSystem.allyMembers().length; i++) {
             var id = $gameSystem.allyMembers()[i];
             if (id > 0) {
