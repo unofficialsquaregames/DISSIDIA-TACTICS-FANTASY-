@@ -443,12 +443,12 @@ function Game_Avatar() {
                             var unitId = list[i].unit[j];
                             if (unitId > 0) {
                                 var actor = $gameActors.actor(unitId);
-                                //現時点ではsystem欄が部屋分なく1つのみなので、そこを解決すれば以下の処理は機能する
-                                if ($gameSystem.isAllyTeam(list[i].id)) {
+                                //ルームID内のカラムを引っ張りたい
+                                //if ($gameSystem.isAllyTeam(list[i].id)) {
                                     this.drawActorCharacter(actor, rect.x + 24 + 32 * j, rect.y + rect.height / 2, rect.width, rect.height / 2);
-                                } else if ($gameSystem.isEnemyTeam(list[i].id)) {
-                                    this.drawActorCharacter(actor, rect.x + 24 + 32 * (j + 5), rect.y + rect.height / 2, rect.width, rect.height / 2);
-                                }
+                                //} else if ($gameSystem.isEnemyTeam(list[i].id)) {
+                                //    this.drawActorCharacter(actor, rect.x + 24 + 32 * (j + 5), rect.y + rect.height / 2, rect.width, rect.height / 2);
+                                //}
                             }
                         }
                     }
@@ -502,7 +502,7 @@ function Game_Avatar() {
         $gameVariables.setValue(8, id);
         $gameSwitches.setValue(12, false); //エリア選択スイッチOFF(スイッチNoはいずれプラグインの変数設定から行えるようにする)
         $gameSwitches.setValue(16, true); //マッチングスイッチOFF(スイッチNoはいずれプラグインの変数設定から行えるようにする)
-        OnlineManager.startSync();
+        OnlineManager.startSync(); //ここで同期すると待機メンバーのスイッチ変数を上書きしてしまうのでは？
         OnlineManager.sendUserInfo();
         $gamePlayer.refresh();
         this.popScene();
