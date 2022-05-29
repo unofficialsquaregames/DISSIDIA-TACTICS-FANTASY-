@@ -418,7 +418,7 @@ function Game_Avatar() {
     Window_RoomSelect.prototype.drawItem = function (index) {
         var rect = this.itemRect(index);
         var roomId = index + 1;
-        this.contents.drawText("ルーム" + id, rect.x, rect.y + 8, rect.width, 32, "left");
+        this.contents.drawText("ルーム" + roomId, rect.x, rect.y + 8, rect.width, 32, "left");
         //データベースから検索したい
         OnlineManager.userRef.on("value", (data) => {
             if (data) {
