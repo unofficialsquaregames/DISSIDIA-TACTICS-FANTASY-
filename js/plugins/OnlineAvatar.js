@@ -507,6 +507,7 @@ function Game_Avatar() {
         $gameVariables.setValue(8, id);
         $gameSwitches.setValue(12, false); //エリア選択スイッチOFF(スイッチNoはいずれプラグインの変数設定から行えるようにする)
         $gameSwitches.setValue(16, true); //マッチングスイッチOFF(スイッチNoはいずれプラグインの変数設定から行えるようにする)
+        OnlineManager.sendUserInfo();
         $gamePlayer.refresh();
         this.popScene();
     }
