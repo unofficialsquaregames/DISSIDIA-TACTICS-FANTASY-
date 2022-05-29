@@ -433,7 +433,7 @@ function Game_Avatar() {
                     })
                 }
                 for (var i = 0; i < list.length; i++) {
-                    if (list[i].room == index) {
+                    if (list[i].room == id) {
                         for (var j = 0; j < list[i].unit.length; j++) {
                             var id = list[i].unit[j];
                             if (id > 0) {
