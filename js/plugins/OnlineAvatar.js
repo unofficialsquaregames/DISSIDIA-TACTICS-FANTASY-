@@ -432,8 +432,18 @@ function Game_Avatar() {
                         list.push(rootList[val]);
                     })
                 }
-                console.log(list);
-                console.log(list[index]);
+                for (var i = 0; i < list.length; i++) {
+                    if (list[i].room == index) {
+                        for (var j = 0; j < list[i].unit.length; j++) {
+                            var id = list[i].unit[j];
+                            if (id > 0) {
+                                var actor = $gameActors.actor(id);
+                                this.drawActorCharacter(actor, rect.x + 24 + 32 * j, rect.y + rect.height / 2, rect.width, rect.height / 2);
+                            }
+                        }
+                    }
+                }
+                /*
                 if (list[index]) {
                     console.log(list[index].unit);
                     console.log(list[index].unit.length);
@@ -445,6 +455,7 @@ function Game_Avatar() {
                         }
                     }
                 }
+                */
             }
         });
 
