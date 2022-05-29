@@ -171,7 +171,6 @@ function Game_Avatar() {
         this.selfRef = this.userRef.child(this.user.uid); //配列にpushする感じで宣言したい
         this.selfRef.onDisconnect().remove();	//切断時にキャラ座標をリムーブ
 
-        OnlineManager.sendUserInfo();
         /*
         this.userRef.on('child_added', function (data) {
             OnlineManager.sendUserInfo();
@@ -275,7 +274,7 @@ function Game_Avatar() {
     OnlineManager.sendUserInfo = function () {
         if (this.selfRef) {
             var send = {};
-            send = { uid: this.user.uid,unit: $gameSystem.allyMembers()};
+            send = { unit: $gameSystem.allyMembers(), room: $gameVariables.value(8)};
             this.selfRef.update(send);
         }
     };
@@ -435,15 +434,16 @@ function Game_Avatar() {
                 }
                 console.log(list);
             }
+            for (var i = 0; i < list[index].unit.length; i++) {
+                var id = list[index].unit[i];
+                if (id > 0) {
+                    var actor = $gameActors.actor(id);
+                    this.drawActorCharacter(actor, rect.x + 24 + 32 * i, rect.y + rect.height / 2, rect.width, rect.height / 2);
+                }
+            }
         });
 
-        for (var i = 0; i < $gameSystem.allyMembers().length; i++) {
-            var id = $gameSystem.allyMembers()[i];
-            if (id > 0) {
-                var actor = $gameActors.actor(id);
-                this.drawActorCharacter(actor, rect.x + 24 + 32 * i, rect.y + rect.height / 2, rect.width, rect.height / 2);
-            }
-        }
+        
         //対戦中、待機中、空きの3種に分けたい
     }
 
@@ -474,6 +474,7 @@ function Game_Avatar() {
     Scene_RoomSelect.prototype.create = function () {
         Scene_MenuBase.prototype.create.call(this);
         //ssBitmap = null;
+        OnlineManager.sendUserInfo();
         this.createRoomSelectWindow();
     }
 
@@ -495,6 +496,7 @@ function Game_Avatar() {
     }
 
     Scene_RoomSelect.prototype.commandCancelRoomSelect = function () {
+        $gameVariables.setValue(8, 0);
         $gameSwitches.setValue(12, false); //エリア選択スイッチOFF(スイッチNoはいずれプラグインの変数設定から行えるようにする)
         $gameSwitches.setValue(11, true); //キャラクター選択スイッチON(スイッチNoはいずれプラグインの変数設定から行えるようにする)
         $gamePlayer.refresh();
