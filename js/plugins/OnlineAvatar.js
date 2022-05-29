@@ -174,16 +174,15 @@ function Game_Avatar() {
         //this.selfRef = this.userRef.child(count); //配列にpushする感じで宣言したい
         this.selfRef = this.userRef.child(this.user.uid); //配列にpushする感じで宣言したい
         this.selfRef.onDisconnect().remove();	//切断時にキャラ座標をリムーブ
-        
+
+        OnlineManager.sendUserInfo();
+        /*
         this.userRef.on('child_added', function (data) {
             OnlineManager.sendUserInfo();
         });
-        
-
+        */
         //ユーザーが退場
         this.userRef.on('child_removed', function (data) {
-            //if (avatarsInThisMap[data.key]) avatarsInThisMap[data.key].erase();
-            //delete avatarsInThisMap[data.key];
             OnlineManager.removeUserInfo();
         });
 
