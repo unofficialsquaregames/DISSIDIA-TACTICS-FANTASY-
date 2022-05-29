@@ -189,11 +189,13 @@ function Game_Avatar() {
 
     //スイッチと変数のオンライン同期の開始
     OnlineManager.startSync = function () {
-        if (!this.user) return;
+        if (!this.user || $gameVariables.value(8) == 0) return;
+        var roomId = 'room' + $gameVariables.value(8);
 
         if (this.parameters['syncSwitchStart'] || this.parameters['syncSwitchEnd']) {
+            var switchColumn = roomId + '/switches';
             if (this.switchRef) this.switchRef.off();
-            else this.switchRef = firebase.database().ref('switches');
+            else this.switchRef = firebase.database().ref(switchColumn);
             OnlineManager.syncBusy = true;
             this.switchRef.once('value', function (data) {
                 OnlineManager.syncBusy = false;
@@ -207,8 +209,9 @@ function Game_Avatar() {
         }
 
         if (this.parameters['syncVariableStart'] || this.parameters['syncVariableEnd']) {
+            var variablesColumn = roomId + '/variables';
             if (this.variableRef) this.variableRef.off();
-            else this.variableRef = firebase.database().ref('variables');
+            else this.variableRef = firebase.database().ref(variablesColumn);
             OnlineManager.syncBusy = true;
             this.variableRef.once('value', function (data) {
                 OnlineManager.syncBusy = false;
@@ -220,8 +223,9 @@ function Game_Avatar() {
                 $gameVariables.setValue(data.key, data.val(), true);
             });
         }
+        var sysColumn = roomId + '/system';
         if (this.sysRef) this.sysRef.off();
-        else this.sysRef = firebase.database().ref('system');
+        else this.sysRef = firebase.database().ref(sysColumn);
         OnlineManager.syncBusy = true;
         this.sysRef.once('value', function (data) {
             OnlineManager.syncBusy = false;
@@ -232,8 +236,9 @@ function Game_Avatar() {
         this.sysRef.on('child_changed', function (data) {
             //$gameVariables.setValue(data.key, data.val(), true);
         });
+        var unitColumn = roomId + '/units';
         if (this.unitRef) this.unitRef.off();
-        else this.unitRef = firebase.database().ref('units');
+        else this.unitRef = firebase.database().ref(unitColumn);
         OnlineManager.syncBusy = true;
         this.unitRef.once('value', function (data) {
             OnlineManager.syncBusy = false;
@@ -438,30 +443,20 @@ function Game_Avatar() {
                             var unitId = list[i].unit[j];
                             if (unitId > 0) {
                                 var actor = $gameActors.actor(unitId);
-                                this.drawActorCharacter(actor, rect.x + 24 + 32 * j, rect.y + rect.height / 2, rect.width, rect.height / 2);
+                                //現時点ではsystem欄が部屋分なく1つのみなので、そこを解決すれば以下の処理は機能する
+                                if ($gameSystem.isAllyTeam(list[i].id)) {
+                                    this.drawActorCharacter(actor, rect.x + 24 + 32 * j, rect.y + rect.height / 2, rect.width, rect.height / 2);
+                                } else if ($gameSystem.isEnemyTeam(list[i].id)) {
+                                    this.drawActorCharacter(actor, rect.x + 24 + 32 * (j + 5), rect.y + rect.height / 2, rect.width, rect.height / 2);
+                                }
                             }
                         }
                     }
                 }
-                /*
-                if (list[index]) {
-                    console.log(list[index].unit);
-                    console.log(list[index].unit.length);
-                    for (var i = 0; i < list[index].unit.length; i++) {
-                        var id = list[index].unit[i];
-                        if (id > 0) {
-                            var actor = $gameActors.actor(id);
-                            this.drawActorCharacter(actor, rect.x + 24 + 32 * i, rect.y + rect.height / 2, rect.width, rect.height / 2);
-                        }
-                    }
-                }
-                */
+                //対戦中、待機中、空きの3種に分けたい
             }
         });
-
-
-        //対戦中、待機中、空きの3種に分けたい
-    }
+    };
 
     Window_RoomSelect.prototype.drawCharacter = function (characterName, characterIndex, x, y) {
         var bitmap = ImageManager.loadCharacter(characterName);
@@ -507,6 +502,7 @@ function Game_Avatar() {
         $gameVariables.setValue(8, id);
         $gameSwitches.setValue(12, false); //エリア選択スイッチOFF(スイッチNoはいずれプラグインの変数設定から行えるようにする)
         $gameSwitches.setValue(16, true); //マッチングスイッチOFF(スイッチNoはいずれプラグインの変数設定から行えるようにする)
+        OnlineManager.startSync();
         OnlineManager.sendUserInfo();
         $gamePlayer.refresh();
         this.popScene();
