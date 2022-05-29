@@ -167,7 +167,7 @@ function Game_Avatar() {
 
         if (this.userRef) this.userRef.off();
         else this.userRef = firebase.database().ref('users');
-        
+
         this.selfRef = this.userRef.child(this.user.uid); //配列にpushする感じで宣言したい
         this.selfRef.onDisconnect().remove();	//切断時にキャラ座標をリムーブ
 
@@ -263,7 +263,7 @@ function Game_Avatar() {
 
         this.mapRef = firebase.database().ref('map' + $gameMap.mapId().padZero(3));
 
-        
+
         //他プレイヤーが同マップに入場(gameSystem._allyTeamIDに直接割り振った方がいい？、プレイヤー自体をマップから独立させて)
         this.mapRef.on('child_added', function (data) {
             //avatarsInThisMap[data.key] = new Game_Avatar(avatarTemplate, data.val());
@@ -274,7 +274,7 @@ function Game_Avatar() {
     OnlineManager.sendUserInfo = function () {
         if (this.selfRef) {
             var send = {};
-            send = { unit: $gameSystem.allyMembers(), room: $gameVariables.value(8)};
+            send = { unit: $gameSystem.allyMembers(), room: $gameVariables.value(8) };
             this.selfRef.update(send);
         }
     };
@@ -301,7 +301,7 @@ function Game_Avatar() {
             var $ = $gameSystem;
             var send = {
                 allyTeamID: $._allyTeamID, enemyTeamID: $._enemyTeamID, isAllyTurn: $._isAllyTurn, isEnemyTurn: $._isEnemyTurn, wtTurnList: $._wtTurnList, turnUnit: $._turnUnit
-                ,moveTargetPointFlag: $._moveTargetPointFlag, moveTargetPointX: $._moveTargetPointX, moveTargetPointY: $._moveTargetPointY, resurrectionFlag: $._resurrectionFlag, resurrectionUnit: $._resurrectionUnit
+                , moveTargetPointFlag: $._moveTargetPointFlag, moveTargetPointX: $._moveTargetPointX, moveTargetPointY: $._moveTargetPointY, resurrectionFlag: $._resurrectionFlag, resurrectionUnit: $._resurrectionUnit
             }
             this.sysRef.update(send);
         }
@@ -433,18 +433,22 @@ function Game_Avatar() {
                     })
                 }
                 console.log(list);
-
-                for (var i = 0; i < list[index].unit.length; i++) {
-                    var id = list[index].unit[i];
-                    if (id > 0) {
-                        var actor = $gameActors.actor(id);
-                        this.drawActorCharacter(actor, rect.x + 24 + 32 * i, rect.y + rect.height / 2, rect.width, rect.height / 2);
+                console.log(list[index]);
+                if (list[index]) {
+                    console.log(list[index].unit);
+                    console.log(list[index].unit.length);
+                    for (var i = 0; i < list[index].unit.length; i++) {
+                        var id = list[index].unit[i];
+                        if (id > 0) {
+                            var actor = $gameActors.actor(id);
+                            this.drawActorCharacter(actor, rect.x + 24 + 32 * i, rect.y + rect.height / 2, rect.width, rect.height / 2);
+                        }
                     }
                 }
             }
         });
 
-        
+
         //対戦中、待機中、空きの3種に分けたい
     }
 
@@ -456,7 +460,7 @@ function Game_Avatar() {
         var n = characterIndex;
         var sx = (n % 4 * 3 + 1) * pw;
         var sy = (Math.floor(n / 4) * 4) * ph + 8;//param.wwRowTop;
-        this.contents.blt(bitmap, sx, sy, pw, this.itemHeight()/2, x - pw / 2, y);
+        this.contents.blt(bitmap, sx, sy, pw, this.itemHeight() / 2, x - pw / 2, y);
     };
 
     Window_RoomSelect.prototype.lineHeight = function () {
@@ -723,7 +727,7 @@ function Game_Avatar() {
                 }
                 //コマンダーの行動終わってからアクションなのでテンポは悪い
                 if ($gameSwitches.value(24) && $gameSwitches.value(20)) {
-                    if(!turnUnit.useSkill()) return;
+                    if (!turnUnit.useSkill()) return;
                     $gameSystem._phaseState = 5; //状況によっては5に移行
                     $gameSwitches.setValue(24, false);
                 }
@@ -846,7 +850,7 @@ function Game_Avatar() {
             $gameSystem._moveTargetPointY = data.child("moveTargetPointY").val();
             $gameSystem._resurrectionFlag = data.child("resurrectionFlag").val();
             $gameSystem._resurrectionUnit = data.child("resurrectionUnit").val();
-            if(!$gameSystem._resurrectionUnit) $gameSystem._resurrectionUnit = [];
+            if (!$gameSystem._resurrectionUnit) $gameSystem._resurrectionUnit = [];
         });
 
     };
@@ -878,7 +882,7 @@ function Game_Avatar() {
             }
         });
     };
-    
+
     Game_System.prototype.sendInfo = function (eventId = null) {
         OnlineManager.sendUnitInfo(eventId);
         OnlineManager.sendSysInfo();
