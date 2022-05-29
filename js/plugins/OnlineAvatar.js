@@ -417,7 +417,7 @@ function Game_Avatar() {
 
     Window_RoomSelect.prototype.drawItem = function (index) {
         var rect = this.itemRect(index);
-        var id = index + 1;
+        var roomId = index + 1;
         this.contents.drawText("ルーム" + id, rect.x, rect.y + 8, rect.width, 32, "left");
         //データベースから検索したい
         OnlineManager.userRef.on("value", (data) => {
@@ -433,11 +433,11 @@ function Game_Avatar() {
                     })
                 }
                 for (var i = 0; i < list.length; i++) {
-                    if (list[i].room == id) {
+                    if (parseInt(list[i].room) == roomId) {
                         for (var j = 0; j < list[i].unit.length; j++) {
-                            var id = list[i].unit[j];
-                            if (id > 0) {
-                                var actor = $gameActors.actor(id);
+                            var unitId = list[i].unit[j];
+                            if (unitId > 0) {
+                                var actor = $gameActors.actor(unitId);
                                 this.drawActorCharacter(actor, rect.x + 24 + 32 * j, rect.y + rect.height / 2, rect.width, rect.height / 2);
                             }
                         }
