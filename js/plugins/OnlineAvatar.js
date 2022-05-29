@@ -433,12 +433,13 @@ function Game_Avatar() {
                     })
                 }
                 console.log(list);
-            }
-            for (var i = 0; i < list[index].unit.length; i++) {
-                var id = list[index].unit[i];
-                if (id > 0) {
-                    var actor = $gameActors.actor(id);
-                    this.drawActorCharacter(actor, rect.x + 24 + 32 * i, rect.y + rect.height / 2, rect.width, rect.height / 2);
+
+                for (var i = 0; i < list[index].unit.length; i++) {
+                    var id = list[index].unit[i];
+                    if (id > 0) {
+                        var actor = $gameActors.actor(id);
+                        this.drawActorCharacter(actor, rect.x + 24 + 32 * i, rect.y + rect.height / 2, rect.width, rect.height / 2);
+                    }
                 }
             }
         });
