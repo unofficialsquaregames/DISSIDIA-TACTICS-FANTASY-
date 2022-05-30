@@ -385,16 +385,6 @@ function Game_Avatar() {
         }
     };
 
-    OnlineManager.prototype.allyRoomId = function () {
-        OnlineManager.roomRef.once("value").then(function (data) {
-            return data.child("allyTeamID").val();
-        });
-    };
-    OnlineManager.prototype.enemyRoomId = function () {
-        OnlineManager.roomRef.once("value").then(function (data) {
-            return data.child("enemyTeamID").val();
-        });
-    };
     //OnlineManagerを起動
     var _SceneManager_initialize = SceneManager.initialize;
     SceneManager.initialize = function () {
@@ -452,8 +442,8 @@ function Game_Avatar() {
                 var roomRefId = 'room' + roomId + '/system';
                 console.log(roomRefId);
                 OnlineManager.roomRef = firebase.database().ref(roomRefId);
-                var allyTeamID = OnlineManager.allyRoomId();
-                var enemyTeamID = OnlineManager.enemyRoomId();
+                var allyTeamID = $gameSystem.allyRoomId();
+                var enemyTeamID = $gameSystem.enemyRoomId();
                 console.log(allyTeamID);
                 console.log(enemyTeamID);
                 for (var i = 0; i < list.length; i++) {
@@ -915,6 +905,16 @@ function Game_Avatar() {
         OnlineManager.sendSysInfo();
     };
 
+    Game_System.prototype.allyRoomId = function () {
+        OnlineManager.roomRef.once("value").then(function (data) {
+            return data.child("allyTeamID").val();
+        });
+    };
+    Game_System.prototype.enemyRoomId = function () {
+        OnlineManager.roomRef.once("value").then(function (data) {
+            return data.child("enemyTeamID").val();
+        });
+    };
     
     //同期中のターンか
     Game_System.prototype.isSyncTurn = function (unit = null) {
