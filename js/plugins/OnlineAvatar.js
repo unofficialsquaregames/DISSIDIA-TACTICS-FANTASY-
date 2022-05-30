@@ -440,30 +440,34 @@ function Game_Avatar() {
                 }
                 //以下、部屋からUIDを引き出す
                 var roomRefId = 'room' + roomId + '/system';
+                console.log(roomRefId);
                 OnlineManager.roomRef = firebase.database().ref(roomRefId);
-
+                var allyTeamID = "";
+                var enemyTeamID = "";
                 OnlineManager.roomRef.once("value").then(function (data2) {
-                    var allyTeamID = data2.child("allyTeamID").val();
-                    var enemyTeamID = data2.child("enemyTeamID").val();
+                    allyTeamID = data2.child("allyTeamID").val();
+                    enemyTeamID = data2.child("enemyTeamID").val();
 
-                    for (var i = 0; i < list.length; i++) {
-                        if (parseInt(list[i].room) == roomId) {
-                            for (var j = 0; j < list[i].unit.length; j++) {
-                                var unitId = list[i].unit[j];
-                                if (unitId > 0) {
-                                    var actor = $gameActors.actor(unitId);
-                                    //ルームID内のカラムを引っ張りたい
-                                    if (list[i].id == allyTeamID) {
-                                        this.drawActorCharacter(actor, rect.x + 24 + 32 * j, rect.y + rect.height / 2, rect.width, rect.height / 2);
-                                    } else if (list[i].id == enemyTeamID) {
-                                        this.drawActorCharacter(actor, rect.x + 24 + 32 * (j + 5), rect.y + rect.height / 2, rect.width, rect.height / 2);
-                                    }
+                });
+                console.log(allyTeamID);
+                console.log(enemyTeamID);
+                for (var i = 0; i < list.length; i++) {
+                    if (parseInt(list[i].room) == roomId) {
+                        for (var j = 0; j < list[i].unit.length; j++) {
+                            var unitId = list[i].unit[j];
+                            if (unitId > 0) {
+                                var actor = $gameActors.actor(unitId);
+                                //ルームID内のカラムを引っ張りたい
+                                if (list[i].id == allyTeamID) {
+                                    this.drawActorCharacter(actor, rect.x + 24 + 32 * j, rect.y + rect.height / 2, rect.width, rect.height / 2); //onlineManager外またはウインドウクラスを指定して処理を行いたい
+                                } else if (list[i].id == enemyTeamID) {
+                                    this.drawActorCharacter(actor, rect.x + 24 + 32 * (j + 5), rect.y + rect.height / 2, rect.width, rect.height / 2); //onlineManager外またはウインドウクラスを指定して処理を行いたい
                                 }
                             }
                         }
                     }
+                }
                 //対戦中、待機中、空きの3種に分けたい
-                });
             }
         });
     };
