@@ -385,6 +385,16 @@ function Game_Avatar() {
         }
     };
 
+    OnlineManager.prototype.allyRoomId = function () {
+        OnlineManager.roomRef.once("value").then(function (data) {
+            return data.child("allyTeamID").val();
+        });
+    };
+    OnlineManager.prototype.enemyRoomId = function () {
+        OnlineManager.roomRef.once("value").then(function (data) {
+            return data.child("enemyTeamID").val();
+        });
+    };
     //OnlineManagerを起動
     var _SceneManager_initialize = SceneManager.initialize;
     SceneManager.initialize = function () {
@@ -442,13 +452,8 @@ function Game_Avatar() {
                 var roomRefId = 'room' + roomId + '/system';
                 console.log(roomRefId);
                 OnlineManager.roomRef = firebase.database().ref(roomRefId);
-                var allyTeamID = "";
-                var enemyTeamID = "";
-                OnlineManager.roomRef.once("value").then(function (data2) {
-                    allyTeamID = data2.child("allyTeamID").val();
-                    enemyTeamID = data2.child("enemyTeamID").val();
-
-                });
+                var allyTeamID = OnlineManager.allyRoomId();
+                var enemyTeamID = OnlineManager.enemyRoomId();
                 console.log(allyTeamID);
                 console.log(enemyTeamID);
                 for (var i = 0; i < list.length; i++) {
@@ -461,7 +466,7 @@ function Game_Avatar() {
                                 if (list[i].id == allyTeamID) {
                                     this.drawActorCharacter(actor, rect.x + 24 + 32 * j, rect.y + rect.height / 2, rect.width, rect.height / 2); //onlineManager外またはウインドウクラスを指定して処理を行いたい
                                 } else if (list[i].id == enemyTeamID) {
-                                    this.drawActorCharacter(actor, rect.x + 24 + 32 * (j + 5), rect.y + rect.height / 2, rect.width, rect.height / 2); //onlineManager外またはウインドウクラスを指定して処理を行いたい
+                                    this.drawActorCharacter(actor, rect.x + 24 + 32 * (j + 5), rect.y + rect.height / 2, rect.width, rect.height / 2); //一旦配列に格納して他のメソッドで表示させるとか
                                 }
                             }
                         }
@@ -909,6 +914,8 @@ function Game_Avatar() {
         OnlineManager.sendUnitInfo(eventId);
         OnlineManager.sendSysInfo();
     };
+
+    
     //同期中のターンか
     Game_System.prototype.isSyncTurn = function (unit = null) {
         if (this.isEnemyTurn()) {
