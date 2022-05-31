@@ -425,6 +425,7 @@ function Game_Avatar() {
         var rect = this.itemRect(index);
         var roomId = index + 1;
         this.contents.drawText("ルーム" + roomId, rect.x, rect.y + 8, rect.width, 32, "left");
+        var w = this;
         //データベースから検索したい
         OnlineManager.userRef.on("value", (data) => {
             if (data) {
@@ -456,9 +457,9 @@ function Game_Avatar() {
                                     var actor = $gameActors.actor(unitId);
                                     //ルームID内のカラムを引っ張りたい
                                     if (list[i].id == allyTeamID) {
-                                        this.drawActorCharacter(actor, rect.x + 24 + 32 * j, rect.y + rect.height / 2, rect.width, rect.height / 2); //onlineManager外またはウインドウクラスを指定して処理を行いたい
+                                        w.drawActorCharacter(actor, rect.x + 24 + 32 * j, rect.y + rect.height / 2, rect.width, rect.height / 2); //onlineManager外またはウインドウクラスを指定して処理を行いたい
                                     } else if (list[i].id == enemyTeamID) {
-                                        this.drawActorCharacter(actor, rect.x + 24 + 32 * (j + 5), rect.y + rect.height / 2, rect.width, rect.height / 2); //onlineManager外またはウインドウクラスを指定して処理を行いたい
+                                        w.drawActorCharacter(actor, rect.x + 24 + 32 * (j + 5), rect.y + rect.height / 2, rect.width, rect.height / 2); //onlineManager外またはウインドウクラスを指定して処理を行いたい
                                     }
                                 }
                             }
