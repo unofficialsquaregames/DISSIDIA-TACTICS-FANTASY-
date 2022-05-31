@@ -441,14 +441,10 @@ function Game_Avatar() {
                 }
                 //以下、部屋からUIDを引き出す
                 var roomRefId = 'room' + roomId + '/system';
-                console.log(roomRefId);
                 OnlineManager.roomRef = firebase.database().ref(roomRefId);
                 OnlineManager.roomRef.once("value").then(function (data2) {
                     var allyTeamID = data2.child("allyTeamID").val();
                     var enemyTeamID = data2.child("enemyTeamID").val();
-
-                    console.log(allyTeamID);
-                    console.log(enemyTeamID);
                     for (var i = 0; i < list.length; i++) {
                         if (parseInt(list[i].room) == roomId) {
                             for (var j = 0; j < list[i].unit.length; j++) {
