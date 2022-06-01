@@ -424,7 +424,7 @@ function Game_Avatar() {
     Window_RoomSelect.prototype.drawItem = function (index) {
         var rect = this.itemRect(index);
         var roomId = index + 1;
-        this.contents.drawText("ルーム" + roomId, rect.x, rect.y + 8, rect.width, 32, "left");
+        this.contents.drawText("ルーム" + roomId, rect.x, rect.y + 8, 96, 32, "left");
         var window = this;
         //データベースから検索したい
         OnlineManager.userRef.on("value", (data) => {
@@ -464,13 +464,13 @@ function Game_Avatar() {
                     //対戦中、待機中、空きの3種に分けたい
                     if (allyTeamID && enemyTeamID) {
                         window.changeTextColor('red');
-                        window.contents.drawText("対戦中", rect.x + rect.width + 8, rect.y + 8, rect.width, 32);
+                        window.contents.drawText("対戦中", rect.x + 128, rect.y + 8, rect.width, 32);
                     } else if (allyTeamID || enemyTeamID) {
                         window.changeTextColor('orange');
-                        window.contents.drawText("待機中", rect.x + rect.width + 8, rect.y + 8, rect.width, 32);
+                        window.contents.drawText("待機中", rect.x + 128, rect.y + 8, rect.width, 32);
                     } else {
                         window.resetTextColor();
-                        window.contents.drawText("空き", rect.x + rect.width + 8, rect.y + 8, rect.width, 32);
+                        window.contents.drawText("空き", rect.x + 128, rect.y + 8, rect.width, 32);
                     }
                 });
             }
