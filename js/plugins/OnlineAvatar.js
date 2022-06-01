@@ -425,7 +425,7 @@ function Game_Avatar() {
         var rect = this.itemRect(index);
         var roomId = index + 1;
         this.contents.drawText("ルーム" + roomId, rect.x, rect.y + 8, rect.width, 32, "left");
-        var w = this;
+        var window = this;
         //データベースから検索したい
         OnlineManager.userRef.on("value", (data) => {
             if (data) {
@@ -453,15 +453,25 @@ function Game_Avatar() {
                                     var actor = $gameActors.actor(unitId);
                                     //ルームID内のカラムを引っ張りたい
                                     if (list[i].id == allyTeamID) {
-                                        w.drawActorCharacter(actor, rect.x + 24 + 32 * j, rect.y + rect.height / 2, rect.width, rect.height / 2); //onlineManager外またはウインドウクラスを指定して処理を行いたい
+                                        window.drawActorCharacter(actor, rect.x + 24 + 32 * j, rect.y + rect.height / 2, rect.width, rect.height / 2); //onlineManager外またはウインドウクラスを指定して処理を行いたい
                                     } else if (list[i].id == enemyTeamID) {
-                                        w.drawActorCharacter(actor, rect.x + 24 + 32 * (j + 5), rect.y + rect.height / 2, rect.width, rect.height / 2); //onlineManager外またはウインドウクラスを指定して処理を行いたい
+                                        window.drawActorCharacter(actor, rect.x + 24 + 32 * (j + 5), rect.y + rect.height / 2, rect.width, rect.height / 2); //onlineManager外またはウインドウクラスを指定して処理を行いたい
                                     }
                                 }
                             }
                         }
                     }
-                //対戦中、待機中、空きの3種に分けたい
+                    //対戦中、待機中、空きの3種に分けたい
+                    if (allyTeamID && enemyTeamID) {
+                        window.changeTextColor('red');
+                        window.contents.drawText("対戦中", rect.x + rect.width + 8, rect.y + 8, rect.width, 32);
+                    } else if (allyTeamID || enemyTeamID) {
+                        window.changeTextColor('orange');
+                        window.contents.drawText("待機中", rect.x + rect.width + 8, rect.y + 8, rect.width, 32);
+                    } else {
+                        window.resetTextColor();
+                        window.contents.drawText("空き", rect.x + rect.width + 8, rect.y + 8, rect.width, 32);
+                    }
                 });
             }
         });
@@ -480,13 +490,13 @@ function Game_Avatar() {
 
     Window_RoomSelect.prototype.lineHeight = function () {
         return 128; //param.wwRowHeight;
-    }
+    };
 
     // Scene_RoomSelect
 
     function Scene_RoomSelect() {
         return this.initialize.apply(this, arguments);
-    }
+    };
 
     Scene_RoomSelect.prototype = Object.create(Scene_MenuBase.prototype);
     Scene_RoomSelect.prototype.constructor = Scene_RoomSelect;
@@ -496,7 +506,7 @@ function Game_Avatar() {
         //ssBitmap = null;
         OnlineManager.sendUserInfo();
         this.createRoomSelectWindow();
-    }
+    };
 
     Scene_RoomSelect.prototype.createRoomSelectWindow = function () {
         this.createRoomSelectWindow = new Window_RoomSelect();
@@ -504,18 +514,22 @@ function Game_Avatar() {
         this.createRoomSelectWindow.setHandler('cancel', this.commandCancelRoomSelect.bind(this));
         this.createRoomSelectWindow.activate();
         this.addWindow(this.createRoomSelectWindow);
-    }
+    };
 
     Scene_RoomSelect.prototype.commandOkRoomSelect = function () {
         var id = this.createRoomSelectWindow._index + 1;
-        $gameVariables.setValue(8, id);
-        $gameSwitches.setValue(12, false); //エリア選択スイッチOFF(スイッチNoはいずれプラグインの変数設定から行えるようにする)
-        $gameSwitches.setValue(16, true); //マッチングスイッチOFF(スイッチNoはいずれプラグインの変数設定から行えるようにする)
-        OnlineManager.startSync(); //ここで同期すると待機メンバーのスイッチ変数を上書きしてしまうのでは？
-        OnlineManager.sendUserInfo();
-        $gamePlayer.refresh();
-        this.popScene();
-    }
+        if (this.checkCanInRoom(id)) {
+            $gameVariables.setValue(8, id);
+            $gameSwitches.setValue(12, false); //エリア選択スイッチOFF(スイッチNoはいずれプラグインの変数設定から行えるようにする)
+            $gameSwitches.setValue(16, true); //マッチングスイッチOFF(スイッチNoはいずれプラグインの変数設定から行えるようにする)
+            OnlineManager.startSync(); //ここで同期すると待機メンバーのスイッチ変数を上書きしてしまうのでは？
+            OnlineManager.sendUserInfo();
+            $gamePlayer.refresh();
+            this.popScene();
+        } else {
+            SoundManager.playBuzzer();//ブザー
+        }
+    };
 
     Scene_RoomSelect.prototype.commandCancelRoomSelect = function () {
         $gameVariables.setValue(8, 0);
@@ -523,8 +537,20 @@ function Game_Avatar() {
         $gameSwitches.setValue(11, true); //キャラクター選択スイッチON(スイッチNoはいずれプラグインの変数設定から行えるようにする)
         $gamePlayer.refresh();
         this.popScene();
-    }
-
+    };
+    //選択した部屋に入れるか？
+    Scene_RoomSelect.prototype.checkCanInRoom = function (roomId) {
+        //以下、部屋からUIDを引き出す
+        var roomRefId = 'room' + roomId + '/system';
+        OnlineManager.roomRef = firebase.database().ref(roomRefId);
+        OnlineManager.roomRef.once("value").then(function (data2) {
+            var allyTeamID = data2.child("allyTeamID").val();
+            var enemyTeamID = data2.child("enemyTeamID").val();
+            //対戦中、待機中、空きの3種に分けたい
+            if (allyTeamID && enemyTeamID) return false;
+            else return true;
+        });
+    };
     /*
     //歩行時
     var _Game_Player_moveStraight = Game_Player.prototype.moveStraight;
