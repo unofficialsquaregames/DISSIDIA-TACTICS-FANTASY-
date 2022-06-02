@@ -196,7 +196,10 @@ function Game_Avatar() {
         if (this.parameters['syncSwitchStart'] || this.parameters['syncSwitchEnd']) {
             var switchColumn = roomId + '/switches';
             if (this.switchRef) this.switchRef.off();
-            else this.switchRef = firebase.database().ref(switchColumn);
+            else {
+                this.switchRef = firebase.database().ref(switchColumn);
+                this.switchRef.onDisconnect().remove();	//切断時にリムーブ
+            }
             OnlineManager.syncBusy = true;
             this.switchRef.once('value', function (data) {
                 OnlineManager.syncBusy = false;
@@ -212,7 +215,10 @@ function Game_Avatar() {
         if (this.parameters['syncVariableStart'] || this.parameters['syncVariableEnd']) {
             var variablesColumn = roomId + '/variables';
             if (this.variableRef) this.variableRef.off();
-            else this.variableRef = firebase.database().ref(variablesColumn);
+            else {
+                this.variableRef = firebase.database().ref(variablesColumn);
+                this.variableRef.onDisconnect().remove();	//切断時にリムーブ
+            }
             OnlineManager.syncBusy = true;
             this.variableRef.once('value', function (data) {
                 OnlineManager.syncBusy = false;
@@ -226,7 +232,10 @@ function Game_Avatar() {
         }
         var sysColumn = roomId + '/system';
         if (this.sysRef) this.sysRef.off();
-        else this.sysRef = firebase.database().ref(sysColumn);
+        else {
+            this.sysRef = firebase.database().ref(sysColumn);
+            this.sysRef.onDisconnect().remove();	//切断時にリムーブ
+        }
         OnlineManager.syncBusy = true;
         this.sysRef.once('value', function (data) {
             OnlineManager.syncBusy = false;
@@ -239,7 +248,10 @@ function Game_Avatar() {
         });
         var unitColumn = roomId + '/units';
         if (this.unitRef) this.unitRef.off();
-        else this.unitRef = firebase.database().ref(unitColumn);
+        else {
+            this.unitRef = firebase.database().ref(unitColumn);
+            this.unitRef.onDisconnect().remove();	//切断時にリムーブ
+        }
         OnlineManager.syncBusy = true;
         this.unitRef.once('value', function (data) {
             OnlineManager.syncBusy = false;
