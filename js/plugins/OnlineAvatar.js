@@ -453,9 +453,15 @@ function Game_Avatar() {
                                     var actor = $gameActors.actor(unitId);
                                     //ルームID内のカラムを引っ張りたい
                                     if (list[i].id == allyTeamID) {
-                                        window.drawActorCharacter(actor, rect.x + 24 + 32 * j, rect.y + rect.height / 2, rect.width, rect.height / 2); //onlineManager外またはウインドウクラスを指定して処理を行いたい
+                                        window.drawActorCharacter(actor, rect.x + 24 + 32 * j, rect.y + rect.height / 2, rect.width, rect.height / 2);
                                     } else if (list[i].id == enemyTeamID) {
-                                        window.drawActorCharacter(actor, rect.x + 24 + 32 * (j + 5), rect.y + rect.height / 2, rect.width, rect.height / 2); //onlineManager外またはウインドウクラスを指定して処理を行いたい
+                                        window.drawActorCharacter(actor, rect.x + 24 + 32 * (j + 5), rect.y + rect.height / 2, rect.width, rect.height / 2);
+                                    }
+                                } else {
+                                    if (list[i].id == allyTeamID) {
+                                        window.contents.drawText("ラ", rect.x + 24 + 32 * j, rect.y + rect.height / 2, 32, rect.height / 2);
+                                    } else if (list[i].id == enemyTeamID) {
+                                        window.contents.drawText("ラ", rect.x + 24 + 32 * j, rect.y + rect.height / 2, 32, rect.height / 2);
                                     }
                                 }
                             }
@@ -517,18 +523,30 @@ function Game_Avatar() {
     };
 
     Scene_RoomSelect.prototype.commandOkRoomSelect = function () {
-        var id = this.createRoomSelectWindow._index + 1;
-        if (this.checkCanInRoom(id)) {
-            $gameVariables.setValue(8, id);
-            $gameSwitches.setValue(12, false); //エリア選択スイッチOFF(スイッチNoはいずれプラグインの変数設定から行えるようにする)
-            $gameSwitches.setValue(16, true); //マッチングスイッチOFF(スイッチNoはいずれプラグインの変数設定から行えるようにする)
-            OnlineManager.startSync(); //ここで同期すると待機メンバーのスイッチ変数を上書きしてしまうのでは？
-            OnlineManager.sendUserInfo();
-            $gamePlayer.refresh();
-            this.popScene();
-        } else {
-            SoundManager.playBuzzer();//ブザー
-        }
+        var roomId = this.createRoomSelectWindow._index + 1;
+        //以下、部屋からUIDを引き出す
+        var roomRefId = 'room' + roomId + '/system';
+        var scene = this;
+        OnlineManager.roomRef = firebase.database().ref(roomRefId);
+        OnlineManager.roomRef.once("value").then(function (data) {
+            var allyTeamID = data.child("allyTeamID").val();
+            var enemyTeamID = data.child("enemyTeamID").val();
+            //対戦中、待機中、空きの3種に分けたい
+            if (allyTeamID && enemyTeamID) {
+                //以下の処理を行うとストップしてしまう
+                SoundManager.playBuzzer();//ブザー
+                scene.createRoomSelectWindow.activate();
+            } else {
+                $gameVariables.setValue(8, roomId);
+                $gameSwitches.setValue(12, false); //エリア選択スイッチOFF(スイッチNoはいずれプラグインの変数設定から行えるようにする)
+                $gameSwitches.setValue(16, true); //マッチングスイッチOFF(スイッチNoはいずれプラグインの変数設定から行えるようにする)
+                OnlineManager.startSync(); //ここで同期すると待機メンバーのスイッチ変数を上書きしてしまうのでは？
+                OnlineManager.sendUserInfo();
+                $gamePlayer.refresh();
+                scene.popScene();
+            }
+        });
+
     };
 
     Scene_RoomSelect.prototype.commandCancelRoomSelect = function () {
@@ -537,19 +555,6 @@ function Game_Avatar() {
         $gameSwitches.setValue(11, true); //キャラクター選択スイッチON(スイッチNoはいずれプラグインの変数設定から行えるようにする)
         $gamePlayer.refresh();
         this.popScene();
-    };
-    //選択した部屋に入れるか？
-    Scene_RoomSelect.prototype.checkCanInRoom = function (roomId) {
-        //以下、部屋からUIDを引き出す
-        var roomRefId = 'room' + roomId + '/system';
-        OnlineManager.roomRef = firebase.database().ref(roomRefId);
-        OnlineManager.roomRef.once("value").then(function (data2) {
-            var allyTeamID = data2.child("allyTeamID").val();
-            var enemyTeamID = data2.child("enemyTeamID").val();
-            //対戦中、待機中、空きの3種に分けたい
-            if (allyTeamID && enemyTeamID) return false;
-            else return true;
-        });
     };
     /*
     //歩行時
