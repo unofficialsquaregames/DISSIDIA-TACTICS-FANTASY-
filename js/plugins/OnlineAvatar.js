@@ -464,15 +464,15 @@ function Game_Avatar() {
                                 if (unitId > 0) {
                                     var actor = $gameActors.actor(unitId);
                                     //ルームID内のカラムを引っ張りたい
-                                    if (list[i].id == allyTeamID) {
+                                    if (list[i].id == allyTeamID && j < 4) {
                                         window.drawActorCharacter(actor, rect.x + 24 + 32 * j, rect.y + rect.height / 2, rect.width, rect.height / 2);
-                                    } else if (list[i].id == enemyTeamID) {
+                                    } else if (list[i].id == enemyTeamID && j >= 5) {
                                         window.drawActorCharacter(actor, rect.x + 24 + 32 * (j + 5), rect.y + rect.height / 2, rect.width, rect.height / 2);
                                     }
                                 } else {
-                                    if (list[i].id == allyTeamID) {
+                                    if (list[i].id == allyTeamID && j < 4) {
                                         window.contents.drawText("ラ", rect.x + 24 + 32 * j, rect.y + rect.height / 2, 32, rect.height / 2);
-                                    } else if (list[i].id == enemyTeamID) {
+                                    } else if (list[i].id == enemyTeamID && j >= 5) {
                                         window.contents.drawText("ラ", rect.x + 24 + 32 * j, rect.y + rect.height / 2, 32, rect.height / 2);
                                     }
                                 }
