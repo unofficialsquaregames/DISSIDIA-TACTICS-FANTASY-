@@ -777,6 +777,7 @@ Imported.TacticsBattleSys = true;
 
                 if ($gameSwitches.value(15)) {
                     $gameSystem.sendInfo();
+
                     if ($gameSystem.isSyncTurn()) $gameSwitches.setValue(19, false);
                     else $gameSwitches.setValue(19, true);
                     $gameSwitches.setValue(21, false);
@@ -787,7 +788,7 @@ Imported.TacticsBattleSys = true;
         }
         if ($gameSwitches.value(15)) {
             if (($gameSwitches.value(21) && this.isEnemyTeam()) || ($gameSwitches.value(22) && this.isAllyTeam()) || (!$gameSwitches.value(21) && !$gameSwitches.value(22) && this.isEnemyTeam())){
-                this.syncWtList();
+                if ($gameSwitches.value(19)) this.syncWtList();
                 return;
             }
         }
@@ -799,7 +800,7 @@ Imported.TacticsBattleSys = true;
 
             if (!battler.matchWt()) {
                 battler.countWt(); //WT数を加算する
-                if ($gameSwitches.value(15)) $gameSystem.sendInfo();
+                //if ($gameSwitches.value(15)) $gameSystem.sendInfo();
             }
         }
     };
