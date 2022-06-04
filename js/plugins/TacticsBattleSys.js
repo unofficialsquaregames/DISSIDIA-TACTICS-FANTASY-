@@ -777,7 +777,7 @@ Imported.TacticsBattleSys = true;
 
                 if ($gameSwitches.value(15)) {
                     $gameSystem.sendInfo();
-                    if ($gameSwitches.value(19)) $gameSwitches.setValue(19, false);
+                    if ($gameSystem.isSyncTurn()) $gameSwitches.setValue(19, false);
                     else $gameSwitches.setValue(19, true);
                     $gameSwitches.setValue(21, false);
                     $gameSwitches.setValue(22, false);
