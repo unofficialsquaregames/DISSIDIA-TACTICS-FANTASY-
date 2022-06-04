@@ -777,7 +777,8 @@ Imported.TacticsBattleSys = true;
 
                 if ($gameSwitches.value(15)) {
                     $gameSystem.sendInfo();
-                    if (!$gameSystem.isSyncTurn()) $gameSwitches.setValue(20, true);
+                    if ($gameSwitches.value(20)) $gameSwitches.setValue(20, false);
+                    else $gameSwitches.setValue(20, true);
                     $gameSwitches.setValue(21, false);
                     $gameSwitches.setValue(22, false);
                 }
@@ -785,9 +786,8 @@ Imported.TacticsBattleSys = true;
             }
         }
         if ($gameSwitches.value(15)) {
-            if ($gameSwitches.value(20) && (($gameSwitches.value(21) && this.isEnemyTeam()) || ($gameSwitches.value(22) && this.isAllyTeam()) || (!$gameSwitches.value(21) && !$gameSwitches.value(22) && this.isEnemyTeam()))){
+            if (($gameSwitches.value(21) && this.isEnemyTeam()) || ($gameSwitches.value(22) && this.isAllyTeam()) || (!$gameSwitches.value(21) && !$gameSwitches.value(22) && this.isEnemyTeam())){
                 this.syncWtList();
-                $gameSwitches.setValue(20, false);
                 return;
             }
         }
