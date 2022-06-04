@@ -777,8 +777,8 @@ Imported.TacticsBattleSys = true;
 
                 if ($gameSwitches.value(15)) {
                     $gameSystem.sendInfo();
-                    if ($gameSwitches.value(20)) $gameSwitches.setValue(20, false);
-                    else $gameSwitches.setValue(20, true);
+                    if ($gameSwitches.value(19)) $gameSwitches.setValue(19, false);
+                    else $gameSwitches.setValue(19, true);
                     $gameSwitches.setValue(21, false);
                     $gameSwitches.setValue(22, false);
                 }
@@ -7926,7 +7926,7 @@ Imported.TacticsBattleSys = true;
     // 味方ターンの更新
     Scene_Map.prototype.updateAllyTurn = function () {
         if($gameSwitches.value(15)){
-            if($gameSwitches.value(20)) return;
+            if ($gameSwitches.value(19) || $gameSwitches.value(20)) return;
         }
         var turnUnit = $gameSystem.turnUnit();
         switch ($gameSystem._phaseState) {
@@ -8068,7 +8068,7 @@ Imported.TacticsBattleSys = true;
     // 敵ターンの更新
     Scene_Map.prototype.updateEnemyTurn = function () {
         if ($gameSwitches.value(15)) {
-            if ($gameSwitches.value(20)) return;
+            if ($gameSwitches.value(19) || $gameSwitches.value(20)) return;
         }
         var turnUnit = $gameSystem.turnUnit();
         switch ($gameSystem._phaseState) {
