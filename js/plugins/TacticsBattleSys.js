@@ -756,6 +756,13 @@ Imported.TacticsBattleSys = true;
             var battler = character.isActor();
 
             if (battler.matchWt()) {
+                /*
+                if ($gameSwitches.value(15)) {
+                    if (!$gameSwitches.value(20) && (($gameSwitches.value(21) && this.isEnemyTeam()) || ($gameSwitches.value(22) && this.isAllyTeam()) || (!$gameSwitches.value(21) && !$gameSwitches.value(22) && this.isEnemyTeam()))) {
+                        return;
+                    }
+                }
+                */
                 //同一WTのユニットがいて先にターンが回られてしまった場合、以降の処理は行わない
                 //敵のターンか味方のターンか
                 if (character.isAlly()) this._isAllyTurn = true;
@@ -770,6 +777,7 @@ Imported.TacticsBattleSys = true;
 
                 if ($gameSwitches.value(15)) {
                     $gameSystem.sendInfo();
+                    if (!$gameSystem.isSyncTurn()) $gameSwitches.setValue(20, true);
                     $gameSwitches.setValue(21, false);
                     $gameSwitches.setValue(22, false);
                 }
@@ -777,8 +785,9 @@ Imported.TacticsBattleSys = true;
             }
         }
         if ($gameSwitches.value(15)) {
-            if(($gameSwitches.value(21) && this.isEnemyTeam()) || ($gameSwitches.value(22) && this.isAllyTeam()) || (!$gameSwitches.value(21) && !$gameSwitches.value(22) && this.isEnemyTeam())){
+            if ($gameSwitches.value(20) && (($gameSwitches.value(21) && this.isEnemyTeam()) || ($gameSwitches.value(22) && this.isAllyTeam()) || (!$gameSwitches.value(21) && !$gameSwitches.value(22) && this.isEnemyTeam()))){
                 this.syncWtList();
+                $gameSwitches.setValue(20, false);
                 return;
             }
         }
