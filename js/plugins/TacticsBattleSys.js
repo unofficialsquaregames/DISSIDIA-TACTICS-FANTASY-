@@ -776,7 +776,7 @@ Imported.TacticsBattleSys = true;
                 $gameTemp._countWtTime = false;
 
                 if ($gameSwitches.value(15)) {
-                    $gameSystem.sendInfo();
+                    //$gameSystem.sendInfo();
 
                     //if ($gameSystem.isSyncTurn()) $gameSwitches.setValue(19, false);
                     //else $gameSwitches.setValue(19, true);
