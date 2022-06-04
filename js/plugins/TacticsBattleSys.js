@@ -804,7 +804,7 @@ Imported.TacticsBattleSys = true;
             if (!battler.matchWt()) {
                 battler.countWt(); //WT数を加算する
                 //if ($gameSwitches.value(15)) $gameSystem.sendInfo();
-                if (battler.matchWt()) {
+                if ($gameSwitches.value(15) && battler.matchWt()) {
                     $gameSystem.sendInfo();
                     $gameSwitches.setValue(19, true);
                 }
