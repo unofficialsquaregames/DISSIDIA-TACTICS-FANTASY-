@@ -1633,7 +1633,8 @@ Imported.TacticsBattleSys = true;
     Game_BattlerBase.prototype.updateStateTurns = function () {
         for (i = 0; i < this._states.length; i++) {
             var stateId = this._states[i];
-            var selfBuff = this._selfState.contains(parseInt(stateId));
+            var selfBuff = false;
+            if (this._selfState) selfBuff = this._selfState.contains(parseInt(stateId));
             if ((this._stateTurns[stateId] > 0) && !selfBuff) this._stateTurns[stateId]--;
         }
         for (i = this._states.length - 1; i >= 0; i--) {
