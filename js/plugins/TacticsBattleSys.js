@@ -1611,6 +1611,8 @@ Imported.TacticsBattleSys = true;
 
     //パラダイムシフトやベロシティチェンジ、ラウンドアサルトなどで行動順を繰り上げてもらう
     Game_BattlerBase.prototype.wtTurnAdvance = function () {
+        this._wt = this.wtTurn();
+        /*
         if ($gameSwitches.value(15)) {
             if ($gameSystem.isSyncTurn()) {
                 $gameSystem.syncWtList();
@@ -1621,6 +1623,7 @@ Imported.TacticsBattleSys = true;
         } else {
             this._wt = this.wtTurn();
         }
+        */
     };
 
     //行動順遅延
