@@ -1285,6 +1285,7 @@ Imported.TacticsBattleSys = true;
                                 if ($gameTemp.isReservationActionTurn()) {
                                     turnUnit.isActor().wtTurnAdvance();
                                 } else {
+                                    console.log("通ってる");
                                     $gameTemp._quickTurnUnit = turnUnit;
                                 }
                             }

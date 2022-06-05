@@ -318,7 +318,7 @@ function Game_Avatar() {
             //var send = $gameSystem;
             var $ = $gameSystem;
             var send = {
-                allyTeamID: $._allyTeamID, enemyTeamID: $._enemyTeamID, isAllyTurn: $._isAllyTurn, isEnemyTurn: $._isEnemyTurn, wtTurnList: $._wtTurnList, turnUnit: $._turnUnit
+                allyTeamID: $._allyTeamID, enemyTeamID: $._enemyTeamID, isAllyTurn: $._isAllyTurn, isEnemyTurn: $._isEnemyTurn, wtTurnList: $._wtTurnList, turnUnit: $._turnUnit, quickTurnUnit: $._quickTurnUnit
                 , moveTargetPointFlag: $._moveTargetPointFlag, moveTargetPointX: $._moveTargetPointX, moveTargetPointY: $._moveTargetPointY, resurrectionFlag: $._resurrectionFlag, resurrectionUnit: $._resurrectionUnit
             }
             this.sysRef.update(send);
@@ -905,6 +905,7 @@ function Game_Avatar() {
             //$gameSystem = data.val();
             $gameSystem._allyTeamID = data.child("allyTeamID").val();
             $gameSystem._enemyTeamID = data.child("enemyTeamID").val();
+            $gameSystem._quickTurnUnit = data.child("quickTurnUnit").val();
             $gameSystem._moveTargetPointFlag = data.child("moveTargetPointFlag").val();
             $gameSystem._moveTargetPointX = data.child("moveTargetPointX").val();
             $gameSystem._moveTargetPointY = data.child("moveTargetPointY").val();
