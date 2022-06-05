@@ -1903,7 +1903,7 @@ Imported.TacticsBattleSys = true;
                 //ステート削除に失敗した場合は通らない
                 if (this._states.length < stateMax) {
                     this.addNewState(grantorId, stateId);
-                    if (!this._selfState.contains(parseInt(stateId))) this._selfState.push(parseInt(stateId)); //セルフバフ追加
+                    if (!this._selfState.contains(parseInt(stateId)) && grantorId == this.eventId()) this._selfState.push(parseInt(stateId)); //セルフバフ追加
                     this.refresh();
                     this.resetStateCounts(parseInt(stateId)); //指定ステートの有効ターン数を初期化。
                     this._result.pushAddedState(parseInt(stateId)); //指定ステートの付加を追加。
