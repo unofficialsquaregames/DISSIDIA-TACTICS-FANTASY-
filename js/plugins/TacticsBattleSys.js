@@ -412,7 +412,6 @@ Imported.TacticsBattleSys = true;
         this._attacktime = false; //攻撃中か
         this._deadUnitIds = []; //ユニット退場予約用
         this._arrangePattern = 0; //配置パターン
-        this._quickTurnUnit = null;//[]; //WT0でも誰を優先的に配置させるか決める
         this._isReservationActionTurn = false;
 
         this._multiHitCount = 0; //多段ヒット時のカウント用
@@ -553,6 +552,7 @@ Imported.TacticsBattleSys = true;
         this._enemyList = []; //ただのユニットリスト
         this._wtTurnList = []; //行動順リスト
         this._turnUnit = 0; //ターンが回ったユニット
+        this._quickTurnUnit = null;//[]; //WT0でも誰を優先的に配置させるか決める
         this.ActorTurn = false; //敵ターンに操作不能にするため(必要ない？)
 
         this._moveTargetPointFlag = false; //攻撃時移動のフラグ
@@ -1285,8 +1285,7 @@ Imported.TacticsBattleSys = true;
                                 if ($gameTemp.isReservationActionTurn()) {
                                     turnUnit.isActor().wtTurnAdvance();
                                 } else {
-                                    console.log("通ってる");
-                                    $gameTemp._quickTurnUnit = turnUnit;
+                                    $gameSystem._quickTurnUnit = turnUnit;
                                 }
                             }
                         }
@@ -3664,8 +3663,8 @@ Imported.TacticsBattleSys = true;
         var actor = this.isActor();
         actor.regenerateAll();//この処理でリジェネや毒を発生させる
         this.reserveDamagePopup(0);//リジェネ効果のポップアップ表示
-        if ($gameTemp._quickTurnUnit == this) {
-            $gameTemp._quickTurnUnit = null;
+        if ($gameSystem._quickTurnUnit == this) {
+            $gameSystem._quickTurnUnit = null;
         } else {
             actor.resetWt(this.checkBehavioralLoad());
         }
