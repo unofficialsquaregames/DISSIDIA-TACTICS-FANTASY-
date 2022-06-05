@@ -555,7 +555,7 @@ Imported.TacticsBattleSys = true;
         this._wtTurnList = []; //行動順リスト
         this._turnUnit = 0; //ターンが回ったユニット
         this.ActorTurn = false; //敵ターンに操作不能にするため(必要ない？)
-        
+
         this._moveTargetPointFlag = false; //攻撃時移動のフラグ
         this._moveTargetPointX = 0; //攻撃時移動の場合の移動座標X
         this._moveTargetPointY = 0; //攻撃時移動の場合の移動座標X
@@ -749,7 +749,7 @@ Imported.TacticsBattleSys = true;
 
     //WTカウント
     Game_System.prototype.countWt = function () {
-        
+
         //以下が平常時の動作
         for (var i = 0; i < this.unitList().length; i++) {
             var character = this.unitList()[i];
@@ -788,7 +788,7 @@ Imported.TacticsBattleSys = true;
             }
         }
         if ($gameSwitches.value(15)) {
-            if (($gameSwitches.value(21) && this.isEnemyTeam()) || ($gameSwitches.value(22) && this.isAllyTeam()) || (!$gameSwitches.value(21) && !$gameSwitches.value(22) && this.isEnemyTeam())){
+            if (($gameSwitches.value(21) && this.isEnemyTeam()) || ($gameSwitches.value(22) && this.isAllyTeam()) || (!$gameSwitches.value(21) && !$gameSwitches.value(22) && this.isEnemyTeam())) {
                 if ($gameSwitches.value(19)) {
                     this.syncWtList();
                     //$gameSwitches.setValue(19, false);
@@ -877,7 +877,7 @@ Imported.TacticsBattleSys = true;
                         //トラッパーがいない場合トラップデバフは剥がれる
                         if (!trapGrantorIsArea) actor.removeState(id);
                     }
-                    
+
                     //スティーラーがいない状態でのトラップデバフの扱い
                     var stealGrantor = $dataStates[id].meta.stealGrantor;
                     if (stealGrantor) {
@@ -1469,7 +1469,7 @@ Imported.TacticsBattleSys = true;
 
     //ステート付与者と一致しているか
     Game_BattlerBase.prototype.checkStateGrantorId = function (targetId, stateId) {
-        if(targetId == this._stateGrantors[stateId]) return true;
+        if (targetId == this._stateGrantors[stateId]) return true;
         else return false;
     };
 
@@ -1522,7 +1522,7 @@ Imported.TacticsBattleSys = true;
     Game_BattlerBase.prototype.unitEvent = function () {
         return $gameMap.event(this.unitEventId());
     };
-    
+
     // WTを代入
     Game_BattlerBase.prototype.setWt = function (wt) {
         this._wt = wt;
@@ -1547,7 +1547,7 @@ Imported.TacticsBattleSys = true;
             if (allyId) {
                 id = 31 + parseInt(allyId);
                 id2 = 51 + parseInt(allyId);
-            }else if (enemyId){
+            } else if (enemyId) {
                 id = 36 + parseInt(enemyId);
                 id2 = 56 + parseInt(enemyId);
             }
@@ -1559,7 +1559,7 @@ Imported.TacticsBattleSys = true;
                 $gameSwitches.setValue(id2, true);
                 $gameVariables.setValue(id, this._wt);
             }
-        }else{
+        } else {
             this._wt = Math.floor(Math.random() * 50); //自身のウェイトターン到達でターンが回り、行動終了後リセットされるような
         }
     };
@@ -1582,7 +1582,7 @@ Imported.TacticsBattleSys = true;
                 this._wt = Math.round(this.wtTurn() * distributed / 100);//0;
                 $gameVariables.setValue(id, this._wt); //イベントIDに依存している
             }
-        }else{
+        } else {
             this._wt = Math.round(this.wtTurn() * distributed / 100);//0;
         }
     };
@@ -2017,7 +2017,7 @@ Imported.TacticsBattleSys = true;
     Game_Battler.prototype.refresh = function () {
         Game_BattlerBase.prototype.refresh.call(this);
         if (this.hp === 0) {
-            this.addState(this.eventId(),this.deathStateId());
+            this.addState(this.eventId(), this.deathStateId());
         } else {
             this.removeState(this.deathStateId());
         }
@@ -7833,7 +7833,7 @@ Imported.TacticsBattleSys = true;
             return;
         }
         if ($gameMap.isUnitAnimationPlaying() || !$gameSystem.isBattleActivate() || $gameMap.isEventRunning()) return; //戦闘中以外、イベント実行中は処理をしない
-        
+
         if ($gameSwitches.value(15)) {
             if ($gameSystem.isAllyTeam()) {
                 //ゲームオーバー判定
@@ -7870,7 +7870,7 @@ Imported.TacticsBattleSys = true;
                 return;
             }
         }
-        
+
         //予約ターン
         if ($gameTemp.isReservationAction() && !$gameSystem.isAllyTurn() && !$gameSystem.isEnemyTurn()) {
             this.updateReservationTurn(); //予約ターンの更新
@@ -7935,7 +7935,7 @@ Imported.TacticsBattleSys = true;
 
     // 味方ターンの更新
     Scene_Map.prototype.updateAllyTurn = function () {
-        if($gameSwitches.value(15)){
+        if ($gameSwitches.value(15)) {
             if ($gameSwitches.value(19) || $gameSwitches.value(20)) return;
         }
         var turnUnit = $gameSystem.turnUnit();
@@ -8054,12 +8054,12 @@ Imported.TacticsBattleSys = true;
                 $gameSystem._phaseState = 12;//事後処理
                 break;
             case 12: //事後処理
-                if ($gameSwitches.value(15))  $gameSwitches.setValue(20, true);
+                if ($gameSwitches.value(15)) $gameSwitches.setValue(20, true);
                 this.endTurn(); //
-                if ($gameSwitches.value(15)){
+                if ($gameSwitches.value(15)) {
                     $gameSystem.sendInfo();
-                    if($gameSystem.isAllyTeam()) $gameSwitches.setValue(21, true);
-                    else if($gameSystem.isEnemyTeam()) $gameSwitches.setValue(22, true);
+                    if ($gameSystem.isAllyTeam()) $gameSwitches.setValue(21, true);
+                    else if ($gameSystem.isEnemyTeam()) $gameSwitches.setValue(22, true);
                 }
                 break;
             case 13: //ユニットリスト選択フェーズ
@@ -8219,7 +8219,7 @@ Imported.TacticsBattleSys = true;
                 break;
             case 12: //事後処理
                 //ターン終了後の処理
-                this.endTurn(); 
+                this.endTurn();
                 if ($gameSwitches.value(15)) {
                     $gameSystem.sendInfo();
                     if ($gameSystem.isAllyTeam()) $gameSwitches.setValue(21, true);
@@ -8317,11 +8317,11 @@ Imported.TacticsBattleSys = true;
                 break;
             case 12: //事後処理
                 //ターン終了後の処理
-                if($gameSwitches.value(15)){
+                if ($gameSwitches.value(15)) {
                     if ($gameSystem.isSyncTurn(turnUnit)) {
                         $gameSwitches.setValue(20, false);
                         $gameSwitches.setValue(26, false);
-                    }else {
+                    } else {
                         $gameSwitches.setValue(20, true);
                         $gameSwitches.setValue(26, true);
                     }
@@ -8682,25 +8682,29 @@ Imported.TacticsBattleSys = true;
         $gameSystem.stateAction();
         $gameTemp._selfState = [];//このターンで付けたバフを初期化
 
-        
+        if ($gameSwitches.value(15)) {
+            if ($gameSystem.isSyncTurn()) {
+                $gameSystem._moveTargetPointFlag = false
+                $gameSystem._moveTargetPointX = 0;
+                $gameSystem._moveTargetPointY = 0;
+                $gameSystem._resurrectionFlag = false
+                $gameSystem.resetResurrectionUnit();
+            }
+        } else {
+            //以下はスイッチ変数で管理した方が良いのでは？
+            $gameSystem._moveTargetPointFlag = false
+            $gameSystem._moveTargetPointX = 0;
+            $gameSystem._moveTargetPointY = 0;
+            $gameSystem._resurrectionFlag = false
+            $gameSystem.resetResurrectionUnit();
+        }
+
         $gameSystem.endTurn();
         $gameTemp._countWtTime = true;
         $gameSystem.setWtTurnList();//行動順調整
         $gameSystem._phaseState = 0; //カメラ移動完了後コマンド表示
-
-        if ($gameSwitches.value(15)) {
-            if (!$gameSystem.isSyncTurn()) return;
-        }
-        //以下はスイッチ変数で管理した方が良いのでは？
-        $gameSystem._moveTargetPointFlag = false
-        $gameSystem._moveTargetPointX = 0;
-        $gameSystem._moveTargetPointY = 0;
-
         //$gameVariables.setValue(8, 0);
         //$gameVariables.setValue(9, 0);
-
-        $gameSystem._resurrectionFlag = false
-        $gameSystem.resetResurrectionUnit();
     };
 
 
