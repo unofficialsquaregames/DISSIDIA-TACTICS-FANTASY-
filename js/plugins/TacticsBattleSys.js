@@ -804,12 +804,14 @@ Imported.TacticsBattleSys = true;
 
             if (!battler.matchWt()) {
                 battler.countWt(); //WT数を加算する
+                /*
                 //if ($gameSwitches.value(15)) $gameSystem.sendInfo();
                 if ($gameSwitches.value(15) && battler.matchWt()) {
                     //this.setTurnUnit(this.unitList()[i]);
                     //$gameSystem.sendInfo();
                     //$gameSwitches.setValue(19, true);
                 }
+                */
             }
         }
     };
@@ -1081,7 +1083,7 @@ Imported.TacticsBattleSys = true;
         result.physical = this.isPhysical();
         result.drain = this.isDrain();
 
-        var isHit = result.isHit();
+        var isHit = false;
         if ($gameSwitches.value(15)) {
             var tunit = $gameMap.event(target.eventId());
             var allyId = tunit.allyNumber();
@@ -1092,8 +1094,11 @@ Imported.TacticsBattleSys = true;
             if ($gameSystem.isSyncTurn(turnUnit)) {
                 isHit = $gameSwitches.value(id);
             } else {
-                $gameSwitches.setValue(id, result.isHit()); //イベントIDに依存している
+                isHit = result.isHit();
+                $gameSwitches.setValue(id, isHit); //イベントIDに依存している
             }
+        } else {
+            isHit = result.isHit();
         }
         //ヒット時の挙動
         if (isHit) {
@@ -1209,8 +1214,6 @@ Imported.TacticsBattleSys = true;
             var value = -1;
             //ダメージ有の場合
             if (this.item().damage.type > 0) {
-                result.critical = (Math.random() < this.itemCri(target));
-                value = this.makeDamageValue(target, false, result.critical);
                 if ($gameSwitches.value(15)) {
                     var tunit = $gameMap.event(target.eventId());
                     var allyId = tunit.allyNumber();
@@ -1221,6 +1224,7 @@ Imported.TacticsBattleSys = true;
                     if ($gameSystem.isSyncTurn(turnUnit)) {
                         value = $gameVariables.value(id);
                     } else {
+                        value = this.makeDamageValue(target, false, result.critical);
                         $gameVariables.setValue(id, value); //イベントIDに依存している
                     }
                     if (allyId) id = 41 + parseInt(allyId);
@@ -1228,8 +1232,12 @@ Imported.TacticsBattleSys = true;
                     if ($gameSystem.isSyncTurn(turnUnit)) {
                         result.critical = $gameSwitches.value(id);
                     } else {
+                        result.critical = (Math.random() < this.itemCri(target));
                         $gameSwitches.setValue(id, result.critical); //イベントIDに依存している
                     }
+                } else {
+                    result.critical = (Math.random() < this.itemCri(target));
+                    value = this.makeDamageValue(target, false, result.critical);
                 }
                 this.executeDamage(target, value);
                 //バフ奪取(クリティカル発生時のみ)
