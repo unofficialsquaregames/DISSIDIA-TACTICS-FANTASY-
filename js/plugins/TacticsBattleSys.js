@@ -1451,13 +1451,13 @@ Imported.TacticsBattleSys = true;
         _Game_BattlerBase_initialize.call(this);
         this._wt = 0;
         this._eventId = null; //バトラーと紐づいてるイベントをセットする
+        this._selfState = []; //自身がそのターンに付与したバフリスト
     }
     //rpg_object.jsより
     Game_BattlerBase.prototype.clearStates = function () {
         this._states = [];
         this._stateTurns = {};
         this._stateGrantors = {}; //新規追加(ステート付与者)
-        this._selfState = []; //自身がそのターンに付与したバフリスト
     };
     //紐づいてるイベントを返す
     Game_BattlerBase.prototype.eventId = function () {
@@ -1633,8 +1633,7 @@ Imported.TacticsBattleSys = true;
     Game_BattlerBase.prototype.updateStateTurns = function () {
         for (i = 0; i < this._states.length; i++) {
             var stateId = this._states[i];
-            var selfBuff = false;
-            if (this._selfState) selfBuff = this._selfState.contains(parseInt(stateId));
+            var selfBuff = this._selfState.contains(parseInt(stateId));
             if ((this._stateTurns[stateId] > 0) && !selfBuff) this._stateTurns[stateId]--;
         }
         for (i = this._states.length - 1; i >= 0; i--) {

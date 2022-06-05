@@ -306,7 +306,7 @@ function Game_Avatar() {
                 var $ = $gameSystem.unitList()[i];
                 if (eventId && eventId != $gameSystem.unitList()[i].event().id) continue;
                 send[i] = {
-                    toX: $.toX(), toY: $.toY(), target: $._target, useSkill: $._useSkill, wt: $.isActor()._wt, states: $.isActor()._states, stateTurns: $.isActor()._stateTurns, stateGrantors: $.isActor()._stateGrantors, selfState: $.isActor()._selfState
+                    toX: $.toX(), toY: $.toY(), target: $._target, useSkill: $._useSkill, wt: $.isActor()._wt, states: $.isActor()._states, stateTurns: $.isActor()._stateTurns, stateGrantors: $.isActor()._stateGrantors
                 };
             }
             this.unitRef.update(send);
@@ -924,7 +924,7 @@ function Game_Avatar() {
                 unit.isActor()._states = data.child(i).child("states").val(); //反映はされているが同期する側（受け手）の効果が適用される
                 unit.isActor()._stateTurns = data.child(i).child("stateTurns").val();
                 unit.isActor()._stateGrantors = data.child(i).child("stateGrantors").val();
-                unit.isActor()._selfState = data.child(i).child("selfState").val();
+                //unit.isActor()._selfState = data.child(i).child("selfState").val();
                 if (!unit.isActor()._states) unit.isActor().clearStates();
             }
         });
