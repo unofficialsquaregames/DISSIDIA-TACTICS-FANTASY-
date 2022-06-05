@@ -1612,7 +1612,7 @@ Imported.TacticsBattleSys = true;
     //パラダイムシフトやベロシティチェンジ、ラウンドアサルトなどで行動順を繰り上げてもらう
     Game_BattlerBase.prototype.wtTurnAdvance = function () {
         if ($gameSwitches.value(15)) {
-            if (gameSystem.isSyncTurn()) {
+            if ($gameSystem.isSyncTurn()) {
                 $gameSystem.syncWtList();
             } else {
                 this._wt = this.wtTurn();
