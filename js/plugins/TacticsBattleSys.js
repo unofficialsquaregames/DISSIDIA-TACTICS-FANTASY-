@@ -411,7 +411,6 @@ Imported.TacticsBattleSys = true;
         this._countWtTime = false; //行動順計算中か
         this._attacktime = false; //攻撃中か
         this._deadUnitIds = []; //ユニット退場予約用
-        this._selfState = []; //自身がそのターンに付与したバフリスト
         this._arrangePattern = 0; //配置パターン
         this._quickTurnUnit = null;//[]; //WT0でも誰を優先的に配置させるか決める
         this._isReservationActionTurn = false;
@@ -1458,6 +1457,7 @@ Imported.TacticsBattleSys = true;
         this._states = [];
         this._stateTurns = {};
         this._stateGrantors = {}; //新規追加(ステート付与者)
+        this._selfState = []; //自身がそのターンに付与したバフリスト
     };
     //紐づいてるイベントを返す
     Game_BattlerBase.prototype.eventId = function () {
@@ -1633,7 +1633,7 @@ Imported.TacticsBattleSys = true;
     Game_BattlerBase.prototype.updateStateTurns = function () {
         for (i = 0; i < this._states.length; i++) {
             var stateId = this._states[i];
-            var selfBuff = $gameTemp._selfState.contains(parseInt(stateId));
+            var selfBuff = this._selfState.contains(parseInt(stateId));
             if ((this._stateTurns[stateId] > 0) && !selfBuff) this._stateTurns[stateId]--;
         }
         for (i = this._states.length - 1; i >= 0; i--) {
@@ -1903,7 +1903,7 @@ Imported.TacticsBattleSys = true;
                 //ステート削除に失敗した場合は通らない
                 if (this._states.length < stateMax) {
                     this.addNewState(grantorId, stateId);
-                    if (!$gameTemp._selfState.contains(parseInt(stateId))) $gameTemp._selfState.push(parseInt(stateId)); //セルフバフ追加
+                    if (!this._selfState.contains(parseInt(stateId))) this._selfState.push(parseInt(stateId)); //セルフバフ追加
                     this.refresh();
                     this.resetStateCounts(parseInt(stateId)); //指定ステートの有効ターン数を初期化。
                     this._result.pushAddedState(parseInt(stateId)); //指定ステートの付加を追加。
@@ -8688,7 +8688,7 @@ Imported.TacticsBattleSys = true;
         var battler = turnUnit.isActor();
         this.closeBattleStatusWindow();
         $gameSystem.stateAction();
-        $gameTemp._selfState = [];//このターンで付けたバフを初期化
+        battler._selfState = [];//このターンで付けたバフを初期化
 
         if ($gameSwitches.value(15)) {
             if ($gameSystem.isSyncTurn()) {
