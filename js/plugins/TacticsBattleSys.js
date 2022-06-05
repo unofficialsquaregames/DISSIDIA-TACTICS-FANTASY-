@@ -3691,7 +3691,7 @@ Imported.TacticsBattleSys = true;
                     }
                 }
                 //追跡でバフチェック
-                var traceGrantor = $dataStates[id].meta.traceGrantor;
+                var traceGrantor = $dataStates[id].meta.traceGrantor; //オンライン対戦時undefinedになる不具合(syncStateのタイミングが悪く消されたあとだから認識されない可能性)
                 if (traceGrantor) {
                     //マップ上にいるユニットのステートをチェックする
                     for (var j = 0; j < $gameSystem.unitList().length; j++) {
@@ -3810,12 +3810,12 @@ Imported.TacticsBattleSys = true;
             actor.addState(this.event().id, 1);
             this.checkDead();
         }
-        if ($gameSwitches.value(15)) {
-            if ($gameSystem.isSyncTurn()) $gameSystem.syncState();
-            else actor.updateStateTurns(); //バフ期間1act減少
-        } else {
+        //if ($gameSwitches.value(15)) {
+        //    if ($gameSystem.isSyncTurn()) $gameSystem.syncState();
+        //    else actor.updateStateTurns(); //バフ期間1act減少
+        //} else {
             actor.updateStateTurns(); //バフ期間1act減少
-        }
+        //}
     };
 
     //行動負荷バフチェック
