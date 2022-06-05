@@ -1256,11 +1256,14 @@ Imported.TacticsBattleSys = true;
             }
             //バフデバフの反映
             if ($gameSwitches.value(15)) {
-                if ($gameSystem.isSyncTurn(turnUnit)) $gameSystem.syncState();
-                else {
+                if ($gameSystem.isSyncTurn(turnUnit)) {
+                    $gameSystem.syncState(); //ここで同期してしまうとトラップなどが発生しない可能性あり
+                    $gameSwitches.setValue(28, false);
+                }else {
                     this.item().effects.forEach(function (effect) {
                         this.applyItemEffect(target, effect); //指定対象にエフェクトを適用。
                     }, this);
+                    $gameSwitches.setValue(28, true);
                 }
             } else {
                 this.item().effects.forEach(function (effect) {
@@ -3810,12 +3813,12 @@ Imported.TacticsBattleSys = true;
             actor.addState(this.event().id, 1);
             this.checkDead();
         }
-        //if ($gameSwitches.value(15)) {
-        //    if ($gameSystem.isSyncTurn()) $gameSystem.syncState();
-        //    else actor.updateStateTurns(); //バフ期間1act減少
-        //} else {
+        if ($gameSwitches.value(15)) {
+            if ($gameSystem.isSyncTurn()) $gameSystem.syncState();
+            else actor.updateStateTurns(); //バフ期間1act減少
+        } else {
             actor.updateStateTurns(); //バフ期間1act減少
-        //}
+        }
     };
 
     //行動負荷バフチェック
@@ -8080,6 +8083,9 @@ Imported.TacticsBattleSys = true;
                 $gameSystem._phaseState = 11;//ターン終了後処理へ移行
                 break;
             case 11: //ターン終了後処理(アニメーションを取り扱う)
+                if ($gameSwitches.value(15)) {
+                    if ($gameSwitches.value(28)) return;
+                }
                 //ターン終了後の処理
                 turnUnit.afterTurnEnd();
                 //トラップやカウンター発動などあった場合、ダメージとアニメーションを入れたいためもう2フェーズ使用する必要性あり
