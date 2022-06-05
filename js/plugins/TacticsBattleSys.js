@@ -2224,12 +2224,12 @@ Imported.TacticsBattleSys = true;
         this.setupTacticsUnits();                // SRPGユニットのセットアップ
         //行動順調整スクリプト(本来ここでは使わない)
         $gameSystem.setUnitList(this.events());
-        if ($gameSwitches.value(19)) {
+        if ($gameSwitches.value(27)) {
             $gameSystem.syncWtList();
-            $gameSwitches.setValue(19, false);
+            $gameSwitches.setValue(27, false);
         } else {
             $gameSystem.setWtTurnList();
-            $gameSwitches.setValue(19, true);
+            $gameSwitches.setValue(27, true);
         }
     };
 
