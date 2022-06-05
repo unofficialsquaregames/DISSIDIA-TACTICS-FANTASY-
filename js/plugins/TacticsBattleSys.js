@@ -3619,6 +3619,12 @@ Imported.TacticsBattleSys = true;
         actor.clearResult();
         //actor.onTurnEnd(); //この処理だとバフターンの仕様がおかしくなる
 
+        $gameSystem._moveTargetPointFlag = false
+        $gameSystem._moveTargetPointX = 0;
+        $gameSystem._moveTargetPointY = 0;
+        $gameSystem._resurrectionFlag = false
+        $gameSystem.resetResurrectionUnit();
+
         //可視バフデバフ処理
         for (var id = 1; id < $dataStates.length; id++) {
             if (actor.isStateAffected(id)) {
