@@ -776,10 +776,11 @@ Imported.TacticsBattleSys = true;
                 $gameTemp._countWtTime = false;
 
                 if ($gameSwitches.value(15)) {
-                    //$gameSystem.sendInfo();
-
                     if ($gameSwitches.value(19)) $gameSwitches.setValue(19, false);
-                    //else $gameSwitches.setValue(19, true);
+                    else {
+                        $gameSystem.sendInfo();
+                        $gameSwitches.setValue(19, true);
+                    }
                     $gameSwitches.setValue(21, false);
                     $gameSwitches.setValue(22, false);
                 }
@@ -805,9 +806,9 @@ Imported.TacticsBattleSys = true;
                 battler.countWt(); //WT数を加算する
                 //if ($gameSwitches.value(15)) $gameSystem.sendInfo();
                 if ($gameSwitches.value(15) && battler.matchWt()) {
-                    this.setTurnUnit(this.unitList()[i]);
-                    $gameSystem.sendInfo();
-                    $gameSwitches.setValue(19, true);
+                    //this.setTurnUnit(this.unitList()[i]);
+                    //$gameSystem.sendInfo();
+                    //$gameSwitches.setValue(19, true);
                 }
             }
         }
