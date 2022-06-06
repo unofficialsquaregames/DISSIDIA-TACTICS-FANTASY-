@@ -1256,14 +1256,11 @@ Imported.TacticsBattleSys = true;
             }
             //バフデバフの反映
             if ($gameSwitches.value(15)) {
-                if ($gameSystem.isSyncTurn(turnUnit)) {
-                    $gameSystem.syncState(); //ここで同期してしまうとトラップなどが発生しない可能性あり
-                    $gameSwitches.setValue(28, false);
-                }else {
+                if ($gameSystem.isSyncTurn(turnUnit)) $gameSystem.syncState(); //ここで同期してしまうとトラップなどが発生しない可能性あり
+                else {
                     this.item().effects.forEach(function (effect) {
                         this.applyItemEffect(target, effect); //指定対象にエフェクトを適用。
                     }, this);
-                    $gameSwitches.setValue(28, true);
                 }
             } else {
                 this.item().effects.forEach(function (effect) {
@@ -1323,6 +1320,11 @@ Imported.TacticsBattleSys = true;
                     }
                 }
             }
+        }
+
+        if ($gameSwitches.value(15)) {
+            if ($gameSystem.isSyncTurn(turnUnit)) $gameSwitches.setValue(28, false);
+            else $gameSwitches.setValue(28, true);
         }
     };
 
@@ -3813,12 +3815,12 @@ Imported.TacticsBattleSys = true;
             actor.addState(this.event().id, 1);
             this.checkDead();
         }
-        //if ($gameSwitches.value(15)) {
-        //    if ($gameSystem.isSyncTurn()) $gameSystem.syncState();
-        //    else actor.updateStateTurns(); //バフ期間1act減少
-        //} else {
+        if ($gameSwitches.value(15)) {
+            if ($gameSystem.isSyncTurn()) $gameSystem.syncState();
+            else actor.updateStateTurns(); //バフ期間1act減少
+        } else {
             actor.updateStateTurns(); //バフ期間1act減少
-        //}
+        }
     };
 
     //行動負荷バフチェック
