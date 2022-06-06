@@ -865,9 +865,11 @@ function Game_Avatar() {
                 $gameSystem._phaseState = 11;//ターン終了後処理へ移行
                 break;
             case 11: //ターン終了後処理(アニメーションを取り扱う)
-                //ターン終了後の処理
-                turnUnit.afterTurnEnd();
-                $gameSystem._phaseState = 12;//事後処理
+                if ($gameSwitches.value(20)) {
+                    //ターン終了後の処理
+                    turnUnit.afterTurnEnd();
+                    $gameSystem._phaseState = 12;//事後処理
+                }
                 break;
             case 12: //事後処理
                 if ($gameSwitches.value(20)) {
