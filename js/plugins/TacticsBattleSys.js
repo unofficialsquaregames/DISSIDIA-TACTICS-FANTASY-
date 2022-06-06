@@ -8962,12 +8962,14 @@ Imported.TacticsBattleSys = true;
                 if ($gameSwitches.value(27)) {
                     //死亡ユニットは変数で管理した方がいい？
                     $gameSystem.setUnitList($gameMap.events());
+                    console.log($gameSystem.unitList());
                     $gameSystem.syncVariable();
                     $gameSystem.syncState();
                     $gameSystem.syncWtList();
                     $gameSwitches.setValue(27, false);
                 } else {
                     $gameSystem.setUnitList($gameMap.events());
+                    console.log($gameSystem.unitList());
                     $gameSystem.setWtTurnList();
                     $gameSystem.sendInfo(); //戦闘不能時はサーバーに送信
                     $gameSwitches.setValue(27, true);
