@@ -8961,6 +8961,7 @@ Imported.TacticsBattleSys = true;
             if ($gameSwitches.value(15)) {
                 if ($gameSwitches.value(27)) {
                     $gameSystem.syncVariable();
+                    $gameSystem.syncState();
                     //$gameSystem.syncWtList();
                     $gameSwitches.setValue(27, false);
                 } else {
