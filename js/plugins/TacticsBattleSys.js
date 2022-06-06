@@ -7877,9 +7877,6 @@ Imported.TacticsBattleSys = true;
 
         //戦闘不能者がいる場合
         if ($gameSystem.isDeadUnit()) {//ここでこの関数使うのはNG
-            if ($gameSwitches.value(15)) {
-                if ($gameSystem.isSyncTurn() && $gameSwitches.value(20)) return;
-            }
             this.updateDeadUnit();
             return;
         }
@@ -8965,6 +8962,9 @@ Imported.TacticsBattleSys = true;
         var eventId = $gameSystem.deadUnitId();
         if (eventId > 0) {
             var event = $gameMap.event(eventId);
+            if ($gameSwitches.value(15)) {
+                if ($gameSystem.isSyncTurn() && $gameSwitches.value(28)) return;
+            }
             event.setDeadBattler();
             if ($gameSwitches.value(15)) {
                 if ($gameSwitches.value(27)) {
