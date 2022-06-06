@@ -441,7 +441,7 @@ Imported.TacticsBattleSys = true;
         return false;
     };
 
-    
+
     /*
      予約アクション系-----------------------------------------------------------------------------
      */
@@ -8959,16 +8959,20 @@ Imported.TacticsBattleSys = true;
             var event = $gameMap.event(eventId);
             event.setDeadBattler();
             if ($gameSwitches.value(15)) {
+                /*
                 if ($gameSwitches.value(27)) {
-                    //$gameSystem.syncVariable();
-                    //$gameSystem.syncState();
                     //死亡ユニットは変数で管理した方がいい？
                     $gameSystem.setUnitList($gameMap.events());
+                    $gameSystem.syncVariable();
+                    $gameSystem.syncState();
                     $gameSystem.syncWtList();
                     $gameSwitches.setValue(27, false);
                 } else {
-                    $gameSystem.setUnitList($gameMap.events());
-                    $gameSystem.setWtTurnList();
+                */
+                $gameSystem.setUnitList($gameMap.events());
+                $gameSystem.setWtTurnList();
+                if ($gameSwitches.value(27)) $gameSwitches.setValue(27, false);
+                else {
                     $gameSystem.sendInfo(); //戦闘不能時はサーバーに送信
                     $gameSwitches.setValue(27, true);
                 }
