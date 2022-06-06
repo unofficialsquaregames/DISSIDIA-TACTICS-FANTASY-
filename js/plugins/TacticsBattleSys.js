@@ -8962,6 +8962,7 @@ Imported.TacticsBattleSys = true;
                 if ($gameSwitches.value(27)) {
                     $gameSystem.syncVariable();
                     $gameSystem.syncState();
+                    $gameSystem.setUnitList($gameMap.events());
                     //$gameSystem.syncWtList();
                     $gameSwitches.setValue(27, false);
                 } else {
