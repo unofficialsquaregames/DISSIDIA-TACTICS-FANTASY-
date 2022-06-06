@@ -8355,6 +8355,7 @@ Imported.TacticsBattleSys = true;
                 $gameSystem._phaseState = 12;//ターン終了後処理へ移行
                 break;
             case 11: //ターン終了後処理(アニメーションを取り扱う)
+                $gameSwitches.setValue(28, false);
                 //迎撃カウンター時に付与されるデバフが同期側で反映されていなかったため、ここで処理
                 if ($gameSwitches.value(15)) {
                     if ($gameSystem.isSyncTurn()) $gameSystem.syncState();
