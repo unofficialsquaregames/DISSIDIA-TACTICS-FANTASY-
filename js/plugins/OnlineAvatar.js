@@ -319,7 +319,7 @@ function Game_Avatar() {
             var $ = $gameSystem;
             var send = {
                 allyTeamID: $._allyTeamID, enemyTeamID: $._enemyTeamID, isAllyTurn: $._isAllyTurn, isEnemyTurn: $._isEnemyTurn, wtTurnList: $._wtTurnList, turnUnit: $._turnUnit, quickTurnUnit: $._quickTurnUnit
-                , moveTargetPointFlag: $._moveTargetPointFlag, moveTargetPointX: $._moveTargetPointX, moveTargetPointY: $._moveTargetPointY, resurrectionFlag: $._resurrectionFlag, resurrectionUnit: $._resurrectionUnit
+                , moveTargetPointFlag: $._moveTargetPointFlag, moveTargetPointX: $._moveTargetPointX, moveTargetPointY: $._moveTargetPointY, resurrectionFlag: $._resurrectionFlag, resurrectionUnit: $._resurrectionUnit, deadUnitIds: $._deadUnitIds
             }
             this.sysRef.update(send);
         }
@@ -914,6 +914,7 @@ function Game_Avatar() {
             $gameSystem._moveTargetPointY = data.child("moveTargetPointY").val();
             $gameSystem._resurrectionFlag = data.child("resurrectionFlag").val();
             $gameSystem._resurrectionUnit = data.child("resurrectionUnit").val();
+            $gameSystem._deadUnitIds = data.child("deadUnitIds").val();
             if (!$gameSystem._resurrectionUnit) $gameSystem._resurrectionUnit = [];
         });
 

@@ -410,7 +410,6 @@ Imported.TacticsBattleSys = true;
         this._cameraWait = false; //カメラ待ちフラグ
         this._countWtTime = false; //行動順計算中か
         this._attacktime = false; //攻撃中か
-        this._deadUnitIds = []; //ユニット退場予約用
         this._arrangePattern = 0; //配置パターン
         this._isReservationActionTurn = false;
 
@@ -442,24 +441,7 @@ Imported.TacticsBattleSys = true;
         return false;
     };
 
-    // ユニットの退場予約
-    Game_Temp.prototype.setDeadUnitId = function (id) {
-        this._deadUnitIds.push(id);
-    };
-
-    // 退場予約されているユニットのイベント番号をひとつ返す
-    Game_Temp.prototype.deadUnitId = function () {
-        return this._deadUnitIds.shift();
-    };
-
-    // 退場予約されているユニットが存在するかどうか
-    Game_Temp.prototype.isDeadUnit = function () {
-        if (this._deadUnitIds.length > 0) {
-            return true;
-        } else {
-            return false;
-        }
-    };
+    
     /*
      予約アクション系-----------------------------------------------------------------------------
      */
@@ -560,6 +542,7 @@ Imported.TacticsBattleSys = true;
         this._moveTargetPointY = 0; //攻撃時移動の場合の移動座標X
         this._resurrectionFlag = false; //蘇生フラグ
         this._resurrectionUnit = []; //蘇生ユニット予約用
+        this._deadUnitIds = []; //ユニット退場予約用
         //以下オンライン時
         this._uids = [];
         this._allyTeamID = ""; //味方チームのID
@@ -642,6 +625,30 @@ Imported.TacticsBattleSys = true;
     // 蘇生ユニットのリセット
     Game_System.prototype.resetResurrectionUnit = function (unit) {
         this._resurrectionUnit = null;
+    };
+
+    // ユニットの退場予約
+    Game_System.prototype.setDeadUnitId = function (id) {
+        if ($gameSwitches.value(15)) {
+            if (this.isSyncTurn()) $gameSystem.syncVariable();
+            else this._deadUnitIds.push(id);
+        } else {
+            this._deadUnitIds.push(id);
+        }
+    };
+
+    // 退場予約されているユニットのイベント番号をひとつ返す
+    Game_System.prototype.deadUnitId = function () {
+        return this._deadUnitIds.shift();
+    };
+
+    // 退場予約されているユニットが存在するかどうか
+    Game_System.prototype.isDeadUnit = function () {
+        if (this._deadUnitIds.length > 0) {
+            return true;
+        } else {
+            return false;
+        }
     };
     /*
     行動順系-----------------------------------------------------------------------------
@@ -4098,7 +4105,7 @@ Imported.TacticsBattleSys = true;
         var battler = this.isActor();
         if (battler.isDead()) {
             var eventId = this.event().id;
-            $gameTemp.setDeadUnitId(eventId);
+            $gameSystem.setDeadUnitId(eventId);
         }
     };
     /*
@@ -7868,7 +7875,7 @@ Imported.TacticsBattleSys = true;
         _Scene_Map_updateMain.call(this);
 
         //戦闘不能者がいる場合
-        if ($gameTemp.isDeadUnit()) {//ここでこの関数使うのはNG
+        if ($gameSystem.isDeadUnit()) {//ここでこの関数使うのはNG
             this.updateDeadUnit();
             return;
         }
@@ -8698,7 +8705,7 @@ Imported.TacticsBattleSys = true;
         $gameSystem._moveTargetPointFlag = false;
         $gameSystem._moveTargetPointX = 0;
         $gameSystem._moveTargetPointY = 0;
-        $gameTemp_resurrectionFlag = false;
+        $gameSystem._resurrectionFlag = false;
         //YesNoウインドウを閉じる
         this.closeYesNoWindow();
         this.openCommandWindow();
@@ -8951,7 +8958,7 @@ Imported.TacticsBattleSys = true;
 
     // 戦闘不能ユニットの処理
     Scene_Map.prototype.updateDeadUnit = function () {
-        var eventId = $gameTemp.deadUnitId();
+        var eventId = $gameSystem.deadUnitId();
         if (eventId > 0) {
             var event = $gameMap.event(eventId);
             event.setDeadBattler();
