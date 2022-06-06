@@ -914,9 +914,9 @@ function Game_Avatar() {
             $gameSystem._moveTargetPointY = data.child("moveTargetPointY").val();
             $gameSystem._resurrectionFlag = data.child("resurrectionFlag").val();
             $gameSystem._resurrectionUnit = data.child("resurrectionUnit").val();
-            $gameSystem._deadUnitIds = data.child("deadUnitIds").val();
+            //$gameSystem._deadUnitIds = data.child("deadUnitIds").val();
             if (!$gameSystem._resurrectionUnit) $gameSystem._resurrectionUnit = [];
-            if (!$gameSystem._deadUnitIds) $gameSystem._deadUnitIds = [];
+            //if (!$gameSystem._deadUnitIds) $gameSystem._deadUnitIds = [];
         });
 
     };
