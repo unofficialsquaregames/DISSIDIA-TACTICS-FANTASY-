@@ -3311,6 +3311,10 @@ Imported.TacticsBattleSys = true;
         if (this.effectLieCryingCheck(targets)) {
             console.log("effectLieCryingCheck");
             SoundManager.playBuzzer();//ブザー
+            if ($gameSwitches.value(15)) {
+                if ($gameSystem.isSyncTurn()) $gameSwitches.setValue(28, false);
+                else $gameSwitches.setValue(28, true);
+            }
             return;
         }
 
@@ -8361,18 +8365,6 @@ Imported.TacticsBattleSys = true;
                 if ($gameSwitches.value(15)) {
                     if ($gameSwitches.value(28)) return;
                 }
-                //迎撃カウンター時に付与されるデバフが同期側で反映されていなかったため、ここで処理
-                /*
-                if ($gameSwitches.value(15)) {
-                    if ($gameSystem.isSyncTurn()) {
-                        if (!$gameSwitches.value(28)) return;
-                        $gameSystem.syncState();
-                    } else {
-                        $gameSystem.sendInfo(); //ここで処理すると不具合発生する可能性
-                        $gameSwitches.setValue(28, true);
-                    }
-                }
-                */
                 $gameSystem._phaseState = 12;//事後処理
                 break;
             case 12: //事後処理
