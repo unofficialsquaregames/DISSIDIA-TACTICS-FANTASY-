@@ -1257,7 +1257,6 @@ Imported.TacticsBattleSys = true;
             //バフデバフの反映
             if ($gameSwitches.value(15)) {
                 if ($gameSystem.isSyncTurn(turnUnit)) {
-
                     $gameSystem.syncState(); //ここで同期してしまうとトラップなどが発生しない可能性あり
                     $gameSwitches.setValue(28, false);
                 } else {
@@ -8079,6 +8078,9 @@ Imported.TacticsBattleSys = true;
                 turnUnit.executeAction();//アクションの実行
                 $gameTemp.countMultiHit();
                 if (!$gameTemp.endMultiHit()) return;//ヒットが終わってない場合やり直し
+                if ($gameSwitches.value(15)) {
+                    $gameSystem.sendInfo(); //オンライン時の処理
+                }
                 this.updateBattleStatusWindow();//戦闘用ステータスウインドウを更新
                 $gameMap.initColorArea();
 
