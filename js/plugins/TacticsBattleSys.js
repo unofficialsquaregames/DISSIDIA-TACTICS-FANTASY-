@@ -782,6 +782,7 @@ Imported.TacticsBattleSys = true;
                 $gameTemp._countWtTime = false;
 
                 if ($gameSwitches.value(15)) {
+                    //たまに変数19がtrueのまま詰んでしまうことがある
                     if ($gameSwitches.value(19)) $gameSwitches.setValue(19, false);
                     else {
                         $gameSystem.sendInfo();
@@ -7876,6 +7877,9 @@ Imported.TacticsBattleSys = true;
 
         //戦闘不能者がいる場合
         if ($gameSystem.isDeadUnit()) {//ここでこの関数使うのはNG
+            if ($gameSwitches.value(15)) {
+                if ($gameSystem.isSyncTurn() && $gameSwitches.value(20)) return;
+            }
             this.updateDeadUnit();
             return;
         }
