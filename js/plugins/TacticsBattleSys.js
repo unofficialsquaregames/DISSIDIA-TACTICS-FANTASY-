@@ -8080,7 +8080,7 @@ Imported.TacticsBattleSys = true;
                 if (!$gameTemp.endMultiHit()) return;//ヒットが終わってない場合やり直し
                 this.updateBattleStatusWindow();//戦闘用ステータスウインドウを更新
                 $gameMap.initColorArea();
-                if ($gameSwitches.value(15)) $gameSwitches.setValue(20, true);
+                //if ($gameSwitches.value(15)) $gameSwitches.setValue(20, true);
                 $gameSystem._phaseState = 11;//ターン終了後処理へ移行
                 break;
             case 11: //ターン終了後処理(アニメーションを取り扱う)
@@ -8093,7 +8093,7 @@ Imported.TacticsBattleSys = true;
                 $gameSystem._phaseState = 12;//事後処理
                 break;
             case 12: //事後処理
-                //if ($gameSwitches.value(15)) $gameSwitches.setValue(20, true);
+                if ($gameSwitches.value(15)) $gameSwitches.setValue(20, true);
                 this.endTurn(); //
                 if ($gameSwitches.value(15)) {
                     $gameSystem.sendInfo();

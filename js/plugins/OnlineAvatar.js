@@ -746,7 +746,7 @@ function Game_Avatar() {
         var turnUnit = $gameSystem.turnUnit();
         switch ($gameSystem._phaseState) {
             case 0: //カメラ移動完了後コマンド表示
-                if ($gameSwitches.value(20)) return; //ここに書くと詰む予感
+                if ($gameSwitches.value(20) && !$gameSwitches.value(28)) return; //ここに書くと詰む予感
                 $gameMap.initColorArea();
                 $gameMap.setMovableArea(turnUnit);
                 //カメラが移動中かどうか
