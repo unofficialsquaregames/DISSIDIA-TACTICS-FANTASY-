@@ -8960,13 +8960,12 @@ Imported.TacticsBattleSys = true;
             event.setDeadBattler();
             if ($gameSwitches.value(15)) {
                 if ($gameSwitches.value(27)) {
-                    $gameSystem.syncVariable();
-                    $gameSystem.syncState();
+                    //$gameSystem.syncVariable();
+                    //$gameSystem.syncState();
                     $gameSystem.setUnitList($gameMap.events());
                     //$gameSystem.syncWtList();
                     $gameSwitches.setValue(27, false);
                 } else {
-                    if(event.isActor()) event.isActor().addState(event.isActor().eventId(), 1);
                     $gameSystem.setUnitList($gameMap.events());
                     $gameSystem.sendInfo(); //戦闘不能時はサーバーに送信
                     $gameSwitches.setValue(27, true);
