@@ -3312,7 +3312,7 @@ Imported.TacticsBattleSys = true;
             SoundManager.playBuzzer();//ブザー
             return;
         }
-        actor.clearResult(); //攻撃しながらバフつける系の不具合対策用
+        subject.clearResult(); //攻撃しながらバフつける系の不具合対策用
         //var checkFlag = action.isSkill() || action.isItem();// && action.item().id === checkSkillId; //isSkillでエラー発生(Enemyだとundefind)
         var targets = $gameMap.unitsArea($gameMap._targetArea, true); //対象とその周囲を設定
         //対象にチャーム付与者がいた場合、攻撃中止する
