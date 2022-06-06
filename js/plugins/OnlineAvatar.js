@@ -790,7 +790,6 @@ function Game_Avatar() {
                     if (!turnUnit.useSkill()) return;
                     $gameSystem._phaseState = 5; //状況によっては5に移行
                     $gameSwitches.setValue(24, false);
-                    $gameSwitches.setValue(28, false);
                 }
                 if ($gameSwitches.value(25)) {
                     this.commandWait();
