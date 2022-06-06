@@ -790,10 +790,12 @@ function Game_Avatar() {
                     if (!turnUnit.useSkill()) return;
                     $gameSystem._phaseState = 5; //状況によっては5に移行
                     $gameSwitches.setValue(24, false);
+                    $gameSwitches.setValue(28, false);
                 }
                 if ($gameSwitches.value(25) && $gameSwitches.value(28)) {
                     this.commandWait();
                     $gameSwitches.setValue(25, false);
+                    $gameSwitches.setValue(28, false);
                 }
                 break;
             case 3: //移動先選択

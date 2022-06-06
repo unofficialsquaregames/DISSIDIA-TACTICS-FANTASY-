@@ -1322,10 +1322,6 @@ Imported.TacticsBattleSys = true;
             }
         }
 
-        if ($gameSwitches.value(15)) {
-            if ($gameSystem.isSyncTurn(turnUnit)) $gameSwitches.setValue(28, false);
-            else $gameSwitches.setValue(28, true);
-        }
     };
 
     //ダメージ設定
@@ -8082,7 +8078,8 @@ Imported.TacticsBattleSys = true;
                 if (!$gameTemp.endMultiHit()) return;//ヒットが終わってない場合やり直し
                 this.updateBattleStatusWindow();//戦闘用ステータスウインドウを更新
                 $gameMap.initColorArea();
-                //if ($gameSwitches.value(15)) $gameSwitches.setValue(20, true);
+
+                if ($gameSwitches.value(15)) $gameSwitches.setValue(28, true);
                 $gameSystem._phaseState = 11;//ターン終了後処理へ移行
                 break;
             case 11: //ターン終了後処理(アニメーションを取り扱う)
