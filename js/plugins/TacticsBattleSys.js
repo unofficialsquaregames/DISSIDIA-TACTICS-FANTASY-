@@ -8966,6 +8966,7 @@ Imported.TacticsBattleSys = true;
                     //$gameSystem.syncWtList();
                     $gameSwitches.setValue(27, false);
                 } else {
+                    if(event.isActor()) event.isActor().addState(event.isActor().eventId(), 1);
                     $gameSystem.setUnitList($gameMap.events());
                     $gameSystem.sendInfo(); //戦闘不能時はサーバーに送信
                     $gameSwitches.setValue(27, true);
