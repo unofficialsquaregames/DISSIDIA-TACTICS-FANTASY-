@@ -8257,6 +8257,9 @@ Imported.TacticsBattleSys = true;
                 $gameSystem._phaseState = 11;//ターン終了後処理へ移行
                 break;
             case 11: //ターン終了後処理(アニメーションを取り扱う)
+                if ($gameSwitches.value(15)) {
+                    if ($gameSwitches.value(28)) return;
+                }
                 //ターン終了後の処理
                 turnUnit.afterTurnEnd();
                 $gameSystem._phaseState = 12;//事後処理
