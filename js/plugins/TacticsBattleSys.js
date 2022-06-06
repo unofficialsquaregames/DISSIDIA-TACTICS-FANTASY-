@@ -8959,12 +8959,14 @@ Imported.TacticsBattleSys = true;
             var event = $gameMap.event(eventId);
             event.setDeadBattler();
             if ($gameSwitches.value(15)) {
+                //死亡ステートを同期させようとしてうまくいかなかった可能性
                 if ($gameSwitches.value(27)) {
                     //死亡ユニットは変数で管理した方がいい？
-                    $gameSystem.syncState();
+                    event.isActor().die();
                     $gameSystem.setUnitList($gameMap.events());
                     console.log($gameSystem.unitList());
                     $gameSystem.syncVariable();
+                    $gameSystem.syncState();
                     $gameSystem.syncWtList();
                     $gameSwitches.setValue(27, false);
                 } else {
