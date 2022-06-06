@@ -746,7 +746,7 @@ function Game_Avatar() {
         var turnUnit = $gameSystem.turnUnit();
         switch ($gameSystem._phaseState) {
             case 0: //カメラ移動完了後コマンド表示
-                if ($gameSwitches.value(20) && !$gameSwitches.value(28)) return; //ここに書くと詰む予感
+                if ($gameSwitches.value(20)) return; //ここに書くと詰む予感
                 $gameMap.initColorArea();
                 $gameMap.setMovableArea(turnUnit);
                 //カメラが移動中かどうか
@@ -786,12 +786,12 @@ function Game_Avatar() {
                     $gameSwitches.setValue(23, false);
                 }
                 //コマンダーの行動終わってからアクションなのでテンポは悪い
-                if ($gameSwitches.value(24) && $gameSwitches.value(20)) {
+                if ($gameSwitches.value(24) && $gameSwitches.value(28)) {
                     if (!turnUnit.useSkill()) return;
                     $gameSystem._phaseState = 5; //状況によっては5に移行
                     $gameSwitches.setValue(24, false);
                 }
-                if ($gameSwitches.value(25) && $gameSwitches.value(20)) {
+                if ($gameSwitches.value(25) && $gameSwitches.value(28)) {
                     this.commandWait();
                     $gameSwitches.setValue(25, false);
                 }
