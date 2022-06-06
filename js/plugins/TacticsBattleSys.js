@@ -8965,8 +8965,8 @@ Imported.TacticsBattleSys = true;
                     event.isActor().die();
                     $gameSystem.setUnitList($gameMap.events());
                     console.log($gameSystem.unitList());
-                    $gameSystem.syncVariable();
-                    $gameSystem.syncState();
+                    //$gameSystem.syncVariable();
+                    //$gameSystem.syncState();
                     $gameSystem.syncWtList();
                     $gameSwitches.setValue(27, false);
                 } else {
