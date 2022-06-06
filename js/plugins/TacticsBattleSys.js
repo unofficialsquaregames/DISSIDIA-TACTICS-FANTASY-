@@ -1322,9 +1322,12 @@ Imported.TacticsBattleSys = true;
             }
         }
 
-        if ($gameSwitches.value(15)) {
+        if ($gameSwitches.value(15) && !$gameTemp.isReservationAction()) {
             if ($gameSystem.isSyncTurn(turnUnit)) $gameSwitches.setValue(28, false);
-            else $gameSwitches.setValue(28, true);
+            else {
+                if ($gameTemp.isReservationAction()) $gameSystem.sendInfo();
+                $gameSwitches.setValue(28, true);
+            }
         }
     };
 
@@ -2101,37 +2104,37 @@ Imported.TacticsBattleSys = true;
                 var ikasama = $dataStates[id].meta.ikasama;
                 if (ikasama) {
                     if (paramId == 0) {
-                        var max = 100;
+                        var max = 1000;
                         var min = 0;
                         var rate = parseInt(Math.floor(Math.random() * (max - min) + min));
                         value += Math.round((value + this.paramBase(paramId)) * rate / 100);
                     } else if (paramId == 1) {
-                        var max = 100;
+                        var max = 500;
                         var min = 0;
                         var rate = parseInt(Math.floor(Math.random() * (max - min) + min));
                         value += Math.round((value + this.paramBase(paramId)) * rate / 100);
                     } else if (paramId == 2) {
-                        var max = 40;
+                        var max = 80;
                         var min = 0;
                         var rate = parseInt(Math.floor(Math.random() * (max - min) + min));
                         value += Math.round((value + this.paramBase(paramId)) * rate / 100);
                     } else if (paramId == 3) {
-                        var max = 40;
+                        var max = 80;
                         var min = 0;
                         var rate = parseInt(Math.floor(Math.random() * (max - min) + min));
                         value += Math.round((value + this.paramBase(paramId)) * rate / 100);
                     } else if (paramId == 4) {
-                        var max = 20;
+                        var max = 40;
                         var min = 0;
                         var rate = parseInt(Math.floor(Math.random() * (max - min) + min));
                         value += Math.round((value + this.paramBase(paramId)) * rate / 100);
                     } else if (paramId == 5) {
-                        var max = 20;
+                        var max = 40;
                         var min = 0;
                         var rate = parseInt(Math.floor(Math.random() * (max - min) + min));
                         value += Math.round((value + this.paramBase(paramId)) * rate / 100);
                     } else if (paramId == 6) {
-                        var max = 80;
+                        var max = 160;
                         var min = 0;
                         var rate = parseInt(Math.floor(Math.random() * (max - min) + min));
                         value += Math.round((value + this.paramBase(paramId)) * rate / 100);
@@ -8355,12 +8358,21 @@ Imported.TacticsBattleSys = true;
                 $gameSystem._phaseState = 12;//ターン終了後処理へ移行
                 break;
             case 11: //ターン終了後処理(アニメーションを取り扱う)
-                $gameSwitches.setValue(28, false);
-                //迎撃カウンター時に付与されるデバフが同期側で反映されていなかったため、ここで処理
                 if ($gameSwitches.value(15)) {
-                    if ($gameSystem.isSyncTurn()) $gameSystem.syncState();
-                    else $gameSystem.sendInfo(); //ここで処理すると不具合発生する可能性
+                    if ($gameSwitches.value(28)) return;
                 }
+                //迎撃カウンター時に付与されるデバフが同期側で反映されていなかったため、ここで処理
+                /*
+                if ($gameSwitches.value(15)) {
+                    if ($gameSystem.isSyncTurn()) {
+                        if (!$gameSwitches.value(28)) return;
+                        $gameSystem.syncState();
+                    } else {
+                        $gameSystem.sendInfo(); //ここで処理すると不具合発生する可能性
+                        $gameSwitches.setValue(28, true);
+                    }
+                }
+                */
                 $gameSystem._phaseState = 12;//事後処理
                 break;
             case 12: //事後処理
