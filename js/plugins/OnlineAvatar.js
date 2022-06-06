@@ -792,7 +792,7 @@ function Game_Avatar() {
                     $gameSwitches.setValue(24, false);
                     $gameSwitches.setValue(28, false);
                 }
-                if ($gameSwitches.value(25) && $gameSwitches.value(28)) {
+                if ($gameSwitches.value(25)) {
                     this.commandWait();
                     $gameSwitches.setValue(25, false);
                     $gameSwitches.setValue(28, false);

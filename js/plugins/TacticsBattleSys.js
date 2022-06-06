@@ -8867,6 +8867,7 @@ Imported.TacticsBattleSys = true;
         $gameSwitches.setValue(25, false);
         $gameSwitches.setValue(26, false);
         $gameSwitches.setValue(27, false);
+        $gameSwitches.setValue(28, false);
         $gameSwitches.setValue(31, false);
         $gameSwitches.setValue(32, false);
         $gameSwitches.setValue(33, false);
