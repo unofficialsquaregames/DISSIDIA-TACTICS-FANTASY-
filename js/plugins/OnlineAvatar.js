@@ -916,6 +916,7 @@ function Game_Avatar() {
             $gameSystem._resurrectionUnit = data.child("resurrectionUnit").val();
             $gameSystem._deadUnitIds = data.child("deadUnitIds").val();
             if (!$gameSystem._resurrectionUnit) $gameSystem._resurrectionUnit = [];
+            if (!$gameSystem._deadUnitIds) $gameSystem._deadUnitIds = [];
         });
 
     };
