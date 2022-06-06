@@ -786,7 +786,7 @@ function Game_Avatar() {
                     $gameSwitches.setValue(23, false);
                 }
                 //コマンダーの行動終わってからアクションなのでテンポは悪い
-                if ($gameSwitches.value(24) && $gameSwitches.value(28)) {
+                if ($gameSwitches.value(24)) {
                     if (!turnUnit.useSkill()) return;
                     $gameSystem._phaseState = 5; //状況によっては5に移行
                     $gameSwitches.setValue(24, false);
