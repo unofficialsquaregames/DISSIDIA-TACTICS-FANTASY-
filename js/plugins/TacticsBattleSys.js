@@ -629,12 +629,7 @@ Imported.TacticsBattleSys = true;
 
     // ユニットの退場予約
     Game_System.prototype.setDeadUnitId = function (id) {
-        if ($gameSwitches.value(15)) {
-            if (this.isSyncTurn()) $gameSystem.syncVariable();
-            else this._deadUnitIds.push(id);
-        } else {
-            this._deadUnitIds.push(id);
-        }
+        this._deadUnitIds.push(id);
     };
 
     // 退場予約されているユニットのイベント番号をひとつ返す
