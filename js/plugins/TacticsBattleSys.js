@@ -8866,6 +8866,15 @@ Imported.TacticsBattleSys = true;
         }
     };
 
+    // 多段ヒット表示ウェイト中か
+    Scene_Map.prototype.isSyncDeadUnitWaitingMode = function () {
+        if (Graphics.frameCount % 60 === 0) {
+            return true;
+        } else {
+            return false;
+        }
+    };
+
     // 戦闘開始準備
     Scene_Map.prototype.setStartBattle = function () {
         //$gameMap.battleActivate();戦闘モードにはまだしない
@@ -8961,6 +8970,7 @@ Imported.TacticsBattleSys = true;
             if ($gameSwitches.value(15)) {
                 //死亡ステートを同期させようとしてうまくいかなかった可能性
                 if ($gameSwitches.value(27)) {
+                    if (!this.isSyncDeadUnitWaitingMode()) return;
                     //死亡ユニットは変数で管理した方がいい？
                     event.isActor().die();
                     $gameSystem.setUnitList($gameMap.events());
