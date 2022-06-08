@@ -8689,6 +8689,7 @@ Imported.TacticsBattleSys = true;
         if ($gameSwitches.value(15)) {
             $gameSystem.sendInfo(); //オンライン時の処理
             $gameSwitches.setValue(24, true);
+            if ($gameSystem._resurrectionFlag) $gameSwitches.setValue(27, true);
         }
         //コマンド実行
         $gameSystem._phaseState = 7;//詠唱アニメーションフェーズへ移行
@@ -8959,28 +8960,6 @@ Imported.TacticsBattleSys = true;
             var event = $gameMap.event(eventId);
             event.setDeadBattler();
             $gameSystem.setUnitList($gameMap.events());
-            /*
-            if ($gameSwitches.value(15)) {
-                //死亡ステートを同期させようとしてうまくいかなかった可能性
-                if ($gameSwitches.value(27)) {
-                    //死亡ユニットは変数で管理した方がいい？
-                    $gameSystem.setUnitList($gameMap.events());
-                    console.log($gameSystem.unitList());
-                    //$gameSystem.syncVariable();
-                    //$gameSystem.syncState();
-                    $gameSystem.syncWtList();
-                    $gameSwitches.setValue(27, false);
-                } else {
-                    $gameSystem.setUnitList($gameMap.events());
-                    console.log($gameSystem.unitList());
-                    $gameSystem.setWtTurnList();
-                    $gameSystem.sendInfo(); //戦闘不能時はサーバーに送信
-                    $gameSwitches.setValue(27, true);
-                }
-            } else {
-                $gameSystem.setUnitList($gameMap.events());
-            }
-            */
         }
     };
 
