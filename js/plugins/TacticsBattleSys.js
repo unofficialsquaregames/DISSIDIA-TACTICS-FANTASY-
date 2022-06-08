@@ -8689,6 +8689,7 @@ Imported.TacticsBattleSys = true;
         if ($gameSwitches.value(15)) {
             $gameSystem.sendInfo(); //オンライン時の処理
             $gameSwitches.setValue(24, true);
+            if ($gameSystem._resurrectionFlag) $gameSwitches.setValue(29, true);
         }
         //コマンド実行
         $gameSystem._phaseState = 7;//詠唱アニメーションフェーズへ移行
@@ -8886,6 +8887,7 @@ Imported.TacticsBattleSys = true;
         $gameSwitches.setValue(26, false);
         $gameSwitches.setValue(27, false);
         $gameSwitches.setValue(28, false);
+        $gameSwitches.setValue(29, false);
         $gameSwitches.setValue(31, false);
         $gameSwitches.setValue(32, false);
         $gameSwitches.setValue(33, false);

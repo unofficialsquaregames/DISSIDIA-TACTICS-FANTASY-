@@ -788,6 +788,10 @@ function Game_Avatar() {
                 //コマンダーの行動終わってからアクションなのでテンポは悪い
                 if ($gameSwitches.value(24) && $gameSwitches.value(28)) {
                     if (!turnUnit.useSkill()) return;
+                    if ($gameSwitches.value(29)) {
+                        $gameSystem.syncResurrection();
+                        $gameSwitches.setValue(29, false);
+                    }
                     $gameSystem._phaseState = 5; //状況によっては5に移行
                     $gameSwitches.setValue(24, false);
                 }
@@ -912,10 +916,7 @@ function Game_Avatar() {
             $gameSystem._moveTargetPointFlag = data.child("moveTargetPointFlag").val();
             $gameSystem._moveTargetPointX = data.child("moveTargetPointX").val();
             $gameSystem._moveTargetPointY = data.child("moveTargetPointY").val();
-            $gameSystem._resurrectionFlag = data.child("resurrectionFlag").val();
-            $gameSystem._resurrectionUnit = data.child("resurrectionUnit").val();
             //$gameSystem._deadUnitIds = data.child("deadUnitIds").val();
-            if (!$gameSystem._resurrectionUnit) $gameSystem._resurrectionUnit = [];
             //if (!$gameSystem._deadUnitIds) $gameSystem._deadUnitIds = [];
         });
 
@@ -947,6 +948,14 @@ function Game_Avatar() {
             for (var i = 0; i < $gameSystem.unitList().length; i++) {
                 $gameSystem.unitList()[i].isActor()._wt = data.child(i).child("wt").val();
             }
+        });
+    };
+
+    Game_System.prototype.syncResurrection = function () {
+        OnlineManager.sysRef.once("value").then(function (data) {
+            $gameSystem._resurrectionFlag = data.child("resurrectionFlag").val();
+            $gameSystem._resurrectionUnit = data.child("resurrectionUnit").val();
+            if (!$gameSystem._resurrectionUnit) $gameSystem._resurrectionUnit = [];
         });
     };
 
