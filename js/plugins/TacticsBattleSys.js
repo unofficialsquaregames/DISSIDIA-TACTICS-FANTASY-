@@ -8067,10 +8067,12 @@ Imported.TacticsBattleSys = true;
                     var yPlus = $gameSystem._moveTargetPointY - turnUnit.y;
                     turnUnit.jump(xPlus, yPlus); //移動しながらの攻撃はジャンプで行う
                 }
+                /*
                 //蘇生の場合
                 if ($gameSystem._resurrectionFlag) {
                     $gameSystem.isResurrectionUnit().resurrectionUnit();
                 }
+                */
                 this.showActionMotion(turnUnit);
                 $gameSystem._phaseState = 8;
                 break;
@@ -8095,6 +8097,10 @@ Imported.TacticsBattleSys = true;
                 if (!$gameTemp.endMultiHit()) return;//ヒットが終わってない場合やり直し
                 if ($gameSwitches.value(15)) {
                     $gameSystem.sendInfo(); //オンライン時の処理
+                }
+                //蘇生の場合
+                if ($gameSystem._resurrectionFlag) {
+                    $gameSystem.isResurrectionUnit().resurrectionUnit();
                 }
                 this.updateBattleStatusWindow();//戦闘用ステータスウインドウを更新
                 $gameMap.initColorArea();
@@ -8237,10 +8243,12 @@ Imported.TacticsBattleSys = true;
                     var yPlus = $gameSystem._moveTargetPointY - turnUnit.y;
                     turnUnit.jump(xPlus, yPlus); //移動しながらの攻撃はジャンプで行う
                 }
+                /*
                 //蘇生の場合
                 if ($gameSystem._resurrectionFlag) {
                     $gameSystem.isResurrectionUnit().resurrectionUnit();
                 }
+                */
                 //自身に攻撃アニメーション
                 this.showActionMotion(turnUnit);
                 //this.showActionAnimation(turnUnit);
@@ -8264,6 +8272,11 @@ Imported.TacticsBattleSys = true;
                 if ($gameSwitches.value(15)) {
                     $gameSystem.sendInfo(); //オンライン時の処理
                     $gameSwitches.setValue(24, true);
+                }
+
+                //蘇生の場合
+                if ($gameSystem._resurrectionFlag) {
+                    $gameSystem.isResurrectionUnit().resurrectionUnit();
                 }
                 this.updateBattleStatusWindow();//戦闘用ステータスウインドウを更新
                 $gameMap.initColorArea();
@@ -8890,6 +8903,7 @@ Imported.TacticsBattleSys = true;
         $gameSwitches.setValue(27, false);
         $gameSwitches.setValue(28, false);
         $gameSwitches.setValue(29, false);
+        $gameSwitches.setValue(30, false);
         $gameSwitches.setValue(31, false);
         $gameSwitches.setValue(32, false);
         $gameSwitches.setValue(33, false);

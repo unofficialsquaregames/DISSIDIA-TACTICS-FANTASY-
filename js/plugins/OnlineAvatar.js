@@ -789,8 +789,7 @@ function Game_Avatar() {
                 if ($gameSwitches.value(24) && $gameSwitches.value(28)) {
                     if (!turnUnit.useSkill()) return;
                     if ($gameSwitches.value(29)) {
-                        console.log(turnUnit);
-                        $gameSystem.syncVariable();
+                        console.log(turnUnit); //targetとskillの値がNULLで送られてしまうことがある(データベースでは対象の4番目の配列が5番目の配列へ移動し、4番目の配列を見てNULLを拾ってきてしまった)
                         $gameSystem.syncResurrection();
                         $gameSwitches.setValue(29, false);
                     }
