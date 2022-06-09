@@ -790,6 +790,7 @@ function Game_Avatar() {
                     if (!turnUnit.useSkill()) return;
                     if ($gameSwitches.value(29)) {
                         console.log(turnUnit);
+                        $gameSystem.syncVariable();
                         $gameSystem.syncResurrection();
                         $gameSwitches.setValue(29, false);
                     }
