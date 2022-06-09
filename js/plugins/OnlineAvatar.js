@@ -789,6 +789,7 @@ function Game_Avatar() {
                 if ($gameSwitches.value(24) && $gameSwitches.value(28)) {
                     if (!turnUnit.useSkill()) return;
                     if ($gameSwitches.value(29)) {
+                        console.log(turnUnit);
                         $gameSystem.syncResurrection();
                         $gameSwitches.setValue(29, false);
                     }
@@ -819,6 +820,7 @@ function Game_Avatar() {
                 }
                 break;
             case 5: //対象選択
+                console.log(turnUnit);
                 $gameMap.showRangeArea(turnUnit, null);
                 $gameSystem._phaseState = 6;//範囲確認へ移行
                 break;
