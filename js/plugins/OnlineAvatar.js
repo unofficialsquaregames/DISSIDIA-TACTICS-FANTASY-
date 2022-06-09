@@ -841,6 +841,7 @@ function Game_Avatar() {
                 }
                 //蘇生の場合
                 if ($gameSystem._resurrectionFlag) {
+                    //エラーが出る原因はresurrectionUnitを丸ごと同期させようとしたがメソッドまではできなかったため宣言ないため発生したという流れ
                     $gameSystem.isResurrectionUnit().resurrectionUnit();
                 }
                 //自身に攻撃アニメーション

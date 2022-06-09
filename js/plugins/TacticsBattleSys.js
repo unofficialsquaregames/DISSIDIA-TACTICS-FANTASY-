@@ -615,12 +615,12 @@ Imported.TacticsBattleSys = true;
     };
     // 蘇生ユニットの予約
     Game_System.prototype.setResurrectionUnit = function (unit) {
-        this._resurrectionUnit = unit;
+        this._resurrectionUnit = unit.event().id;
     };
 
     // 蘇生ユニット
     Game_System.prototype.isResurrectionUnit = function () {
-        return this._resurrectionUnit;
+        return $gameMap.event(this._resurrectionUnit);
     };
     // 蘇生ユニットのリセット
     Game_System.prototype.resetResurrectionUnit = function (unit) {
