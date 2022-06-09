@@ -839,11 +839,13 @@ function Game_Avatar() {
                     var yPlus = $gameSystem._moveTargetPointY - turnUnit.y;
                     turnUnit.jump(xPlus, yPlus); //移動しながらの攻撃はジャンプで行う
                 }
+                /*
                 //蘇生の場合
                 if ($gameSystem._resurrectionFlag) {
                     //エラーが出る原因はresurrectionUnitを丸ごと同期させようとしたがメソッドまではできなかったため宣言ないため発生したという流れ
                     $gameSystem.isResurrectionUnit().resurrectionUnit();
                 }
+                */
                 //自身に攻撃アニメーション
                 this.showActionMotion(turnUnit);
                 //this.showActionAnimation(turnUnit);
@@ -867,6 +869,11 @@ function Game_Avatar() {
                 turnUnit.executeAction();
                 $gameTemp.countMultiHit();
                 if (!$gameTemp.endMultiHit()) return;//ヒットが終わってない場合やり直し
+                //蘇生の場合
+                if ($gameSystem._resurrectionFlag) {
+                    //エラーが出る原因はresurrectionUnitを丸ごと同期させようとしたがメソッドまではできなかったため宣言ないため発生したという流れ
+                    $gameSystem.isResurrectionUnit().resurrectionUnit();
+                }
                 this.updateBattleStatusWindow();//戦闘用ステータスウインドウを更新
                 $gameMap.initColorArea();
                 $gameSystem._phaseState = 11;//ターン終了後処理へ移行
