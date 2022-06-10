@@ -869,7 +869,7 @@ function Game_Avatar() {
                 turnUnit.executeAction();
                 $gameTemp.countMultiHit();
                 if (!$gameTemp.endMultiHit()) return;//ヒットが終わってない場合やり直し
-                //蘇生の場合
+                //蘇生の場合(ここに置くと今度は同期側の処理がされなくなった)
                 if ($gameSystem._resurrectionFlag) {
                     //エラーが出る原因はresurrectionUnitを丸ごと同期させようとしたがメソッドまではできなかったため宣言ないため発生したという流れ
                     $gameSystem.isResurrectionUnit().resurrectionUnit();

@@ -8098,7 +8098,7 @@ Imported.TacticsBattleSys = true;
                 if ($gameSwitches.value(15)) {
                     $gameSystem.sendInfo(); //オンライン時の処理
                 }
-                //蘇生の場合
+                //蘇生の場合(ここに置くと今度は同期側の処理がされなくなった)
                 if ($gameSystem._resurrectionFlag) {
                     $gameSystem.isResurrectionUnit().resurrectionUnit();
                 }
