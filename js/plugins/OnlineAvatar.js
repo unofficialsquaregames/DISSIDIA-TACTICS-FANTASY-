@@ -872,7 +872,11 @@ function Game_Avatar() {
                 //蘇生の場合(ここに置くと今度は同期側の処理がされなくなった)
                 if ($gameSystem._resurrectionFlag) {
                     //エラーが出る原因はresurrectionUnitを丸ごと同期させようとしたがメソッドまではできなかったため宣言ないため発生したという流れ
+
+                    console.log($gameSystem.isResurrectionUnit()._x);
+                    console.log($gameSystem.isResurrectionUnit()._y);
                     $gameSystem.isResurrectionUnit().resurrectionUnit();
+                    $gameSwitches.setValue(28, false);
                 }
                 this.updateBattleStatusWindow();//戦闘用ステータスウインドウを更新
                 $gameMap.initColorArea();
