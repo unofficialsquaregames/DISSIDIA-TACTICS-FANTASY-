@@ -7387,7 +7387,7 @@ Imported.TacticsBattleSys = true;
     //
     Window_TitleCommand.prototype.makeCommandList = function () {
         this.addCommand("トレーニング", 'training');
-        this.addCommand("オンライン", 'online');
+        //this.addCommand("オンライン", 'online');
     };
 
     //-----------------------------------------------------------------------------
@@ -8999,7 +8999,7 @@ Imported.TacticsBattleSys = true;
     Scene_Title.prototype.createCommandWindow = function () {
         this._commandWindow = new Window_TitleCommand();
         this._commandWindow.setHandler('training', this.commandTrainingMode.bind(this));
-        this._commandWindow.setHandler('online', this.commandOnlineMode.bind(this));
+        //this._commandWindow.setHandler('online', this.commandOnlineMode.bind(this));
         this.addWindow(this._commandWindow);
     };
     //トレーニングモード(スタートから流用)
