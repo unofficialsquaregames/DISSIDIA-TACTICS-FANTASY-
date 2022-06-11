@@ -8659,6 +8659,7 @@ Imported.TacticsBattleSys = true;
                     if ($gameMap.unitEnemyXy(x, y) == null && $gameMap.unitAllyXy(x, y) == null) {
                         turnUnit.setTarget($gameSystem.isResurrectionUnit());//あえて自身をターゲットに設定する(自身へのダメージは入らない)
                         $gameSystem._resurrectionFlag = true;
+                        //以下の座標が同期できてない
                         $gameSystem.isResurrectionUnit()._x = x;
                         $gameSystem.isResurrectionUnit()._y = y;
                     } else {

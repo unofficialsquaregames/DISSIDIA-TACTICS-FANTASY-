@@ -873,8 +873,8 @@ function Game_Avatar() {
                 if ($gameSystem._resurrectionFlag) {
                     //エラーが出る原因はresurrectionUnitを丸ごと同期させようとしたがメソッドまではできなかったため宣言ないため発生したという流れ
 
-                    console.log($gameSystem.isResurrectionUnit()._x);
-                    console.log($gameSystem.isResurrectionUnit()._y);
+                    $gameSystem.isResurrectionUnit()._x = $gameVariables.value(9);
+                    $gameSystem.isResurrectionUnit()._y = $gameVariables.value(10);
                     $gameSystem.isResurrectionUnit().resurrectionUnit();
                     $gameSwitches.setValue(28, false);
                 }
