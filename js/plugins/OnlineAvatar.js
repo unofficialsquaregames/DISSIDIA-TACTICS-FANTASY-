@@ -877,9 +877,9 @@ function Game_Avatar() {
                 var unit = $gameMap.events()[i];
                 if (!unit.isActor()) continue;
                 if (eventId && eventId != unit.event().id) continue;
-                $gameSystem.unitList()[i]._target = data.child(i).child("target").val();
-                $gameSystem.unitList()[i]._useSkill = data.child(i).child("useSkill").val();
-                $gameSystem.unitList()[i].setToXy(data.child(i).child("toX").val(), data.child(i).child("toY").val());
+                unit._target = data.child(i).child("target").val();
+                unit._useSkill = data.child(i).child("useSkill").val();
+                unit.setToXy(data.child(i).child("toX").val(), data.child(i).child("toY").val());
             }
         });
 
