@@ -8660,6 +8660,8 @@ Imported.TacticsBattleSys = true;
                         turnUnit.setTarget($gameSystem.isResurrectionUnit());//あえて自身をターゲットに設定する(自身へのダメージは入らない)
                         $gameSystem._resurrectionFlag = true;
                         //以下の座標が同期できてない
+                        $gameVariables.setValue(9, x);
+                        $gameVariables.setValue(10, y);
                         $gameSystem.isResurrectionUnit()._x = x;
                         $gameSystem.isResurrectionUnit()._y = y;
                     } else {
