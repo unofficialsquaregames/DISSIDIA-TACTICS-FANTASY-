@@ -774,8 +774,12 @@ Imported.TacticsBattleSys = true;
 
                 if ($gameSwitches.value(15)) {
                     //たまに変数19がtrueのまま詰んでしまうことがある
-                    if (syncTeam) $gameSwitches.setValue(19, false);
+                    if (syncTeam) {
+                        console.log("通ってる１");
+                        $gameSwitches.setValue(19, false);
+                    }
                     else {
+                        console.log("通ってる２");
                         $gameSystem.sendInfo();
                         $gameSwitches.setValue(19, true);
                     }
