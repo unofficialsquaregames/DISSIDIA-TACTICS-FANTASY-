@@ -789,7 +789,6 @@ function Game_Avatar() {
                 if ($gameSwitches.value(24) && $gameSwitches.value(28)) {
                     if (!turnUnit.useSkill()) return;
                     if ($gameSwitches.value(29)) {
-                        console.log(turnUnit); //targetとskillの値がNULLで送られてしまうことがある(データベースでは対象の4番目の配列が5番目の配列へ移動し、4番目の配列を見てNULLを拾ってきてしまった)
                         $gameSystem.syncResurrection();
                         $gameSwitches.setValue(29, false);
                     }
@@ -820,7 +819,11 @@ function Game_Avatar() {
                 }
                 break;
             case 5: //対象選択
-                console.log(turnUnit);
+                //蘇生の場合
+                if ($gameSystem._resurrectionFlag) {
+                    $gameSystem.isResurrectionUnit()._x = $gameVariables.value(9);
+                    $gameSystem.isResurrectionUnit()._y = $gameVariables.value(10);
+                }
                 $gameMap.showRangeArea(turnUnit, null);
                 $gameSystem._phaseState = 6;//範囲確認へ移行
                 break;
@@ -839,13 +842,6 @@ function Game_Avatar() {
                     var yPlus = $gameSystem._moveTargetPointY - turnUnit.y;
                     turnUnit.jump(xPlus, yPlus); //移動しながらの攻撃はジャンプで行う
                 }
-                
-                //蘇生の場合
-                if ($gameSystem._resurrectionFlag) {
-                    $gameSystem.isResurrectionUnit()._x = $gameVariables.value(9);
-                    $gameSystem.isResurrectionUnit()._y = $gameVariables.value(10);
-                }
-                
                 //自身に攻撃アニメーション
                 this.showActionMotion(turnUnit);
                 //this.showActionAnimation(turnUnit);

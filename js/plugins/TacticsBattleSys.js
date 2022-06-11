@@ -2428,8 +2428,6 @@ Imported.TacticsBattleSys = true;
     // 射程範囲を表示する
     Game_Map.prototype.showRangeArea = function (turnUnit, weapon) {
         var skill = turnUnit.useSkill();
-        console.log(turnUnit);
-        console.log(skill);
         this.initColorArea();
         this._area = this.createRangeArea(turnUnit, weapon);
         //この辺りに自身の座標を基に対象エリアを削除していく(実装が難しいためコメントアウト)
