@@ -302,9 +302,11 @@ function Game_Avatar() {
     OnlineManager.sendUnitInfo = function (eventId) {
         if (this.unitRef && !this.syncBusy) {
             var send = {};
-            for (var i = 0; i < $gameSystem.unitList().length; i++) {
-                var $ = $gameSystem.unitList()[i];
-                if (eventId && eventId != $gameSystem.unitList()[i].event().id) continue;
+            for (var i = 0; i < $gameMap.events().length; i++) {
+                if (!$gameMap.events()[i]) continue;
+                var $ = $gameMap.events()[i];
+                if (!$.isActor()) continue;
+                if (eventId && eventId != $.event().id) continue;
                 send[i] = {
                     toX: $.toX(), toY: $.toY(), target: $._target, useSkill: $._useSkill, wt: $.isActor()._wt, states: $.isActor()._states, stateTurns: $.isActor()._stateTurns, stateGrantors: $.isActor()._stateGrantors
                 };
@@ -568,45 +570,6 @@ function Game_Avatar() {
         $gamePlayer.refresh();
         this.popScene();
     };
-    /*
-    //歩行時
-    var _Game_Player_moveStraight = Game_Player.prototype.moveStraight;
-    Game_Player.prototype.moveStraight = function (d) {
-        var prevD = this.direction();
-        _Game_Player_moveStraight.apply(this, arguments);
-        //前回と位置か方向が違う時のみ送信する
-        if (this.isMovementSucceeded() || d !== prevD) {
-            OnlineManager.sendPlayerInfo();
-        }
-    };
-
-    //グラフィック変更時
-    var _Game_Player_setImage = Game_Player.prototype.setImage;
-    Game_Player.prototype.setImage = function (characterName, characterIndex) {
-        _Game_Player_setImage.apply(this, arguments);
-        if (!this.isTransferring()) OnlineManager.sendPlayerInfo();	//場所移動した時は不要
-    };
-    //マップ切り替え時
-    var _Game_Player_performTransfer = Game_Player.prototype.performTransfer;
-    Game_Player.prototype.performTransfer = function () {
-        if ($gameMap.mapId() === $gamePlayer.newMapId()) {
-            for (var key in OnlineManager.avatarsInThisMap) OnlineManager.avatarsInThisMap[key].erase();
-        }
-        _Game_Player_performTransfer.apply(this, arguments);
-        OnlineManager.connectNewMap();
-    };
-
-    //ロードした時はセーブ時点の残存アバターを消す
-    //（Scene_Load.onLoadSuccessにフックすると$dataMapに触れないのでこのタイミング）
-    var _Scene_Map_start = Scene_Map.prototype.start;
-    Scene_Map.prototype.start = function () {
-        _Scene_Map_start.apply(this, arguments);
-        if (SceneManager.isPreviousScene(Scene_Load)) {
-            $gameMap.events().forEach(function (event) { if (event instanceof Game_Avatar) event.erase(); });
-            OnlineManager.connectNewMap();
-        }
-    };
-    */
 
     //タイトルに戻った時にもキャラ座標をリムーブ
     var _Scene_Title_start = Scene_Title.prototype.start;
@@ -908,9 +871,11 @@ function Game_Avatar() {
     Game_System.prototype.syncVariable = function (eventId) {
         OnlineManager.unitRef.once("value").then(function (data) {
             //ユニット更新用、行動順更新用などで分けた方が良い
-            for (var i = 0; i < $gameSystem.unitList().length; i++) {
-                if (eventId && eventId != $gameSystem.unitList()[i].event().id) continue;
-                var unit = $gameSystem.unitList()[i];
+            for (var i = 0; i < $gameMap.events().length; i++) {
+                if (!$gameMap.events()[i]) continue;
+                var unit = $gameMap.events()[i];
+                if (!unit.isActor()) continue;
+                if (eventId && eventId != unit.event().id) continue;
                 $gameSystem.unitList()[i]._target = data.child(i).child("target").val();
                 $gameSystem.unitList()[i]._useSkill = data.child(i).child("useSkill").val();
                 $gameSystem.unitList()[i].setToXy(data.child(i).child("toX").val(), data.child(i).child("toY").val());
@@ -935,9 +900,11 @@ function Game_Avatar() {
     Game_System.prototype.syncState = function (eventId) {
         OnlineManager.unitRef.once("value").then(function (data) {
             //ユニット更新用、行動順更新用などで分けた方が良い
-            for (var i = 0; i < $gameSystem.unitList().length; i++) {
-                if (eventId && eventId != $gameSystem.unitList()[i].event().id) continue;
-                var unit = $gameSystem.unitList()[i];
+            for (var i = 0; i < $gameMap.events().length; i++) {
+                if (!$gameMap.events()[i]) continue;
+                var unit = $gameMap.events()[i];
+                if (!unit.isActor()) continue;
+                if (eventId && eventId != unit.event().id) continue;
                 unit.isActor()._states = data.child(i).child("states").val(); //反映はされているが同期する側（受け手）の効果が適用される
                 unit.isActor()._stateTurns = data.child(i).child("stateTurns").val();
                 unit.isActor()._stateGrantors = data.child(i).child("stateGrantors").val();
@@ -955,8 +922,12 @@ function Game_Avatar() {
         });
 
         OnlineManager.unitRef.once("value").then(function (data) {
-            for (var i = 0; i < $gameSystem.unitList().length; i++) {
-                $gameSystem.unitList()[i].isActor()._wt = data.child(i).child("wt").val();
+            for (var i = 0; i < $gameMap.events().length; i++) {
+                if (!$gameMap.events()[i]) continue;
+                var unit = $gameMap.events()[i];
+                if (!unit.isActor()) continue;
+                if (eventId && eventId != unit.event().id) continue;
+                unit.isActor()._wt = data.child(i).child("wt").val();
             }
         });
     };
