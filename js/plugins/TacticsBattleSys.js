@@ -750,20 +750,16 @@ Imported.TacticsBattleSys = true;
 
     //WTカウント
     Game_System.prototype.countWt = function () {
-
+        var syncTeam = ($gameSwitches.value(21) && this.isEnemyTeam()) || ($gameSwitches.value(22) && this.isAllyTeam()) || (!$gameSwitches.value(21) && !$gameSwitches.value(22) && this.isEnemyTeam());
         //以下が平常時の動作
         for (var i = 0; i < this.unitList().length; i++) {
             var character = this.unitList()[i];
             var battler = character.isActor();
-
             if (battler.matchWt()) {
-                /*
                 if ($gameSwitches.value(15)) {
-                    if (!$gameSwitches.value(20) && (($gameSwitches.value(21) && this.isEnemyTeam()) || ($gameSwitches.value(22) && this.isAllyTeam()) || (!$gameSwitches.value(21) && !$gameSwitches.value(22) && this.isEnemyTeam()))) {
-                        return;
-                    }
+                    //同期チーム側が反映側より先に処理がきた場合リターン
+                    if (syncTeam && !$gameSwitches.value(19)) return;
                 }
-                */
                 //同一WTのユニットがいて先にターンが回られてしまった場合、以降の処理は行わない
                 //敵のターンか味方のターンか
                 if (character.isAlly()) this._isAllyTurn = true;
@@ -778,7 +774,7 @@ Imported.TacticsBattleSys = true;
 
                 if ($gameSwitches.value(15)) {
                     //たまに変数19がtrueのまま詰んでしまうことがある
-                    if ($gameSwitches.value(19)) $gameSwitches.setValue(19, false);
+                    if (syncTeam) $gameSwitches.setValue(19, false);
                     else {
                         $gameSystem.sendInfo();
                         $gameSwitches.setValue(19, true);
@@ -790,10 +786,9 @@ Imported.TacticsBattleSys = true;
             }
         }
         if ($gameSwitches.value(15)) {
-            if (($gameSwitches.value(21) && this.isEnemyTeam()) || ($gameSwitches.value(22) && this.isAllyTeam()) || (!$gameSwitches.value(21) && !$gameSwitches.value(22) && this.isEnemyTeam())) {
+            if (syncTeam) {
                 if ($gameSwitches.value(19)) {
                     this.syncWtList();
-                    //$gameSwitches.setValue(19, false);
                 }
                 return;
             }
