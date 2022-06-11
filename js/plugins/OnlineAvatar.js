@@ -927,7 +927,6 @@ function Game_Avatar() {
                 if (!$gameMap.events()[i]) continue;
                 var unit = $gameMap.events()[i];
                 if (!unit.isActor()) continue;
-                if (eventId && eventId != unit.event().id) continue;
                 unit.isActor()._wt = data.child(i).child("wt").val();
             }
         });
