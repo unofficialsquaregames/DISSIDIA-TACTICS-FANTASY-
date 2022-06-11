@@ -839,13 +839,13 @@ function Game_Avatar() {
                     var yPlus = $gameSystem._moveTargetPointY - turnUnit.y;
                     turnUnit.jump(xPlus, yPlus); //移動しながらの攻撃はジャンプで行う
                 }
-                /*
+                
                 //蘇生の場合
                 if ($gameSystem._resurrectionFlag) {
-                    //エラーが出る原因はresurrectionUnitを丸ごと同期させようとしたがメソッドまではできなかったため宣言ないため発生したという流れ
-                    $gameSystem.isResurrectionUnit().resurrectionUnit();
+                    $gameSystem.isResurrectionUnit()._x = $gameVariables.value(9);
+                    $gameSystem.isResurrectionUnit()._y = $gameVariables.value(10);
                 }
-                */
+                
                 //自身に攻撃アニメーション
                 this.showActionMotion(turnUnit);
                 //this.showActionAnimation(turnUnit);
@@ -873,8 +873,8 @@ function Game_Avatar() {
                 if ($gameSystem._resurrectionFlag) {
                     //エラーが出る原因はresurrectionUnitを丸ごと同期させようとしたがメソッドまではできなかったため宣言ないため発生したという流れ
 
-                    $gameSystem.isResurrectionUnit()._x = $gameVariables.value(9);
-                    $gameSystem.isResurrectionUnit()._y = $gameVariables.value(10);
+                    //$gameSystem.isResurrectionUnit()._x = $gameVariables.value(9);
+                    //$gameSystem.isResurrectionUnit()._y = $gameVariables.value(10);
                     $gameSystem.isResurrectionUnit().resurrectionUnit();
                     $gameSwitches.setValue(28, false);
                 }
