@@ -303,6 +303,7 @@ function Game_Avatar() {
         if (this.unitRef && !this.syncBusy) {
             var send = {};
             for (var i = 0; i < $gameMap.events().length; i++) {
+                send[i] = {};
                 if (!$gameMap.events()[i]) continue;
                 var $ = $gameMap.events()[i];
                 if (!$.isActor()) continue;
