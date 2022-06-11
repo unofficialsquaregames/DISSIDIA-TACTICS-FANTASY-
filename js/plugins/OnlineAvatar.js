@@ -190,8 +190,8 @@ function Game_Avatar() {
 
     //スイッチと変数のオンライン同期の開始
     OnlineManager.startSync = function () {
-        if (!this.user || $gameVariables.value(8) == 0) return;
-        var roomId = 'room' + $gameVariables.value(8);
+        if (!this.user || $gameVariables.value(6) == 0) return;
+        var roomId = 'room' + $gameVariables.value(6);
 
         if (this.parameters['syncSwitchStart'] || this.parameters['syncSwitchEnd']) {
             var switchColumn = roomId + '/switches';
@@ -292,7 +292,7 @@ function Game_Avatar() {
     OnlineManager.sendUserInfo = function () {
         if (this.selfRef) {
             var send = {};
-            send = { unit: $gameSystem.allyMembers(), room: $gameVariables.value(8) };
+            send = { unit: $gameSystem.allyMembers(), room: $gameVariables.value(6) };
             this.selfRef.update(send);
         }
     };
@@ -549,7 +549,7 @@ function Game_Avatar() {
                 SoundManager.playBuzzer();//ブザー
                 scene.createRoomSelectWindow.activate();
             } else {
-                $gameVariables.setValue(8, roomId);
+                $gameVariables.setValue(6, roomId);
                 $gameSwitches.setValue(12, false); //エリア選択スイッチOFF(スイッチNoはいずれプラグインの変数設定から行えるようにする)
                 $gameSwitches.setValue(16, true); //マッチングスイッチOFF(スイッチNoはいずれプラグインの変数設定から行えるようにする)
                 OnlineManager.startSync(); //ここで同期すると待機メンバーのスイッチ変数を上書きしてしまうのでは？
@@ -562,7 +562,7 @@ function Game_Avatar() {
     };
 
     Scene_RoomSelect.prototype.commandCancelRoomSelect = function () {
-        $gameVariables.setValue(8, 0);
+        $gameVariables.setValue(6, 0);
         $gameSwitches.setValue(12, false); //エリア選択スイッチOFF(スイッチNoはいずれプラグインの変数設定から行えるようにする)
         $gameSwitches.setValue(11, true); //キャラクター選択スイッチON(スイッチNoはいずれプラグインの変数設定から行えるようにする)
         $gamePlayer.refresh();
