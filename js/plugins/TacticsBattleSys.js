@@ -775,13 +775,11 @@ Imported.TacticsBattleSys = true;
                 if ($gameSwitches.value(15)) {
                     //たまに変数19がtrueのまま詰んでしまうことがある
                     if (syncTeam) {
-                        console.log("通ってる２");
                         $gameSwitches.setValue(19, false);
                         $gameSwitches.setValue(21, false);
                         $gameSwitches.setValue(22, false);
                     }
                     else {
-                        console.log("通ってる１");
                         $gameSystem.sendInfo();
                         $gameSwitches.setValue(19, true);
                     }
@@ -1094,6 +1092,7 @@ Imported.TacticsBattleSys = true;
             else if (enemyId) id = 36 + parseInt(enemyId);
             if ($gameSystem.isSyncTurn(turnUnit)) {
                 isHit = $gameSwitches.value(id);
+                $gameSwitches.setValue(id, false);
             } else {
                 isHit = result.isHit();
                 $gameSwitches.setValue(id, isHit); //イベントIDに依存している
@@ -1224,6 +1223,7 @@ Imported.TacticsBattleSys = true;
                     else if (enemyId) id = 26 + parseInt(enemyId);
                     if ($gameSystem.isSyncTurn(turnUnit)) {
                         value = $gameVariables.value(id);
+                        $gameVariables.setValue(id, 0);
                     } else {
                         value = this.makeDamageValue(target, false, result.critical);
                         $gameVariables.setValue(id, value); //イベントIDに依存している
@@ -1232,6 +1232,7 @@ Imported.TacticsBattleSys = true;
                     else if (enemyId) id = 46 + parseInt(enemyId);
                     if ($gameSystem.isSyncTurn(turnUnit)) {
                         result.critical = $gameSwitches.value(id);
+                        $gameSwitches.setValue(id, false);
                     } else {
                         result.critical = (Math.random() < this.itemCri(target));
                         $gameSwitches.setValue(id, result.critical); //イベントIDに依存している
@@ -5909,7 +5910,9 @@ Imported.TacticsBattleSys = true;
     Sprite_StateTurn.prototype.update = function () {
         Sprite.prototype.update.call(this);
         var stateId = this._battler._states[this._number];
-        this._text = this._battler._stateTurns[stateId];
+        //強制終了対策で条件分岐
+        if (stateId) this._text = this._battler._stateTurns[stateId];
+        else this._text = "";
 
         this.refresh();
     };
