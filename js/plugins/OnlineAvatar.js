@@ -437,6 +437,7 @@ function Game_Avatar() {
     };
 
     Window_RoomSelect.prototype.drawItem = function (index) {
+        this.contents.clear();
         var rect = this.itemRect(index);
         var roomId = index + 1;
         this.contents.drawText("ルーム" + roomId, rect.x, rect.y + 8, 96, 32, "left");
@@ -462,21 +463,21 @@ function Game_Avatar() {
                     var enemyTeamID = data2.child("enemyTeamID").val();
                     for (var i = 0; i < list.length; i++) {
                         if (parseInt(list[i].room) == roomId) {
-                            for (var j = 0; j < list[i].unit.length; j++) {
+                            for (var j = 0; j < list[i].unit.length / 2; j++) {
                                 var unitId = list[i].unit[j];
                                 if (unitId > 0) {
                                     var actor = $gameActors.actor(unitId);
                                     //ルームID内のカラムを引っ張りたい
-                                    if (list[i].id == allyTeamID && j < 4) {
+                                    if (list[i].id == allyTeamID) {
                                         window.drawActorCharacter(actor, rect.x + 24 + 32 * j, rect.y + rect.height / 2, rect.width, rect.height / 2);
-                                    } else if (list[i].id == enemyTeamID && j >= 4) {
-                                        window.drawActorCharacter(actor, rect.x + 24 + 32 * (j + 1), rect.y + rect.height / 2, rect.width, rect.height / 2);
+                                    } else if (list[i].id == enemyTeamID) {
+                                        window.drawActorCharacter(actor, rect.x + 24 + 32 * (j + 5), rect.y + rect.height / 2, rect.width, rect.height / 2);
                                     }
                                 } else {
-                                    if (list[i].id == allyTeamID && j < 4) {
+                                    if (list[i].id == allyTeamID) {
                                         window.contents.drawText("ラ", rect.x + 24 + 32 * j, rect.y + rect.height / 2, 32, rect.height / 2);
-                                    } else if (list[i].id == enemyTeamID && j >= 4) {
-                                        window.contents.drawText("ラ", rect.x + 24 + 32 * (j + 1), rect.y + rect.height / 2, 32, rect.height / 2);
+                                    } else if (list[i].id == enemyTeamID) {
+                                        window.contents.drawText("ラ", rect.x + 24 + 32 * (j + 5), rect.y + rect.height / 2, 32, rect.height / 2);
                                     }
                                 }
                             }
