@@ -437,7 +437,7 @@ function Game_Avatar() {
     };
 
     Window_RoomSelect.prototype.drawItem = function (index) {
-        this.contents.clear();
+        //this.contents.clear();
         var rect = this.itemRect(index);
         var roomId = index + 1;
         this.contents.drawText("ルーム" + roomId, rect.x, rect.y + 8, 96, 32, "left");
