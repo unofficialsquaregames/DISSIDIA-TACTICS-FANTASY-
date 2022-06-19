@@ -664,6 +664,28 @@
                     $gameSystem.setPopupFixLower(eventId);
                 }
                 break;
+            case 'MWP_VARIABLE':
+            case '変数に紐づくイベントのフキダシ':
+                $gameSystem.clearMessagePopupFree();
+                var eventId = $gameVariables.value(3);
+                if (isNaN(eventId)) {
+                    eventId = this.getEventIdFromEventName(eventId);
+                }
+                $gameSystem.setMessagePopup(eventId);
+                var windowPosition;
+                if (imported_FTKR_EMW() && args[0]) {
+                    var windowId = getArgNumber(args[0]);
+                    if (windowId >= 0) $gameSystem.setMessagePopupEx(windowId, eventId);
+                    windowPosition = getArgNumber(args[1]);
+                } else {
+                    windowPosition = getArgNumber(args[0]);
+                }
+                if (windowPosition === 1) {
+                    $gameSystem.setPopupFixUpper(eventId);
+                } else if (windowPosition === 2) {
+                    $gameSystem.setPopupFixLower(eventId);
+                }
+                break;
             case 'MWP_FREE' :
             case 'フキダシウィンドウフリー配置':
                 var x = getArgNumber(args[0]) || 0;

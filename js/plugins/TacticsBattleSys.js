@@ -8748,13 +8748,13 @@ Imported.TacticsBattleSys = true;
                 $gameSwitches.setValue(29, true);
             }
         }
-        /*
+        
         if (turnUnit.useSkill() == turnUnit._myAbility[2]) {
             $gameSwitches.setValue(8, true);//バーストアビリティ発動時
             $gameVariables.setValue(3, turnUnit.event().id); //イベントID
-            $gameVariables.setValue(4, turnUnit.isActor()._classId); //イベントID
+            $gameVariables.setValue(4, turnUnit.isActor()._classId); //ユニットID
         }
-        */
+        
         //コマンド実行
         $gameSystem._phaseState = 7;//詠唱アニメーションフェーズへ移行
     };
@@ -8952,7 +8952,6 @@ Imported.TacticsBattleSys = true;
         $gameSwitches.setValue(27, false);
         $gameSwitches.setValue(28, false);
         $gameSwitches.setValue(29, false);
-        $gameSwitches.setValue(30, false);
         $gameSwitches.setValue(31, false);
         $gameSwitches.setValue(32, false);
         $gameSwitches.setValue(33, false);

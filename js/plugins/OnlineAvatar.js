@@ -354,46 +354,10 @@ function Game_Avatar() {
     };
     //ユーザー情報を削除
     OnlineManager.removeUserInfo = function () {
-        /*以下の処理を利用して特定の値だけ削除できないか
-        //データベースから検索したい
-        OnlineManager.userRef.on("value", (data) => {
-            if (data) {
-                const rootList = data.val();
-                const key = data.key;
-                let list = [];
-                // データオブジェクトを配列に変更する
-                if (rootList != null) {
-                    Object.keys(rootList).forEach((val, key) => {
-                        rootList[val].id = val;
-                        list.push(rootList[val]);
-                    })
-                }
-                //以下、部屋からUIDを引き出す
-                var roomRefId = 'room' + roomId + '/system';
-                OnlineManager.roomRef = firebase.database().ref(roomRefId);
-                OnlineManager.roomRef.once("value").then(function (data2) {
-                    var allyTeamID = data2.child("allyTeamID").val();
-                    var enemyTeamID = data2.child("enemyTeamID").val();
-                    for (var i = 0; i < list.length; i++) {
-                        if (parseInt(list[i].room) == roomId) {
-                            for (var j = 0; j < list[i].unit.length / 2; j++) {
-                                var unitId = list[i].unit[j];
-                                if (unitId > 0) {
-                                    var actor = $gameActors.actor(unitId);
-                                    //ルームID内のカラムを引っ張りたい
-                                    if (list[i].id == allyTeamID) {
-                                    }
-                                }
-                            }
-                        }
-                    }
-                });
-
-            }
-        });
-        */
+        
         if (this.userRef) {
             this.userRef.remove();
+            /*
             if ($gameSystem._allyTeamID == OnlineManager.user.uid) {
                 $gameVariables.setValue(11, 0);
                 $gameVariables.setValue(12, 0);
@@ -407,6 +371,7 @@ function Game_Avatar() {
                 $gameVariables.setValue(19, 0);
                 $gameSwitches.setValue(18, false);
             }
+            */
         }
     };
 
