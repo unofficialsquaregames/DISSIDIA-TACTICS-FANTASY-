@@ -107,6 +107,7 @@ function Game_Avatar() {
     OnlineManager.mapRef = null;
     OnlineManager.selfRef = null;
     OnlineManager.switchRef = null;
+    OnlineManager.disconnectRef = null;
     OnlineManager.variableRef = null;
     OnlineManager.unitRef = null;
     OnlineManager.userRef = null;
@@ -179,6 +180,7 @@ function Game_Avatar() {
         */
         //ユーザーが退場
         this.userRef.on('child_removed', function (data) {
+            //切断した部屋を入れたい
             OnlineManager.removeUserInfo();
         });
 
@@ -195,10 +197,13 @@ function Game_Avatar() {
 
         if (this.parameters['syncSwitchStart'] || this.parameters['syncSwitchEnd']) {
             var switchColumn = roomId + '/switches';
+            var switchDisconnect = roomId + '/switches/30';
             if (this.switchRef) this.switchRef.off();
             else {
                 this.switchRef = firebase.database().ref(switchColumn);
-                this.switchRef.onDisconnect().remove();	//切断時にリムーブ
+                this.disconnectRef = firebase.database().ref(switchDisconnect);
+                //this.switchRef.onDisconnect().remove();	//切断時にリムーブ
+                this.disconnectRef.onDisconnect().set(true);	//切断時にフラグを挿入
             }
             OnlineManager.syncBusy = true;
             this.switchRef.once('value', function (data) {
@@ -300,19 +305,24 @@ function Game_Avatar() {
     //ユニット情報を送信(unitsはプレイヤーごとにわけて4体4体で編成させた方がいいか)
     //敵と味方どういう風にわけるか
     OnlineManager.sendUnitInfo = function (eventId) {
-        if (this.unitRef && !this.syncBusy) {
-            var send = {};
-            for (var i = 0; i < $gameMap.events().length; i++) {
-                send[i] = {};
-                if (!$gameMap.events()[i]) continue;
-                var $ = $gameMap.events()[i];
-                if (!$.isActor()) continue;
-                if (eventId && eventId != $.event().id) continue;
-                send[i] = {
-                    toX: $.toX(), toY: $.toY(), target: $._target, useSkill: $._useSkill, wt: $.isActor()._wt, states: $.isActor()._states, stateTurns: $.isActor()._stateTurns, stateGrantors: $.isActor()._stateGrantors
-                };
+        if (this.unitRef) {
+            if (!this.syncBusy) {
+                var send = {};
+                for (var i = 0; i < $gameMap.events().length; i++) {
+                    send[i] = {};
+                    if (!$gameMap.events()[i]) continue;
+                    var $ = $gameMap.events()[i];
+                    if (!$.isActor()) continue;
+                    if (eventId && eventId != $.event().id) continue;
+                    send[i] = {
+                        toX: $.toX(), toY: $.toY(), target: $._target, useSkill: $._useSkill, wt: $.isActor()._wt, states: $.isActor()._states, stateTurns: $.isActor()._stateTurns, stateGrantors: $.isActor()._stateGrantors
+                    };
+                }
+                this.unitRef.update(send);
             }
-            this.unitRef.update(send);
+        } else {
+            //切断フラグを入れたい
+
         }
     };
     //システム情報を送信
@@ -344,6 +354,44 @@ function Game_Avatar() {
     };
     //ユーザー情報を削除
     OnlineManager.removeUserInfo = function () {
+        /*以下の処理を利用して特定の値だけ削除できないか
+        //データベースから検索したい
+        OnlineManager.userRef.on("value", (data) => {
+            if (data) {
+                const rootList = data.val();
+                const key = data.key;
+                let list = [];
+                // データオブジェクトを配列に変更する
+                if (rootList != null) {
+                    Object.keys(rootList).forEach((val, key) => {
+                        rootList[val].id = val;
+                        list.push(rootList[val]);
+                    })
+                }
+                //以下、部屋からUIDを引き出す
+                var roomRefId = 'room' + roomId + '/system';
+                OnlineManager.roomRef = firebase.database().ref(roomRefId);
+                OnlineManager.roomRef.once("value").then(function (data2) {
+                    var allyTeamID = data2.child("allyTeamID").val();
+                    var enemyTeamID = data2.child("enemyTeamID").val();
+                    for (var i = 0; i < list.length; i++) {
+                        if (parseInt(list[i].room) == roomId) {
+                            for (var j = 0; j < list[i].unit.length / 2; j++) {
+                                var unitId = list[i].unit[j];
+                                if (unitId > 0) {
+                                    var actor = $gameActors.actor(unitId);
+                                    //ルームID内のカラムを引っ張りたい
+                                    if (list[i].id == allyTeamID) {
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+
+            }
+        });
+        */
         if (this.userRef) {
             this.userRef.remove();
             if ($gameSystem._allyTeamID == OnlineManager.user.uid) {

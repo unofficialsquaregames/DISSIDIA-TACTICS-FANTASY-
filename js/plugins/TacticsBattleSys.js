@@ -750,7 +750,8 @@ Imported.TacticsBattleSys = true;
 
     //WTカウント
     Game_System.prototype.countWt = function () {
-        var syncTeam = ($gameSwitches.value(21) && this.isEnemyTeam()) || ($gameSwitches.value(22) && this.isAllyTeam()) || (!$gameSwitches.value(21) && !$gameSwitches.value(22) && this.isEnemyTeam());
+        var syncTeam = false;
+        if ($gameSwitches.value(15)) syncTeam = ($gameSwitches.value(21) && this.isEnemyTeam()) || ($gameSwitches.value(22) && this.isAllyTeam()) || (!$gameSwitches.value(21) && !$gameSwitches.value(22) && this.isEnemyTeam());
         //以下が平常時の動作
         for (var i = 0; i < this.unitList().length; i++) {
             var character = this.unitList()[i];
@@ -2208,14 +2209,49 @@ Imported.TacticsBattleSys = true;
                         var teller = $dataStates[id].meta.teller;
                         if (field && teller && robbedUnit.isAttackTarget($gameMap.event(this.eventId()))) {
                             if (robbedUnit.targetRange($gameMap.event(this.eventId())) <= parseInt(field)) {
-                                value -= Math.round((value + this.paramBase(paramId)) * 20 / 100);
+                                switch (paramId) {
+                                    case 0:
+                                    case 2:
+                                    case 3:
+                                    case 4:
+                                    case 5:
+                                    case 6:
+                                        value -= Math.round((value + this.paramBase(paramId)) * 20 / 100);
+                                        break;
+                                }
+                                
                             }
                         }
-                        //親征の檄(領域内の味方ユニットのステータスをアップ)
+                        //親征の檄
                         var conquest = $dataStates[id].meta.conquest;
                         if (field && conquest && robbedUnit.isCoverTarget($gameMap.event(this.eventId()))) {
                             if (robbedUnit.targetRange($gameMap.event(this.eventId())) <= parseInt(field)) {
-                                value += Math.round((value + this.paramBase(paramId)) * 10 / 100);
+                                switch (paramId) {
+                                    case 0:
+                                        value += Math.round((value + this.paramBase(paramId)) * 20 / 100);
+                                        break;
+                                    case 2:
+                                    case 3:
+                                    case 4:
+                                    case 5:
+                                        value += Math.round((value + this.paramBase(paramId)) * 10 / 100);
+                                        break;
+                                }
+                            }
+                        }
+                        //ジョブマスター(領域内の味方ユニットのステータスをアップ)
+                        var master = $dataStates[id].meta.master;
+                        if (field && master && robbedUnit.isCoverTarget($gameMap.event(this.eventId()))) {
+                            if (robbedUnit.targetRange($gameMap.event(this.eventId())) <= parseInt(field)) {
+                                switch (paramId) {
+                                    case 6:
+                                        value += Math.round((value + this.paramBase(paramId)) * 40 / 100);
+                                        break;
+                                    case 2:
+                                    case 4:
+                                        value += Math.round((value + this.paramBase(paramId)) * 10 / 100);
+                                        break;
+                                }
                             }
                         }
                     }
@@ -7573,7 +7609,7 @@ Imported.TacticsBattleSys = true;
             this.startFadeIn(this.fadeSpeed(), false);
         }
         this.menuCalling = false;
-        $gameSwitches.setValue(7, true);//ここだけ追加
+        $gameSwitches.setValue(6, true);//ここだけ追加
     };
     /*
     戦闘開始前-----------------------------------------------------------------------------
@@ -8712,6 +8748,13 @@ Imported.TacticsBattleSys = true;
                 $gameSwitches.setValue(29, true);
             }
         }
+        /*
+        if (turnUnit.useSkill() == turnUnit._myAbility[2]) {
+            $gameSwitches.setValue(8, true);//バーストアビリティ発動時
+            $gameVariables.setValue(3, turnUnit.event().id); //イベントID
+            $gameVariables.setValue(4, turnUnit.isActor()._classId); //イベントID
+        }
+        */
         //コマンド実行
         $gameSystem._phaseState = 7;//詠唱アニメーションフェーズへ移行
     };
