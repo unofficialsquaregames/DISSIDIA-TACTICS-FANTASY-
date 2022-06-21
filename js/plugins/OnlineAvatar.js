@@ -107,7 +107,8 @@ function Game_Avatar() {
     OnlineManager.mapRef = null;
     OnlineManager.selfRef = null;
     OnlineManager.switchRef = null;
-    OnlineManager.disconnectRef = null;
+    OnlineManager.switchRef17 = null;
+    OnlineManager.switchRef30 = null;
     OnlineManager.variableRef = null;
     OnlineManager.unitRef = null;
     OnlineManager.userRef = null;
@@ -197,13 +198,16 @@ function Game_Avatar() {
 
         if (this.parameters['syncSwitchStart'] || this.parameters['syncSwitchEnd']) {
             var switchColumn = roomId + '/switches';
-            var switchDisconnect = roomId + '/switches/30';
+            var switchColumn17 = roomId + '/switches/17';
+            var switchColumn30 = roomId + '/switches/30';
             if (this.switchRef) this.switchRef.off();
             else {
                 this.switchRef = firebase.database().ref(switchColumn);
-                this.disconnectRef = firebase.database().ref(switchDisconnect);
+                this.switchRef17 = firebase.database().ref(switchColumn17);
+                this.switchRef30 = firebase.database().ref(switchColumn30);
                 //this.switchRef.onDisconnect().remove();	//切断時にリムーブ
-                this.disconnectRef.onDisconnect().set(true);	//切断時にフラグを挿入
+                this.switchRef17.onDisconnect().set(false);	//切断時にフラグを挿入
+                this.switchRef30.onDisconnect().set(true);	//切断時にフラグを挿入
             }
             OnlineManager.syncBusy = true;
             this.switchRef.once('value', function (data) {
