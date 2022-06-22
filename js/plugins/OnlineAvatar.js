@@ -208,6 +208,7 @@ function Game_Avatar() {
                 //this.switchRef.onDisconnect().remove();	//切断時にリムーブ
                 this.switchRef17.onDisconnect().set(false);	//切断時にフラグを挿入
                 this.switchRef30.onDisconnect().set(true);	//切断時にフラグを挿入
+                //マッチング中の切断時17はoffになるが30がonのままになる。マッチング中onになってたらoffにするなど対策はできないだろうか
             }
             OnlineManager.syncBusy = true;
             this.switchRef.once('value', function (data) {
@@ -335,7 +336,7 @@ function Game_Avatar() {
             //var send = $gameSystem;
             var $ = $gameSystem;
             var send = {
-                allyTeamID: $._allyTeamID, enemyTeamID: $._enemyTeamID, isAllyTurn: $._isAllyTurn, isEnemyTurn: $._isEnemyTurn, wtTurnList: $._wtTurnList, turnUnit: $._turnUnit, quickTurnUnit: $._quickTurnUnit
+                allyTeamID: $._allyTeamID, enemyTeamID: $._enemyTeamID, isAllyTurn: $._isAllyTurn, isEnemyTurn: $._isEnemyTurn, wtTurnList: $._wtTurnList, turnUnit: $._turnUnit, quickTurnUnit: $._quickTurnUnit, battleActive: $._battleActive
                 , moveTargetPointFlag: $._moveTargetPointFlag, moveTargetPointX: $._moveTargetPointX, moveTargetPointY: $._moveTargetPointY, resurrectionFlag: $._resurrectionFlag, resurrectionUnit: $._resurrectionUnit, deadUnitIds: $._deadUnitIds
             }
             this.sysRef.update(send);
@@ -472,8 +473,23 @@ function Game_Avatar() {
                         list.push(rootList[val]);
                     })
                 }
+                /*
+                //以下、戦闘に移行していなくてスイッチ30がONになってるならOFFにしたい
+                var battleActive = 'room' + roomId + '/system/battleActive';
+                var switchColumn17 = 'room' + roomId + '/switches/17'; //対戦者1人目フラグ
+                var switchColumn18 = 'room' + roomId + '/switches/18'; //対戦者2人目フラグ
+                var switchColumn30 = 'room' + roomId + '/switches/30'; //切断フラグ取得
+
+
+                this.switchRef17 = firebase.database().ref(switchColumn17);
+                this.switchRef30 = firebase.database().ref(switchColumn30);
+                //this.switchRef.onDisconnect().remove();	//切断時にリムーブ
+                this.switchRef17.onDisconnect().set(false);	//切断時にフラグを挿入
+                this.switchRef30.onDisconnect().set(true);	//切断時にフラグを挿入
+                */
                 //以下、部屋からUIDを引き出す
                 var roomRefId = 'room' + roomId + '/system';
+
                 OnlineManager.roomRef = firebase.database().ref(roomRefId);
                 OnlineManager.roomRef.once("value").then(function (data2) {
                     var allyTeamID = data2.child("allyTeamID").val();
