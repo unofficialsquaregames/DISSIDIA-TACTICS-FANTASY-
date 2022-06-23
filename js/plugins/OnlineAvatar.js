@@ -336,7 +336,7 @@ function Game_Avatar() {
             //var send = $gameSystem;
             var $ = $gameSystem;
             var send = {
-                allyTeamID: $._allyTeamID, enemyTeamID: $._enemyTeamID, isAllyTurn: $._isAllyTurn, isEnemyTurn: $._isEnemyTurn, wtTurnList: $._wtTurnList, turnUnit: $._turnUnit, quickTurnUnit: $._quickTurnUnit, battleActive: $._battleActive
+                allyTeamID: $._allyTeamID, enemyTeamID: $._enemyTeamID, isAllyTurn: $._isAllyTurn, isEnemyTurn: $._isEnemyTurn, wtTurnList: $._wtTurnList, turnUnit: $._turnUnit, quickTurnUnit: $._quickTurnUnit//, battleActive: $._battleActive
                 , moveTargetPointFlag: $._moveTargetPointFlag, moveTargetPointX: $._moveTargetPointX, moveTargetPointY: $._moveTargetPointY, resurrectionFlag: $._resurrectionFlag, resurrectionUnit: $._resurrectionUnit, deadUnitIds: $._deadUnitIds
             }
             this.sysRef.update(send);
@@ -588,7 +588,7 @@ function Game_Avatar() {
             } else {
                 $gameVariables.setValue(6, roomId);
                 $gameSwitches.setValue(12, false); //エリア選択スイッチOFF(スイッチNoはいずれプラグインの変数設定から行えるようにする)
-                $gameSwitches.setValue(16, true); //マッチングスイッチOFF(スイッチNoはいずれプラグインの変数設定から行えるようにする)
+                $gameSwitches.setValue(14, true); //マッチングスイッチOFF(スイッチNoはいずれプラグインの変数設定から行えるようにする)
                 OnlineManager.startSync(); //ここで同期すると待機メンバーのスイッチ変数を上書きしてしまうのでは？
                 OnlineManager.sendUserInfo();
                 $gamePlayer.refresh();
@@ -914,6 +914,13 @@ function Game_Avatar() {
                 unit._target = data.child(i).child("target").val();
                 unit._useSkill = data.child(i).child("useSkill").val();
                 unit.setToXy(data.child(i).child("toX").val(), data.child(i).child("toY").val());
+                if (unit.useSkill()) {
+                    if (unit.useSkill() == unit._myAbility[2]) {
+                        $gameSwitches.setValue(8, true);//バーストアビリティ発動時
+                        $gameVariables.setValue(3, unit.event().id); //イベントID
+                        $gameVariables.setValue(4, unit.isActor()._classId); //ユニットID
+                    }
+                }
             }
         });
 

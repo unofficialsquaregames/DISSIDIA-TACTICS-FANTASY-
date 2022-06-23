@@ -8247,6 +8247,11 @@ Imported.TacticsBattleSys = true;
             case 5: //対象選択
                 turnUnit.skillSelectSetting(); //スキルを設定する
                 if (turnUnit.useSkill()) {
+                    if (turnUnit.useSkill() == turnUnit._myAbility[2]) {
+                        $gameSwitches.setValue(8, true);//バーストアビリティ発動時
+                        $gameVariables.setValue(3, turnUnit.event().id); //イベントID
+                        $gameVariables.setValue(4, turnUnit.isActor()._classId); //ユニットID
+                    }
                     $gameMap.showRangeArea(turnUnit, null);
                     $gameSystem._phaseState = 6;//範囲確認へ移行
                 } else {
