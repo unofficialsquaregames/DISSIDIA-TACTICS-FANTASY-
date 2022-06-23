@@ -786,6 +786,11 @@ function Game_Avatar() {
                 //コマンダーの行動終わってからアクションなのでテンポは悪い
                 if ($gameSwitches.value(24) && $gameSwitches.value(28)) {
                     if (!turnUnit.useSkill()) return;
+                    if (turnUnit.useSkill() == unit._myAbility[2]) {
+                        $gameSwitches.setValue(8, true);//バーストアビリティ発動時
+                        $gameVariables.setValue(3, turnUnit.event().id); //イベントID
+                        $gameVariables.setValue(4, turnUnit.isActor()._classId); //ユニットID
+                    }
                     if ($gameSwitches.value(29)) {
                         $gameSystem.syncResurrection();
                         $gameSwitches.setValue(29, false);
@@ -914,13 +919,6 @@ function Game_Avatar() {
                 unit._target = data.child(i).child("target").val();
                 unit._useSkill = data.child(i).child("useSkill").val();
                 unit.setToXy(data.child(i).child("toX").val(), data.child(i).child("toY").val());
-                if (unit.useSkill()) {
-                    if (unit.useSkill() == unit._myAbility[2]) {
-                        $gameSwitches.setValue(8, true);//バーストアビリティ発動時
-                        $gameVariables.setValue(3, unit.event().id); //イベントID
-                        $gameVariables.setValue(4, unit.isActor()._classId); //ユニットID
-                    }
-                }
             }
         });
 
