@@ -242,7 +242,7 @@
  *
  * @param CriticalDamage
  * @desc クリティカルダメージの倍率
- * @default 2
+ * @default 1.5
  *
  * @param MaxElementDamage
  * @desc 属性攻撃による倍率上限
@@ -2108,22 +2108,22 @@ Imported.TacticsBattleSys = true;
                 var ikasama = $dataStates[id].meta.ikasama;
                 if (ikasama) {
                     if (paramId == 0) {
-                        var max = 1000;
+                        var max = 200;
                         var min = 0;
                         var rate = parseInt(Math.floor(Math.random() * (max - min) + min));
                         value += Math.round((value + this.paramBase(paramId)) * rate / 100);
                     } else if (paramId == 1) {
-                        var max = 500;
+                        var max = 100;
                         var min = 0;
                         var rate = parseInt(Math.floor(Math.random() * (max - min) + min));
                         value += Math.round((value + this.paramBase(paramId)) * rate / 100);
                     } else if (paramId == 2) {
-                        var max = 80;
+                        var max = 40;
                         var min = 0;
                         var rate = parseInt(Math.floor(Math.random() * (max - min) + min));
                         value += Math.round((value + this.paramBase(paramId)) * rate / 100);
                     } else if (paramId == 3) {
-                        var max = 80;
+                        var max = 20;
                         var min = 0;
                         var rate = parseInt(Math.floor(Math.random() * (max - min) + min));
                         value += Math.round((value + this.paramBase(paramId)) * rate / 100);
@@ -2133,7 +2133,7 @@ Imported.TacticsBattleSys = true;
                         var rate = parseInt(Math.floor(Math.random() * (max - min) + min));
                         value += Math.round((value + this.paramBase(paramId)) * rate / 100);
                     } else if (paramId == 5) {
-                        var max = 40;
+                        var max = 20;
                         var min = 0;
                         var rate = parseInt(Math.floor(Math.random() * (max - min) + min));
                         value += Math.round((value + this.paramBase(paramId)) * rate / 100);
