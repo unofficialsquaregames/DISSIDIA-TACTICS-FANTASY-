@@ -788,6 +788,7 @@ function Game_Avatar() {
                     if (!turnUnit.useSkill()) return;
                     if (turnUnit.useSkill() == turnUnit._myAbility[2]) {
                         $gameSwitches.setValue(8, true);//バーストアビリティ発動時
+                        alert("");
                         $gameVariables.setValue(3, turnUnit.event().id); //イベントID
                         $gameVariables.setValue(4, turnUnit.isActor()._classId); //ユニットID
                     }
