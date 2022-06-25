@@ -6174,22 +6174,6 @@ Imported.TacticsBattleSys = true;
         //this.setHandler('cancel', this._handlers['cancelOrigin']);
         var actor = event._actor;
         if (actor) {
-            /*
-            for (var i = 0; i < actor._skills.length; i++) {
-                //メインアビリティの設定
-                if ($dataSkills[actor._skills[i]].stypeId == 1) {
-                    event._myAbility[0] = $dataSkills[actor._skills[i]]; //MPを消費するアビリティ
-                }
-                //サブアビリティの設定
-                if ($dataSkills[actor._skills[i]].stypeId == 2) {
-                    event._myAbility[1] = $dataSkills[actor._skills[i]]; //MPを消費するアビリティ
-                }
-                //リミットアビリティの設定
-                if ($dataSkills[actor._skills[i]].stypeId == 3) {
-                    event._myAbility[2] = $dataSkills[actor._skills[i]]; //TPを消費するアビリティ
-                }
-            }
-            */
             //移動
             if (actor.meetsSkillConditions($dataSkills[2])) {
                 if (!event._moved) {
