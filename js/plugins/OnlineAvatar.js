@@ -786,9 +786,8 @@ function Game_Avatar() {
                 //コマンダーの行動終わってからアクションなのでテンポは悪い
                 if ($gameSwitches.value(24) && $gameSwitches.value(28)) {
                     if (!turnUnit.useSkill()) return;
-                    if (turnUnit.useSkill() == turnUnit._myAbility[2]) {
+                    if (turnUnit.useSkill() == turnUnit._myAbility[2]) { //nullが入ってる（設定していない）
                         $gameSwitches.setValue(8, true);//バーストアビリティ発動時
-                        alert("");
                         $gameVariables.setValue(3, turnUnit.event().id); //イベントID
                         $gameVariables.setValue(4, turnUnit.isActor()._classId); //ユニットID
                     }

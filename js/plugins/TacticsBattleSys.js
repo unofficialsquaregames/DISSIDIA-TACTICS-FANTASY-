@@ -3162,6 +3162,23 @@ Imported.TacticsBattleSys = true;
                 if (Utils.isOptionValid('test')) this._actor.gainTp(100);//テスト用
             }
         }
+        //スキル設定
+        if (this.isActor()) {
+            for (var i = 0; i < this.isActor()._skills.length; i++) {
+                //メインアビリティの設定
+                if ($dataSkills[this.isActor()._skills[i]].stypeId == 1) {
+                    this._myAbility[0] = $dataSkills[this.isActor()._skills[i]]; //MPを消費するアビリティ
+                }
+                //サブアビリティの設定
+                if ($dataSkills[this.isActor()._skills[i]].stypeId == 2) {
+                    this._myAbility[1] = $dataSkills[this.isActor()._skills[i]]; //MPを消費するアビリティ
+                }
+                //リミットアビリティの設定
+                if ($dataSkills[this.isActor()._skills[i]].stypeId == 3) {
+                    this._myAbility[2] = $dataSkills[this.isActor()._skills[i]]; //TPを消費するアビリティ
+                }
+            }
+        }
     };
     // ユニット蘇生
     Game_Event.prototype.resurrectionUnit = function () {
@@ -6157,8 +6174,8 @@ Imported.TacticsBattleSys = true;
         //this.setHandler('cancel', this._handlers['cancelOrigin']);
         var actor = event._actor;
         if (actor) {
+            /*
             for (var i = 0; i < actor._skills.length; i++) {
-
                 //メインアビリティの設定
                 if ($dataSkills[actor._skills[i]].stypeId == 1) {
                     event._myAbility[0] = $dataSkills[actor._skills[i]]; //MPを消費するアビリティ
@@ -6172,7 +6189,7 @@ Imported.TacticsBattleSys = true;
                     event._myAbility[2] = $dataSkills[actor._skills[i]]; //TPを消費するアビリティ
                 }
             }
-
+            */
             //移動
             if (actor.meetsSkillConditions($dataSkills[2])) {
                 if (!event._moved) {
