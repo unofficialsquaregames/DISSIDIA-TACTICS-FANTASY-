@@ -630,6 +630,28 @@ Imported.TacticsBattleSys = true;
     // ユニットの退場予約
     Game_System.prototype.setDeadUnitId = function (id) {
         this._deadUnitIds.push(id);
+
+        var allyId = $gameMap.event(id).allyNumber();
+        var enemyId = $gameMap.event(id).enemyNumber();
+        var switchsId;
+        var variablesEventId
+        var variablesClassId;
+        if (allyId) {
+            switchsId = 60 + parseInt(allyId);
+            variablesEventId = 40 + parseInt(allyId);
+            variablesClassId = 50 + parseInt(allyId);
+        } else if (enemyId) {
+            switchsId = 65 + parseInt(enemyId);
+            variablesEventId = 45 + parseInt(enemyId);
+            variablesClassId = 55 + parseInt(enemyId);
+        }
+        else return;
+        $gameSwitches.setValue(7, true);
+        $gameSwitches.setValue(switchsId, true); //スイッチ
+        $gameVariables.setValue(variablesEventId, $gameMap.event(id).event().id); //イベントID
+        $gameVariables.setValue(variablesClassId, $gameMap.event(id).isActor()._classId); //ユニットID
+        //足踏み設定
+
     };
 
     // 退場予約されているユニットのイベント番号をひとつ返す
@@ -7909,17 +7931,18 @@ Imported.TacticsBattleSys = true;
     Scene_Map.prototype.updateMain = function () {
         _Scene_Map_updateMain.call(this);
 
-        //戦闘不能者がいる場合
-        if ($gameSystem.isDeadUnit()) {//ここでこの関数使うのはNG
-            this.updateDeadUnit();
-            return;
-        }
         //戦闘開始準備
         if ($gameTemp._startBattleFlag) {
             this.setStartBattle();
             return;
         }
         if ($gameMap.isUnitAnimationPlaying() || !$gameSystem.isBattleActivate() || $gameMap.isEventRunning()) return; //戦闘中以外、イベント実行中は処理をしない
+
+        //戦闘不能者がいる場合
+        if ($gameSystem.isDeadUnit()) {//ここでこの関数使うのはNG
+            this.updateDeadUnit();
+            return;
+        }
 
         if ($gameSwitches.value(15)) {
             if ($gameSystem.isAllyTeam()) {
@@ -9026,6 +9049,7 @@ Imported.TacticsBattleSys = true;
 
     // 戦闘不能ユニットの処理
     Scene_Map.prototype.updateDeadUnit = function () {
+        //死亡前にセリフを入れたい
         var eventId = $gameSystem.deadUnitId();
         if (eventId > 0) {
             var event = $gameMap.event(eventId);
