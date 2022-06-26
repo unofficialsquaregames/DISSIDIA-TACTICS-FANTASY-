@@ -244,7 +244,7 @@ function Game_Avatar() {
         if (this.sysRef) this.sysRef.off();
         else {
             this.sysRef = firebase.database().ref(sysColumn);
-            this.sysRef.onDisconnect().remove();	//切断時にリムーブ
+            //this.sysRef.onDisconnect().remove();	//切断時にリムーブ
         }
         OnlineManager.syncBusy = true;
         this.sysRef.once('value', function (data) {
