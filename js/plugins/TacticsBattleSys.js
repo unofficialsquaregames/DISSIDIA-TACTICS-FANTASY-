@@ -9040,6 +9040,18 @@ Imported.TacticsBattleSys = true;
         $gameSystem.battleDeactivate(); //フェードアウト後ユニットを全消去し移動可能な状態でバトルモードを解除してからフェードインする流れが良い
         this.endTurn();
         this._phaseState = 0;
+        for (var i = 0; i < $gameMap.events().length; i++) {
+            //このループ内に入らない
+            if (!$gameMap.events()[i]) continue;
+            var event = $gameMap.events()[i];
+            //アクターがない場合、次のループへ移行
+            if (!event.isActor()) continue;
+            //対象が戦闘不能状態の場合も次のループへ
+            if (event.isActor().isDead()) continue;
+            $gameVariables.setValue(3, event.event().id); //イベントID
+            $gameVariables.setValue(4, event.isActor()._classId); //ユニットID
+            break;
+        }
         $gameSwitches.setValue(3, true); //コモンイベントと連携(スイッチNoはいずれプラグインの変数設定から行えるようにする)
         $gamePlayer.setPriorityType(1);
         $gameTemp._commandTime = false;
