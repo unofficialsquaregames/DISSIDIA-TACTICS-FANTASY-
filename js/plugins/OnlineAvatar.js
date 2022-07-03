@@ -445,6 +445,7 @@ function Game_Avatar() {
             a = eval("[0, 0, w, h]");
             //a = eval("[0, 96, w, h - 96]");
         Window_Selectable.prototype.initialize.call(this, a[0], a[1], a[2], a[3]);
+        this._index = 0;
         this.refresh();
     }
 
@@ -474,22 +475,16 @@ function Game_Avatar() {
                         list.push(rootList[val]);
                     })
                 }
-                /*
-                //以下、戦闘に移行していなくてスイッチ30がONになってるならOFFにしたい
-                var battleActive = 'room' + roomId + '/system/battleActive';
-                var switchColumn17 = 'room' + roomId + '/switches/17'; //対戦者1人目フラグ
-                var switchColumn18 = 'room' + roomId + '/switches/18'; //対戦者2人目フラグ
-                var switchColumn30 = 'room' + roomId + '/switches/30'; //切断フラグ取得
-
-
-                this.switchRef17 = firebase.database().ref(switchColumn17);
-                this.switchRef30 = firebase.database().ref(switchColumn30);
-                //this.switchRef.onDisconnect().remove();	//切断時にリムーブ
-                this.switchRef17.onDisconnect().set(false);	//切断時にフラグを挿入
-                this.switchRef30.onDisconnect().set(true);	//切断時にフラグを挿入
-                */
                 //以下、部屋からUIDを引き出す
                 var roomRefId = 'room' + roomId + '/system';
+                var switchRefId = 'room' + roomId + '/switches/30';
+                var disconnectFlag = false;
+
+                OnlineManager.switchRef30 = firebase.database().ref(switchRefId);
+
+                OnlineManager.switchRef30.once("value").then(function (data2) {
+                    disconnectFlag = data2.val();
+                });
 
                 OnlineManager.roomRef = firebase.database().ref(roomRefId);
                 OnlineManager.roomRef.once("value").then(function (data2) {
@@ -517,7 +512,7 @@ function Game_Avatar() {
                     if (allyTeamID && enemyTeamID) {
                         window.changeTextColor('red');
                         window.contents.drawText("対戦中", rect.x + 128, rect.y + 8, rect.width, 32);
-                    } else if ((allyTeamID || enemyTeamID) && !$gameSwitches.value(30)) {
+                    } else if ((allyTeamID || enemyTeamID) && !disconnectFlag) {
                         window.changeTextColor('orange');
                         window.contents.drawText("待機中", rect.x + 128, rect.y + 8, rect.width, 32);
                     } else {
