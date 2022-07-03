@@ -359,7 +359,7 @@ function Game_Avatar() {
     };
     //ユーザー情報を削除
     OnlineManager.removeUserInfo = function () {
-        
+
         if (this.userRef) {
             this.userRef.remove();
             /*
@@ -498,21 +498,17 @@ function Game_Avatar() {
                         if (parseInt(list[i].room) == roomId) {
                             for (var j = 0; j < list[i].unit.length / 2; j++) {
                                 var unitId = list[i].unit[j];
-                                if (unitId > 0) {
-                                    var actor = $gameActors.actor(unitId);
-                                    //ルームID内のカラムを引っ張りたい
-                                    if (list[i].id == allyTeamID) {
-                                        window.drawActorCharacter(actor, rect.x + 24 + 32 * j, rect.y + rect.height / 2, rect.width, rect.height / 2);
-                                    } else if (list[i].id == enemyTeamID) {
-                                        window.drawActorCharacter(actor, rect.x + 24 + 32 * (j + 5), rect.y + rect.height / 2, rect.width, rect.height / 2);
-                                    }
-                                } else {
-                                    if (list[i].id == allyTeamID) {
-                                        window.contents.drawText("ラ", rect.x + 24 + 32 * j, rect.y + rect.height / 2, 32, rect.height / 2);
-                                    } else if (list[i].id == enemyTeamID) {
-                                        window.contents.drawText("ラ", rect.x + 24 + 32 * (j + 5), rect.y + rect.height / 2, 32, rect.height / 2);
-                                    }
+                                var actor;
+                                var x;
+                                if (unitId > 0) actor = $gameActors.actor(unitId);
+                                else actor = $gameActors.actor(200);
+                                //ルームID内のカラムを引っ張りたい
+                                if (list[i].id == allyTeamID) {
+                                    x = rect.x + 24 + 32 * j;
+                                } else if (list[i].id == enemyTeamID) {
+                                    x = rect.x + 24 + 32 * (j + 5);
                                 }
+                                window.drawActorCharacter(actor, x, rect.y + rect.height / 2, rect.width, rect.height / 2);
                             }
                         }
                     }
