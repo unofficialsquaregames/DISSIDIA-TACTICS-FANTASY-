@@ -516,7 +516,7 @@ function Game_Avatar() {
                     if (allyTeamID && enemyTeamID) {
                         window.changeTextColor('red');
                         window.contents.drawText("対戦中", rect.x + 128, rect.y + 8, rect.width, 32);
-                    } else if (allyTeamID || enemyTeamID) {
+                    } else if ((allyTeamID || enemyTeamID) && !$gameSwitches.value(30)) {
                         window.changeTextColor('orange');
                         window.contents.drawText("待機中", rect.x + 128, rect.y + 8, rect.width, 32);
                     } else {
