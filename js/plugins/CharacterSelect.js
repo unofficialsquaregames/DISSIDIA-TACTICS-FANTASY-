@@ -576,7 +576,12 @@
                 if (a[2]) window.drawActorIcons(actor, a[0], a[1], a[2]);
                 
                 //ユニットの詳細を表示
-                var description = $dataClasses[actor._classId].meta.description.split(",");
+                var description;
+                if ($dataClasses[actor._classId].meta.description) {
+                    description = $dataClasses[actor._classId].meta.description.split(",");
+                } else {
+                    return;
+                }
                 a = eval("[0, 64, w - 304]");
                 for (var i = 0; i < description.length; i++) {
                   window.resetFontSettings();
@@ -594,9 +599,14 @@
             }
         }
     }
-
+    
     Window_AllyBattlerList.prototype.updateHelp = function () {
-        var actor = $gameActors.actor($gameParty._actors[this._index]);
+        var actor = $gameActors.actor($gameSystem.allyMembers()[this._index]);
+        refreshStatus(actor, this._helpWindow);
+    }
+
+    Window_EnemyBattlerList.prototype.updateHelp = function () {
+        var actor = $gameActors.actor($gameSystem.enemyMembers()[this._index]);
         refreshStatus(actor, this._helpWindow);
     }
 
@@ -672,7 +682,7 @@
         a = eval("[160, 72, w - 320, 184]");
         this.statusWindow = new Window_Base(a[0], a[1], a[2], a[3]);
         this.allyBattlerListWindow.setHelpWindow(this.statusWindow);
-        //this.enemyBattlerListWindow.setHelpWindow(this.statusWindow);
+        this.enemyBattlerListWindow.setHelpWindow(this.statusWindow);
         this.reserveMemberWindow.setHelpWindow(this.statusWindow);
         this.addWindow(this.statusWindow);
     }
