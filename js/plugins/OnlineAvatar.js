@@ -455,14 +455,18 @@ function Game_Avatar() {
     Window_RoomSelect.prototype.maxCols = function () {
         return 2;
     };
+
+    Window_RoomSelect.prototype.refresh = function () {
+        if (this.contents) {
+            this.contents.clear();
+            this.drawAllItems();
+        }
+    };
     Window_RoomSelect.prototype.drawItem = function (index) {
         //this.contents.clear();
         var rect = this.itemRect(index);
         var roomId = index + 1;
-        this.contents.drawText("ルーム" + roomId, rect.x, rect.y + 8, 96, 32, "left");
         var window = this;
-        var actor;
-        var x;
         //データベースから検索したい
         OnlineManager.userRef.on("value", (data) => {
             if (data) {
@@ -489,6 +493,11 @@ function Game_Avatar() {
 
                 OnlineManager.roomRef = firebase.database().ref(roomRefId);
                 OnlineManager.roomRef.once("value").then(function (data2) {
+                    if (index == 0) window.contents.clear();
+                    window.resetTextColor();
+                    window.contents.drawText("ルーム" + roomId, rect.x, rect.y + 8, 96, 32, "left");
+                    var actor;
+                    var x;
                     var allyTeamID = data2.child("allyTeamID").val();
                     var enemyTeamID = data2.child("enemyTeamID").val();
                     for (var i = 0; i < list.length; i++) {
