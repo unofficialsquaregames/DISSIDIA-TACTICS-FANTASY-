@@ -442,13 +442,14 @@ function Game_Avatar() {
 
     Window_RoomSelect.prototype.initialize = function () {
         var w = Graphics.boxWidth, h = Graphics.boxHeight,
-            a = eval("[0, 96, w, h - 96]");
+            a = eval("[0, 0, w, h]");
+            //a = eval("[0, 96, w, h - 96]");
         Window_Selectable.prototype.initialize.call(this, a[0], a[1], a[2], a[3]);
         this.refresh();
     }
 
     Window_RoomSelect.prototype.maxItems = function () {
-        return 6; //ルームの最大数(後にグローバル変数から指定予定)
+        return 8; //ルームの最大数(後にグローバル変数から指定予定)
     };
     Window_RoomSelect.prototype.maxCols = function () {
         return 2;
@@ -562,7 +563,7 @@ function Game_Avatar() {
     Scene_RoomSelect.prototype.createRoomSelectWindow = function () {
         this.createRoomSelectWindow = new Window_RoomSelect();
         this.createRoomSelectWindow.setHandler('ok', this.commandOkRoomSelect.bind(this));
-        this.createRoomSelectWindow.setHandler('cancel', this.commandCancelRoomSelect.bind(this));
+        //this.createRoomSelectWindow.setHandler('cancel', this.commandCancelRoomSelect.bind(this));
         this.createRoomSelectWindow.activate();
         this.addWindow(this.createRoomSelectWindow);
     };
