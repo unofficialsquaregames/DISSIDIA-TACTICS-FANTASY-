@@ -455,13 +455,14 @@ function Game_Avatar() {
     Window_RoomSelect.prototype.maxCols = function () {
         return 2;
     };
-
     Window_RoomSelect.prototype.drawItem = function (index) {
         //this.contents.clear();
         var rect = this.itemRect(index);
         var roomId = index + 1;
         this.contents.drawText("ルーム" + roomId, rect.x, rect.y + 8, 96, 32, "left");
         var window = this;
+        var actor;
+        var x;
         //データベースから検索したい
         OnlineManager.userRef.on("value", (data) => {
             if (data) {
@@ -494,8 +495,6 @@ function Game_Avatar() {
                         if (parseInt(list[i].room) == roomId) {
                             for (var j = 0; j < list[i].unit.length / 2; j++) {
                                 var unitId = list[i].unit[j];
-                                var actor;
-                                var x;
                                 if (unitId > 0) actor = $gameActors.actor(unitId);
                                 else actor = $gameActors.actor(200);
                                 //ルームID内のカラムを引っ張りたい
