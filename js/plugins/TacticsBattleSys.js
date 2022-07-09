@@ -3078,7 +3078,7 @@ Imported.TacticsBattleSys = true;
                 //向きの設定
                 var d = this.event().meta.Direction;
                 if (d) this.setDirection(d);
-                if (testMode) this._actor.gainTp(100);//テスト用
+                //if (testMode) this._actor.gainTp(100);//テスト用
             }
             else if (enemyId) {
                 this.initTacticsUnitSetting();
@@ -3105,7 +3105,7 @@ Imported.TacticsBattleSys = true;
                 //向きの設定
                 var d = this.event().meta.Direction;
                 if (d) this.setDirection(d);
-                this._actor.gainTp(100);//テスト用
+                //this._actor.gainTp(100);//テスト用
             }
         } else {
             //味方の配置
