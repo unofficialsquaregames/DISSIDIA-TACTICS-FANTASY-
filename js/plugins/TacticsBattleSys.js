@@ -1115,8 +1115,8 @@ Imported.TacticsBattleSys = true;
             else if (enemyId) id = 36 + parseInt(enemyId);
             if ($gameSystem.isSyncTurn(turnUnit)) {
                 isHit = $gameSwitches.value(id);
-                this.missed = !isHit;
-                this.evaded = !isHit;
+                result.missed = !isHit;
+                result.evaded = !isHit;
                 $gameSwitches.setValue(id, false);
             } else {
                 isHit = result.isHit();
