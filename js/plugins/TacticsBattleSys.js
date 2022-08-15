@@ -4188,7 +4188,7 @@ Imported.TacticsBattleSys = true;
     // 最も近いユニットをターゲットにする
     Game_Event.prototype.targetNearSearch = function (target) {
         if (this.target()) {
-            if (this.targetRange(target) < this.targetRange(this.target()) && this.targetIsInvalid(target)) {
+            if ((this.targetRange(target) < this.targetRange(this.target())) && this.targetIsInvalid(target)) {
                 return target;
             } else {
                 return null;
@@ -4205,7 +4205,7 @@ Imported.TacticsBattleSys = true;
     // 最もHPの低いユニットをターゲットにする
     Game_Event.prototype.targetLowHpSearch = function (target) {
         if (this.target()) {
-            if (target.isActor().hp < this.target().isActor().hp && this.targetIsInvalid(target)) {
+            if ((target.isActor().hp < this.target().isActor().hp) && this.targetIsInvalid(target)) {
                 return target;
             } else {
                 return null;
@@ -4222,7 +4222,7 @@ Imported.TacticsBattleSys = true;
     // 自身のHPが○○%以下で最も近いユニットをターゲットにする
     Game_Event.prototype.targetLessHpSelfNearSearch = function (target, rate) {
         if (this.isActor().hp < this.isActor().mhp * rate / 100) {
-            if (this.targetRange(target) < this.targetRange(this.target()) && this.targetIsInvalid(target)) {
+            if (this.targetRange(target) < this.targetRange(this.target())) {
                 return this.targetNearSearch(target);
             }
         }
@@ -4232,7 +4232,7 @@ Imported.TacticsBattleSys = true;
     // 自身のHPが○○%以下で最もHPの低いユニットをターゲットにする
     Game_Event.prototype.targetLessHpSelfLowHpSearch = function (target, rate) {
         if (this.isActor().hp < this.isActor().mhp * rate / 100) {
-            if (target.isActor().hp < this.target().isActor().hp && this.targetIsInvalid(target)) {
+            if (target.isActor().hp < this.target().isActor().hp) {
                 return this.targetNearSearch(target);
             }
         }
@@ -4250,7 +4250,7 @@ Imported.TacticsBattleSys = true;
     };
     // HPが○○%以下のユニット
     Game_Event.prototype.targetLessHpSearch = function (target, rate) {
-        if (target.isActor().hp < target.isActor().mhp * rate / 100 && this.targetIsInvalid(target)) {
+        if (target.isActor().hp < target.isActor().mhp * rate / 100) {
             return this.targetNearSearch(target);
         }
         return null;
@@ -4258,28 +4258,28 @@ Imported.TacticsBattleSys = true;
 
     // MPが○○%以下のユニット
     Game_Event.prototype.targetLessMpSearch = function (target, rate) {
-        if (target.isActor().mp < target.isActor().mmp * rate / 100 && this.targetIsInvalid(target)) {
+        if (target.isActor().mp < target.isActor().mmp * rate / 100) {
             return this.targetNearSearch(target);
         }
         return null;
     };
     // HPが○○%以上のユニット
     Game_Event.prototype.targetMoreHpSearch = function (target, rate) {
-        if (target.isActor().hp >= target.isActor().mhp * rate / 100 && this.targetIsInvalid(target)) {
+        if (target.isActor().hp >= target.isActor().mhp * rate / 100) {
             return this.targetNearSearch(target);
         }
         return null;
     };
     // 特殊なステートにかかってるユニット
     Game_Event.prototype.targetStateSearch = function (target, stateId) {
-        if (target.isActor().isStateAffected(stateId) && this.targetIsInvalid(target)) {
+        if (target.isActor().isStateAffected(stateId)) {
             return this.targetNearSearch(target);
         }
         return null;
     };
     // 特殊なステートにかかってないユニット
     Game_Event.prototype.targetNonstateSearch = function (target, stateId) {
-        if (!(target.isActor().isStateAffected(stateId)) && this.targetIsInvalid(target)) {
+        if (!(target.isActor().isStateAffected(stateId))) {
             return this.targetNearSearch(target);
         }
         return null;
@@ -4287,7 +4287,7 @@ Imported.TacticsBattleSys = true;
     // バフにかかってるユニット
     Game_Event.prototype.targetBuffSearch = function (target) {
         for (var id = 1; id < $dataStates.length; id++) {
-            if (target.isActor().isStateAffected(id) && $dataStates[id].meta.type == "buff" && !$dataStates[id].meta.buffFixed && this.targetIsInvalid(target)) {
+            if (target.isActor().isStateAffected(id) && $dataStates[id].meta.type == "buff" && !$dataStates[id].meta.buffFixed) {
                 return this.targetNearSearch(target);
             }
         }
@@ -4296,7 +4296,7 @@ Imported.TacticsBattleSys = true;
     // デバフにかかってるユニット
     Game_Event.prototype.targetDebuffSearch = function (target) {
         for (var id = 1; id < $dataStates.length; id++) {
-            if (target.isActor().isStateAffected(id) && $dataStates[id].meta.type == "debuff" && !$dataStates[id].meta.debuffFixed && this.targetIsInvalid(target)) {
+            if (target.isActor().isStateAffected(id) && $dataStates[id].meta.type == "debuff" && !$dataStates[id].meta.debuffFixed) {
                 return this.targetNearSearch(target);
             }
         }
