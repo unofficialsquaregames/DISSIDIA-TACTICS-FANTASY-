@@ -891,7 +891,6 @@ Imported.TacticsBattleSys = true;
                                 var trapGrantorUnit = this.unitList()[j];
                                 var trapGrantorActor = trapGrantorUnit.isActor();
                                 var trapGrantorIsArea = false;
-                                //if ((trapGrantorActor._classId == parseInt(trapGrantor)) && trapGrantorUnit.isHostileUnit(target)) {
                                 if (actor.checkStateGrantorId(trapGrantorActor.eventId(), id)) {
                                     trapGrantorIsArea = true;
                                     break;
@@ -910,7 +909,6 @@ Imported.TacticsBattleSys = true;
                             var stealGrantorUnit = this.unitList()[j];
                             var stealGrantorActor = stealGrantorUnit.isActor();
                             var stealGrantorIsArea = false;
-                            //if ((stealGrantorActor._classId == parseInt(stealGrantor)) && stealGrantorUnit.isHostileUnit(target)) {
                             if (actor.checkStateGrantorId(stealGrantorActor.eventId(), id)) {
                                 stealGrantorIsArea = true;
                                 break;
@@ -928,7 +926,6 @@ Imported.TacticsBattleSys = true;
                             var slipUnit = this.unitList()[j];
                             var slipActor = slipUnit.isActor();
                             var slipIsArea = false;
-                            //if ((slipActor._classId == parseInt(slipGrantor)) && slipUnit.isHostileUnit(target)) {
                             if (actor.checkStateGrantorId(slipActor.eventId(), id)) {
                                 slipIsArea = true;
                                 break;
@@ -946,7 +943,6 @@ Imported.TacticsBattleSys = true;
                             var coverUnit = this.unitList()[j];
                             var coverActor = coverUnit.isActor();
                             var coverIsArea = false;
-                            //if ((coverActor._classId == parseInt(coverGrantor)) && !coverUnit.isHostileUnit(target)) {
                             if (actor.checkStateGrantorId(coverActor.eventId(), id)) {
                                 coverIsArea = true;
                                 break;
@@ -963,7 +959,6 @@ Imported.TacticsBattleSys = true;
                             var changeUnit = this.unitList()[j];
                             var changeActor = changeUnit.isActor();
                             var changeIsArea = false;
-                            //if ((changeActor._classId == parseInt(changeGrantor)) && !changeUnit.isHostileUnit(target)) {
                             if (actor.checkStateGrantorId(changeActor.eventId(), id)) {
                                 changeIsArea = true;
                                 break;
@@ -982,7 +977,6 @@ Imported.TacticsBattleSys = true;
                             if (!hateUnit.isHostileUnit(target)) continue;
                             if ($dataStates[id].meta.hateGrantor) {
                                 var hateGrantor = $dataStates[id].meta.hateGrantor;
-                                //if (hateActor._classId == parseInt(hateGrantor)) {
                                 if (actor.checkStateGrantorId(hateActor.eventId(), id)) {
                                     hateIsArea = true;
                                     break;
@@ -1006,7 +1000,6 @@ Imported.TacticsBattleSys = true;
                             var ctrlUnit = this.unitList()[j];
                             var ctrlActor = ctrlUnit.isActor();
                             var ctrlIsArea = false;
-                            //if (ctrlActor._classId == parseInt(ctrlGrantor) && !target.isHostileUnit(ctrlUnit)) {
                             if (actor.checkStateGrantorId(ctrlActor.eventId(), id)) {
                                 ctrlIsArea = true;
                                 break;
@@ -1023,7 +1016,6 @@ Imported.TacticsBattleSys = true;
                             var shiftUnit = this.unitList()[j];
                             var shiftActor = shiftUnit.isActor();
                             var shiftIsArea = false;
-                            //if (shiftActor._classId == parseInt(shiftGrantor) && !target.isHostileUnit(shiftUnit)) {
                             if (actor.checkStateGrantorId(shiftActor.eventId(), id)) {
                                 shiftIsArea = true;
                                 break;
@@ -1040,7 +1032,6 @@ Imported.TacticsBattleSys = true;
                             var traceUnit = this.unitList()[j];
                             var traceActor = traceUnit.isActor();
                             var traceIsArea = false;
-                            //if (traceActor._classId == parseInt(traceGrantor) && target.isHostileUnit(traceUnit)) {
                             if (actor.checkStateGrantorId(traceActor.eventId(), id)) {
                                 traceIsArea = true;
                                 break;
@@ -5020,6 +5011,7 @@ Imported.TacticsBattleSys = true;
         if (this.isActor().restriction() == 2) {
             return true;
         } else {
+            if (!target) return false;
             if (this.isHostileUnit(target)) {
                 return true;
             } else {
@@ -5034,6 +5026,7 @@ Imported.TacticsBattleSys = true;
         if (this.isActor().restriction() == 2) {
             return true;
         } else {
+            if (!target) return false;
             if (this.isHostileUnit(target)) {
                 return false;
             } else {
