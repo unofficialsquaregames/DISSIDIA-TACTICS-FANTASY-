@@ -571,7 +571,6 @@
                 a = eval("[394, 0, 32]");
                 window.drawText(type, a[0], a[1], a[2]);
                 window.resetTextColor();
-                
                 a = eval("[330, 36, 180]");
                 if (a[2]) window.drawActorIcons(actor, a[0], a[1], a[2]);
                 
@@ -599,7 +598,6 @@
             }
         }
     }
-    
     Window_AllyBattlerList.prototype.updateHelp = function () {
         var actor = $gameActors.actor($gameSystem.allyMembers()[this._index]);
         refreshStatus(actor, this._helpWindow);

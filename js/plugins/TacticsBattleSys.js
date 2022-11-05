@@ -441,7 +441,7 @@ Imported.TacticsBattleSys = true;
         return false;
     };
 
-    
+
     /*
      予約アクション系-----------------------------------------------------------------------------
      */
@@ -1290,10 +1290,19 @@ Imported.TacticsBattleSys = true;
             if (turnUnit.useSkill().meta.extend) {
                 if (turnUnit.useSkill().meta.extend == "buffTurn") target.extendBuffStateTurns();
             }
+            //バフ減少
+            if (turnUnit.useSkill().meta.decrease) {
+                if (turnUnit.useSkill().meta.decrease == "buffTurn") target.decreaseBuffStateTurns();
+            }
             //デバフ延長
             if (turnUnit.useSkill().meta.extend) {
                 if (turnUnit.useSkill().meta.extend == "debuffTurn") target.extendDebuffStateTurns();
             }
+            //デバフ減少
+            if (turnUnit.useSkill().meta.decrease) {
+                if (turnUnit.useSkill().meta.decrease == "debuffTurn") target.decreaseDebuffStateTurns();
+            }
+
             //敵対ユニットが対象
             if (turnUnit.isAttackTarget(targetUnit)) {
                 //ヒットによって行動負荷がなくなるデバフ
@@ -1479,6 +1488,7 @@ Imported.TacticsBattleSys = true;
         this._wt = 0;
         this._eventId = null; //バトラーと紐づいてるイベントをセットする
         this._selfState = []; //自身がそのターンに付与したバフリスト
+        this._standBy = false; //待機中か
     }
     //rpg_object.jsより
     Game_BattlerBase.prototype.clearStates = function () {
@@ -1745,11 +1755,29 @@ Imported.TacticsBattleSys = true;
             }
         }, this);
     };
+    //バフターン減少
+    Game_BattlerBase.prototype.decreaseBuffStateTurns = function () {
+        this._states.forEach(function (stateId) {
+            if (this._stateTurns[stateId] > 0 && $dataStates[stateId].meta.type == "buff") {
+                this._stateTurns[stateId]--;
+                if (this._stateTurns[stateId] <= 0) this.removeState(stateId);
+            }
+        }, this);
+    };
     //デバフターン延長
     Game_BattlerBase.prototype.extendDebuffStateTurns = function () {
         this._states.forEach(function (stateId) {
             if (this._stateTurns[stateId] > 0 && $dataStates[stateId].meta.type == "debuff") {
                 this._stateTurns[stateId]++;
+            }
+        }, this);
+    };
+    //デバフターン減少
+    Game_BattlerBase.prototype.decreaseDebuffStateTurns = function () {
+        this._states.forEach(function (stateId) {
+            if (this._stateTurns[stateId] > 0 && $dataStates[stateId].meta.type == "debuff") {
+                this._stateTurns[stateId]--;
+                if (this._stateTurns[stateId] <= 0) this.removeState(stateId);
             }
         }, this);
     };
@@ -2106,57 +2134,86 @@ Imported.TacticsBattleSys = true;
         //ここからバフデバフバフフィールドの影響でパラメータの上げ下げを行う(ブラッドもここで取り扱った方がよい？)
         for (var id = 1; id < $dataStates.length; id++) {
             if (this.isStateAffected(id)) {
-                /*
+
                 //ブラッド系(最大HPを下げる)
                 var invalid = $dataStates[id].meta.invalid;
-                if(invalid){ 
-                  if(invalid == "mhp" && paramId == 0){
-                    var mhp = this.paramBase(0);
-                    if(mhp != this.hp){
-                      value = -(mhp - this.hp);
+                if (invalid) {
+                    if (invalid == "mhp" && paramId == 0) {
+                        var mhp = this.paramBase(0);
+                        if (mhp != this.hp) {
+                            value = -(mhp - this.hp);
+                        }
+                        break;
                     }
-                    break;
-                  }
                 }
-                */
-                //イカサマバフ
-                var ikasama = $dataStates[id].meta.ikasama;
-                if (ikasama) {
+
+
+                var buffReel = $dataStates[id].meta.buffReel;
+                if (buffReel) {
                     if (paramId == 0) {
-                        var max = 200;
-                        var min = 0;
-                        var rate = parseInt(Math.floor(Math.random() * (max - min) + min));
-                        value += Math.round((value + this.paramBase(paramId)) * rate / 100);
-                    } else if (paramId == 1) {
-                        var max = 100;
+                        var max = 40;
                         var min = 0;
                         var rate = parseInt(Math.floor(Math.random() * (max - min) + min));
                         value += Math.round((value + this.paramBase(paramId)) * rate / 100);
                     } else if (paramId == 2) {
-                        var max = 40;
-                        var min = 0;
+                        var max = 20;
+                        var min = -10;
                         var rate = parseInt(Math.floor(Math.random() * (max - min) + min));
                         value += Math.round((value + this.paramBase(paramId)) * rate / 100);
                     } else if (paramId == 3) {
                         var max = 20;
-                        var min = 0;
+                        var min = -10;
                         var rate = parseInt(Math.floor(Math.random() * (max - min) + min));
                         value += Math.round((value + this.paramBase(paramId)) * rate / 100);
                     } else if (paramId == 4) {
-                        var max = 40;
-                        var min = 0;
+                        var max = 20;
+                        var min = -10;
                         var rate = parseInt(Math.floor(Math.random() * (max - min) + min));
                         value += Math.round((value + this.paramBase(paramId)) * rate / 100);
                     } else if (paramId == 5) {
                         var max = 20;
-                        var min = 0;
+                        var min = -10;
                         var rate = parseInt(Math.floor(Math.random() * (max - min) + min));
                         value += Math.round((value + this.paramBase(paramId)) * rate / 100);
                     } else if (paramId == 6) {
-                        var max = 160;
-                        var min = 0;
+                        var max = 40;
+                        var min = -20;
                         var rate = parseInt(Math.floor(Math.random() * (max - min) + min));
                         value += Math.round((value + this.paramBase(paramId)) * rate / 100);
+                    }
+                }
+                var debuffReel = $dataStates[id].meta.debuffReel;
+                if (debuffReel) {
+                    if (paramId == 0) {
+                        var max = 20;
+                        var min = 0;
+                        var rate = parseInt(Math.floor(Math.random() * (max - min) + min));
+                        value -= Math.round((value + this.paramBase(paramId)) * rate / 100);
+                    } else if (paramId == 2) {
+                        var max = 20;
+                        var min = -10;
+                        var rate = parseInt(Math.floor(Math.random() * (max - min) + min));
+                        value -= Math.round((value + this.paramBase(paramId)) * rate / 100);
+                    } else if (paramId == 3) {
+                        var max = 20;
+                        var min = -10;
+                        var rate = parseInt(Math.floor(Math.random() * (max - min) + min));
+                        value -= Math.round((value + this.paramBase(paramId)) * rate / 100);
+                    } else if (paramId == 4) {
+                        var max = 20;
+                        var min = -10;
+                        var rate = parseInt(Math.floor(Math.random() * (max - min) + min));
+                        value -= Math.round((value + this.paramBase(paramId)) * rate / 100);
+                    } else if (paramId == 5) {
+                        var max = 20;
+                        var min = -10;
+                        var rate = parseInt(Math.floor(Math.random() * (max - min) + min));
+                        value -= Math.round((value + this.paramBase(paramId)) * rate / 100);
+                    } else if (paramId == 6) {
+                        var max = 40;
+                        var min = -20;
+                        var rate = parseInt(Math.floor(Math.random() * (max - min) + min));
+                        value -= Math.round((value + this.paramBase(paramId)) * rate / 100);
                     }
                 }
                 //リユニオンバフ(セフィロスのステータスをアップ)
@@ -2168,8 +2225,8 @@ Imported.TacticsBattleSys = true;
                         var reunionUnit = $gameSystem.unitList()[i];
                         var reunionActor = reunionUnit.isActor();
                         //オンラインデータベースの都合上アクタークラスからキャラクラスにアクセスしないようにしたい
-                        if ($gameMap.event(this.eventId()).targetRange(reunionUnit) <= parseInt(field)) {
-                            value += Math.round((value + this.paramBase(paramId)) * 5 / 100);
+                        if ($gameMap.event(this.eventId()).targetRange(reunionUnit) <= parseInt(field) && $gameMap.event(this.eventId()).isAttackTarget(reunionUnit)) {
+                            value += Math.round((value + this.paramBase(paramId)) * 10 / 100);
                         }
                     }
                 }
@@ -2214,10 +2271,62 @@ Imported.TacticsBattleSys = true;
                         //リユニオンバフ(領域内のユニットのステータスをダウン)
                         var field = $dataStates[id].meta.field;
                         var reunion = $dataStates[id].meta.reunion;
-                        if (field && reunion) {
+                        if (field && reunion && robbedUnit.isAttackTarget($gameMap.event(this.eventId()))) {
                             //オンラインデータベースの都合上アクタークラスからキャラクラスにアクセスしないようにしたい
                             if (robbedUnit.targetRange($gameMap.event(this.eventId())) <= parseInt(field)) {
-                                value -= Math.round((value + this.paramBase(paramId)) * 5 / 100);
+                                value -= Math.round((value + this.paramBase(paramId)) * 10 / 100);
+                            }
+                        }
+                        //フリーズ(領域内のユニットの攻撃力と魔法力をダウン)
+                        var freeze = $dataStates[id].meta.freeze;
+                        if (field && freeze && robbedUnit.isAttackTarget($gameMap.event(this.eventId()))) {
+                            if (robbedUnit.targetRange($gameMap.event(this.eventId())) <= parseInt(field)) {
+                                switch (paramId) {
+                                    case 2:
+                                    case 4:
+                                        value -= Math.round((value + this.paramBase(paramId)) * 10 / 100);
+                                        break;
+                                }
+
+                            }
+                        }
+                        //ムラクモ(領域内のユニットの敏捷性をダウン)
+                        var murakumo = $dataStates[id].meta.murakumo;
+                        if (field && murakumo && robbedUnit.isAttackTarget($gameMap.event(this.eventId()))) {
+                            if (robbedUnit.targetRange($gameMap.event(this.eventId())) <= parseInt(field)) {
+                                switch (paramId) {
+                                    case 6:
+                                        value -= Math.round((value + this.paramBase(paramId)) * 40 / 100);
+                                        break;
+                                }
+
+                            }
+                        }
+                        //エソテリックリージョン(領域内の敵ユニットの防御力敏捷性をダウン、味方ユニットの攻撃力敏捷性をアップ)
+                        var esotericregion = $dataStates[id].meta.esotericregion;
+                        if (field && esotericregion) {
+                            if (robbedUnit.targetRange($gameMap.event(this.eventId())) <= parseInt(field)) {
+                                if (robbedUnit.isAttackTarget($gameMap.event(this.eventId()))) {
+                                    switch (paramId) {
+                                        case 3:
+                                        case 5:
+                                            value -= Math.round((value + this.paramBase(paramId)) * 10 / 100);
+                                            break;
+                                        case 6:
+                                            value -= Math.round((value + this.paramBase(paramId)) * 20 / 100);
+                                            break;
+                                    }
+                                } else if (robbedUnit.isCoverTarget($gameMap.event(this.eventId()))) {
+                                    switch (paramId) {
+                                        case 2:
+                                        case 4:
+                                            value += Math.round((value + this.paramBase(paramId)) * 10 / 100);
+                                            break;
+                                        case 6:
+                                            value += Math.round((value + this.paramBase(paramId)) * 20 / 100);
+                                            break;
+                                    }
+                                }
                             }
                         }
                         //テラー(領域内のユニットのステータスをダウン)
@@ -2234,7 +2343,7 @@ Imported.TacticsBattleSys = true;
                                         value -= Math.round((value + this.paramBase(paramId)) * 20 / 100);
                                         break;
                                 }
-                                
+
                             }
                         }
                         //親征の檄
@@ -2249,21 +2358,6 @@ Imported.TacticsBattleSys = true;
                                     case 3:
                                     case 4:
                                     case 5:
-                                        value += Math.round((value + this.paramBase(paramId)) * 10 / 100);
-                                        break;
-                                }
-                            }
-                        }
-                        //ジョブマスター(領域内の味方ユニットのステータスをアップ)
-                        var master = $dataStates[id].meta.master;
-                        if (field && master && robbedUnit.isCoverTarget($gameMap.event(this.eventId()))) {
-                            if (robbedUnit.targetRange($gameMap.event(this.eventId())) <= parseInt(field)) {
-                                switch (paramId) {
-                                    case 6:
-                                        value += Math.round((value + this.paramBase(paramId)) * 40 / 100);
-                                        break;
-                                    case 2:
-                                    case 4:
                                         value += Math.round((value + this.paramBase(paramId)) * 10 / 100);
                                         break;
                                 }
@@ -3802,6 +3896,7 @@ Imported.TacticsBattleSys = true;
                                     //if ((trapGrantorActor._classId == parseInt(trapGrantor)) && trapGrantorUnit.isAttackTarget(this)) {
                                     if (actor.checkStateGrantorId(trapGrantorActor.eventId(), id)) {
                                         if ($dataStates[id].meta.skill == "impersonation") {
+                                            if (!this.useSkill()) continue;
                                             if (this.useSkill().scope == 1 || this.useSkill().scope == 2) {
                                                 $gameTemp.addReservationActionList(trapGrantorUnit, this.useSkill(), this, $dataStates[id].meta.activate);
                                             } else if (this.useSkill().scope == 7 || this.useSkill().scope == 8 || this.useSkill().scope == 11) {
@@ -3845,15 +3940,16 @@ Imported.TacticsBattleSys = true;
                             var state = $dataStates[id];
                             var gainHp = state.meta.gainHp;
                             if (gainHp) {
-                                if (parseInt(-gainHp) > actor.hp) {
-                                    gainHp = actor.hp - 1;
-                                }
                                 if (parseInt(gainHp) > 0 && checkUnit.isCoverTarget(this)) {
                                     actor.gainHp(Math.round(actor.mhp * parseInt(gainHp) / 100));
                                     this.reserveDamagePopup(0);//リジェネ効果のポップアップ表示
                                 }
                                 if (parseInt(gainHp) < 0 && checkUnit.isAttackTarget(this)) {
-                                    actor.gainHp(Math.round(actor.mhp * parseInt(gainHp) / 100));
+                                    var damage = -1 * Math.round(actor.mhp * parseInt(gainHp) / 100);
+                                    if (damage >= actor.hp) {
+                                        damage = actor.hp - 1;
+                                    }
+                                    actor.gainHp(-damage);
                                     this.reserveDamagePopup(0);//リジェネ効果のポップアップ表示
                                 }
                             }
@@ -6752,6 +6848,8 @@ Imported.TacticsBattleSys = true;
         var faceWidth = Window_Base._faceWidth;
         var w = this.contents.width - faceWidth * 2;
         var lineHeight = this.lineHeight();
+        if (!action) return;
+        if (!action.item()) return;
         this.drawText(action.item().name, faceWidth, 0, w, 'center');
         var damageText = this.makeDamageText(targetBattler, action);
         this.drawText(damageText, faceWidth, lineHeight * 1, w, 'center');
@@ -8772,13 +8870,13 @@ Imported.TacticsBattleSys = true;
                 $gameSwitches.setValue(29, true);
             }
         }
-        
+
         if (turnUnit.useSkill() == turnUnit._myAbility[2]) {
             $gameSwitches.setValue(8, true);//バーストアビリティ発動時
             $gameVariables.setValue(3, turnUnit.event().id); //イベントID
             $gameVariables.setValue(4, turnUnit.isActor()._classId); //ユニットID
         }
-        
+
         //コマンド実行
         $gameSystem._phaseState = 7;//詠唱アニメーションフェーズへ移行
     };
