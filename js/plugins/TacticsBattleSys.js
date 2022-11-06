@@ -3680,6 +3680,11 @@ Imported.TacticsBattleSys = true;
                         var skill = $dataStates[id].meta.skill;
                         if (skill == "same") {
                             $gameTemp.addReservationActionList(this, this.useSkill(), target, "chase");
+                        } else if (skill.match(/,/)) {
+                            var skills = skill.split(',');
+                            for(i=0; i<skills.length; i++){
+                                $gameTemp.addReservationActionList(this, $dataSkills[parseInt(skills[i])], target, "chase");
+                            }
                         } else {
                             $gameTemp.addReservationActionList(this, $dataSkills[parseInt(skill)], target, "chase");
                         }
