@@ -2363,6 +2363,30 @@ Imported.TacticsBattleSys = true;
                                 }
                             }
                         }
+                        
+                        //ランパートフォース
+                        var rampart = $dataStates[id].meta.rampart;
+                        if (field && rampart && robbedUnit.isCoverTarget($gameMap.event(this.eventId()))) {
+                            if (robbedUnit.targetRange($gameMap.event(this.eventId())) <= parseInt(field)) {
+                                switch (paramId) {
+                                    case 3:
+                                        value += Math.round((value + this.paramBase(paramId)) * 10 / 100);
+                                        break;
+                                }
+                            }
+                        }
+                        //ホワイトナイト
+                        var whiteKnight = $dataStates[id].meta.whiteKnight;
+                        if (field && whiteKnight && robbedUnit.isCoverTarget($gameMap.event(this.eventId()))) {
+                            if (robbedUnit.targetRange($gameMap.event(this.eventId())) <= parseInt(field)) {
+                                switch (paramId) {
+                                    case 3:
+                                    case 5:
+                                        value += Math.round((value + this.paramBase(paramId)) * 10 / 100);
+                                        break;
+                                }
+                            }
+                        }
                     }
                 }
             }
