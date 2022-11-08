@@ -2287,7 +2287,19 @@ Imported.TacticsBattleSys = true;
                                         value -= Math.round((value + this.paramBase(paramId)) * 10 / 100);
                                         break;
                                 }
-
+                            }
+                        }
+                        
+                        //ブラックホール(領域内のユニットの攻撃力と魔法力をダウン)
+                        var blackHole = $dataStates[id].meta.blackHole;
+                        if (field && blackHole && robbedUnit.isAttackTarget($gameMap.event(this.eventId()))) {
+                            if (robbedUnit.targetRange($gameMap.event(this.eventId())) <= parseInt(field)) {
+                                switch (paramId) {
+                                    case 2:
+                                    case 4:
+                                        value -= Math.round((value + this.paramBase(paramId)) * 20 / 100);
+                                        break;
+                                }
                             }
                         }
                         //ムラクモ(領域内のユニットの敏捷性をダウン)
