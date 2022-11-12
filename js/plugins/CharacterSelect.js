@@ -502,7 +502,7 @@
               paintOpacity = 255;
             }
             */
-            this.drawActorCharacter(actor, rect.x + 24, rect.y + 8,rect.width, rect.height);
+            this.drawActorCharacter(actor, rect.x + 24, rect.y + 8, rect.width, rect.height);
             //this.drawText(actor.name(), rect.x + 42, rect.y,rect.width);
         }else{
             this.drawText(param.removeOnReserveTerm, rect.x, rect.y,rect.width, "center");
