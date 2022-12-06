@@ -4235,6 +4235,7 @@ Imported.TacticsBattleSys = true;
                             coverGrantor.setPosition(x, y);
                             coverGrantor.turnTowardCharacter(attacker);// 向き
                             coverGrantor._alreadyCover = true; // かばうフラグon
+                            coverGrantor.isActor().wtTurnAdvance();
                             return coverGrantor;
                             break;
                         }
