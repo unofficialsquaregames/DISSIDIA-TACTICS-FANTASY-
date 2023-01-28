@@ -409,7 +409,6 @@ Imported.TacticsBattleSys = true;
         this._commandTime = false; //コマンド選択中
         this._cameraWait = false; //カメラ待ちフラグ
         this._countWtTime = false; //行動順計算中か
-        this._attacktime = false; //攻撃中か
         this._arrangePattern = 0; //配置パターン
         this._isReservationActionTurn = false;
 
@@ -3414,11 +3413,11 @@ Imported.TacticsBattleSys = true;
     };
     // 攻撃時のアニメ設定
     Game_Event.prototype.setBattlerAttack = function () {
-        /*
+        
         this.resetPattern();
         this.setImage(this._actor.characterName(), 2);
-        */
-        $gameTemp._attacktime = true;
+        
+        this._attacktime = true;
     };
     // 攻撃時のアニメ設定
     Game_Event.prototype.setBattlerReturn = function () {
@@ -5063,6 +5062,7 @@ Imported.TacticsBattleSys = true;
         this._enemyId = null;
         this._unitId = null;
         this._actor = null; //アクターであった場合代入
+        this._attacktime = false; //攻撃中か
     };
     // キャラクターがSRPGユニットかどうかを返す
     Game_CharacterBase.prototype.isUnit = function () {
@@ -5179,7 +5179,7 @@ Imported.TacticsBattleSys = true;
     Game_CharacterBase.prototype.updateAnimation = function () {
         this.updateAnimationCount();
         if (this._animationCount >= this.animationWait()) {
-            if ($gameTemp._attacktime) {
+            if (this._attacktime) {
                 this.updateAttackPattern();
             } else {
                 this.updatePattern();
@@ -5187,12 +5187,25 @@ Imported.TacticsBattleSys = true;
             this._animationCount = 0;
         }
     };
-
+    var _Game_CharacterBase_updateAnimationCount = Game_CharacterBase.prototype.updateAnimationCount;
+    Game_CharacterBase.prototype.updateAnimationCount = function() {
+        if(this._attacktime){
+            this._animationCount++;
+        } else if (this.isMoving() && this.hasWalkAnime()) {
+            this._animationCount += 1.5;
+        } else if (this.hasStepAnime() || !this.isOriginalPattern()) {
+            this._animationCount++;
+        }
+    };
+    
     Game_CharacterBase.prototype.updateAttackPattern = function () {
-        if (!this.hasStepAnime() && this._stopCount > 0) {
+        //$gameTempではなくユニット固有の方が良いのでは？
+        if(this._attacktime){
+            if (this._pattern == (this.maxPattern() - 2)) this._attackTime = false;
+            this._pattern = (this._pattern + 1) % this.maxPattern();
+        } else if (!this.hasStepAnime() && this._stopCount > 0) {
             this.resetPattern();
         } else {
-            if (this._pattern == (this.maxPattern() - 1)) $gameTemp._attackTime = false;
             this._pattern = (this._pattern + 1) % this.maxPattern();
         }
     };
@@ -8272,7 +8285,7 @@ Imported.TacticsBattleSys = true;
                 $gameSystem._phaseState = 8;
                 break;
             case 8: //コマンド実行処理(詠唱アニメーション)
-                if ($gameTemp._attackTime == false) {
+                if (turnUnit._attackTime == false) {
                     turnUnit.setBattlerReturn();
                     $gameSystem._phaseState = 9;
                 }
@@ -8954,7 +8967,7 @@ Imported.TacticsBattleSys = true;
         if (!$gameSystem._moveTargetPointFlag) {
             unit.turnTowardCharacter(target);// 向き
         }
-        unit.setBattlerAttack();
+        //unit.setBattlerAttack();
         //unit.hasStepAnime();
         $gameSystem._phaseState = 10;//対象アニメーションフェーズへ移行
     };
