@@ -2288,7 +2288,7 @@ Imported.TacticsBattleSys = true;
                                 }
                             }
                         }
-                        
+
                         //ブラックホール(領域内のユニットの攻撃力と魔法力をダウン)
                         var blackHole = $dataStates[id].meta.blackHole;
                         if (field && blackHole && robbedUnit.isAttackTarget($gameMap.event(this.eventId()))) {
@@ -2374,7 +2374,7 @@ Imported.TacticsBattleSys = true;
                                 }
                             }
                         }
-                        
+
                         //ランパートフォース
                         var rampart = $dataStates[id].meta.rampart;
                         if (field && rampart && robbedUnit.isCoverTarget($gameMap.event(this.eventId()))) {
@@ -3413,15 +3413,19 @@ Imported.TacticsBattleSys = true;
     };
     // 攻撃時のアニメ設定
     Game_Event.prototype.setBattlerAttack = function () {
-        
         this.resetPattern();
-        this.setImage(this._actor.characterName(), 2);
-        
+        // var skillMotions = (this.useSkill().meta.motion || '1 false').split(' ');
+        var battlerName = this.isActor().characterName() + "_Battler";
+        var skillMotions = (this.useSkill().meta.motion || '0');
+        this.setImage(battlerName, skillMotions);
         this._attacktime = true;
+        this._attackmode = true;
     };
-    // 攻撃時のアニメ設定
+    // 攻撃モーション終了後のアニメ設定
     Game_Event.prototype.setBattlerReturn = function () {
-        this.setImage(this._actor.characterName(), 0);
+        this._attackmode = false;
+        var battlerName = this.isActor().characterName().replace("_Battler", "");
+        this.setImage(battlerName, 0);
     };
     //初期化？
     Game_Event.prototype.initTacticsUnitSetting = function () {
@@ -3717,7 +3721,7 @@ Imported.TacticsBattleSys = true;
                             $gameTemp.addReservationActionList(this, this.useSkill(), target, "chase");
                         } else if (skill.match(/,/)) {
                             var skills = skill.split(',');
-                            for(i=0; i<skills.length; i++){
+                            for (i = 0; i < skills.length; i++) {
                                 $gameTemp.addReservationActionList(this, $dataSkills[parseInt(skills[i])], target, "chase");
                             }
                         } else {
@@ -5063,6 +5067,7 @@ Imported.TacticsBattleSys = true;
         this._unitId = null;
         this._actor = null; //アクターであった場合代入
         this._attacktime = false; //攻撃中か
+        this._attackmode = false; //攻撃モードか
     };
     // キャラクターがSRPGユニットかどうかを返す
     Game_CharacterBase.prototype.isUnit = function () {
@@ -5188,8 +5193,8 @@ Imported.TacticsBattleSys = true;
         }
     };
     var _Game_CharacterBase_updateAnimationCount = Game_CharacterBase.prototype.updateAnimationCount;
-    Game_CharacterBase.prototype.updateAnimationCount = function() {
-        if(this._attacktime){
+    Game_CharacterBase.prototype.updateAnimationCount = function () {
+        if (this._attacktime) {
             this._animationCount++;
         } else if (this.isMoving() && this.hasWalkAnime()) {
             this._animationCount += 1.5;
@@ -5197,12 +5202,22 @@ Imported.TacticsBattleSys = true;
             this._animationCount++;
         }
     };
-    
+
     Game_CharacterBase.prototype.updateAttackPattern = function () {
         //$gameTempではなくユニット固有の方が良いのでは？
-        if(this._attacktime){
-            if (this._pattern == (this.maxPattern() - 2)) this._attackTime = false;
-            this._pattern = (this._pattern + 1) % this.maxPattern();
+        if (this._attackmode) {
+            //モーションによって2コマ3コマ変わることがあるのでアビリティのメモと紐づかせる必要あり
+            //var skillMotions = (this.useSkill().meta.motion || '1 false').split(' ');
+            var skillMotions = (this.useSkill().meta.motion || '0');
+
+            if (this._attacktime) {
+                //if (this._pattern == (this.maxPattern() - (4 - skillMotions[1]))) this._attackTime = false;
+                if (this._pattern == this.maxPattern()) {
+                    this._attackTime = false;
+                } else {
+                    this._pattern = (this._pattern + 1) % this.maxPattern();
+                }
+            }
         } else if (!this.hasStepAnime() && this._stopCount > 0) {
             this.resetPattern();
         } else {
@@ -5630,14 +5645,20 @@ Imported.TacticsBattleSys = true;
         var id = $gameSystem._wtTurnList[this._number][0]; //OnlineAvatar.jsと併用させるとエラーが発生する
         var character = $gameMap._events[id];
         if (!character) return;
-        var image = ImageManager.loadCharacter(character.characterName());
+        var characterName;
+        if (character.characterName().includes("_Battler")) {
+            characterName = ImageManager.loadCharacter(character.characterName().replace("_Battler", ""));
+        } else {
+            characterName = ImageManager.loadCharacter(character.characterName());
+        }
+        var image = characterName;
         var big = ImageManager.isBigCharacter(character.characterName());
         var pw = image.width / (big ? 3 : 12);
         var ph = image.height / (big ? 4 : 8);
         var n = character.characterIndex();
         if (big) n = 0;
-        var sx = (n % 4 * 3 + 1) * pw + pw / 4;
-        var sy = (Math.floor(n / 4) * 4) * ph + ph / 4;
+        var sx = (n % 4 * 3 + 1) * pw;// + pw / 4;
+        var sy = (Math.floor(n / 4) * 4) * ph;// + ph / 4;
         sy = sy + sy / 4;
 
         var alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -5710,6 +5731,36 @@ Imported.TacticsBattleSys = true;
                 this.removeChild(this._unitIDSprite);
                 this._unitIDSprite = null;
             }
+        }
+    };
+    //バトラーファイルであった場合バトラーフォルダの方を読みに行く
+    Sprite_Character.prototype.setCharacterBitmap = function () {
+        if (this._characterName.includes("_Battler")) {
+            this.bitmap = ImageManager.loadSvActor(this._characterName);
+        } else {
+            this.bitmap = ImageManager.loadCharacter(this._characterName);
+        }
+        this._isBigCharacter = ImageManager.isBigCharacter(this._characterName);
+    };
+    //キャラチップの座標設定(おそらく)
+    Sprite_Character.prototype.updateCharacterFrame = function () {
+        var is_attacker = false;
+        if (this._characterName.includes("_Battler")) is_attacker = true;
+        var pw = this.patternWidth();
+        var ph = this.patternHeight();
+        var sx = (this.characterBlockX() + this.characterPatternX()) * pw;
+        var sy = (this.characterBlockY() + this.characterPatternY()) * ph;
+        //バトラーとしてのファイルであった場合
+        if (is_attacker) sy -= 16;
+
+        this.updateHalfBodySprites();
+        if (this._bushDepth > 0) {
+            var d = this._bushDepth;
+            this._upperBody.setFrame(sx, sy, pw, ph - d);
+            this._lowerBody.setFrame(sx, sy + ph - d, pw, d);
+            this.setFrame(sx, sy, 0, ph);
+        } else {
+            this.setFrame(sx, sy, pw, ph);
         }
     };
 
@@ -8284,11 +8335,8 @@ Imported.TacticsBattleSys = true;
                 this.showActionMotion(turnUnit);
                 $gameSystem._phaseState = 8;
                 break;
-            case 8: //コマンド実行処理(詠唱アニメーション)
-                if (turnUnit._attackTime == false) {
-                    turnUnit.setBattlerReturn();
-                    $gameSystem._phaseState = 9;
-                }
+            case 8: //コマンド実行処理(詠唱アニメーションの予定)
+                $gameSystem._phaseState = 9;
                 break;
             case 9: //コマンド実行処理(対象アニメーション)
                 //対象に攻撃アニメーション
@@ -8299,6 +8347,11 @@ Imported.TacticsBattleSys = true;
                 $gameSystem._phaseState = 10;//ダメージ表示フェーズへ移行
                 break;
             case 10: //コマンド実行処理(ダメージ表示)
+                if (turnUnit._attackTime) {
+                    return;
+                } else {
+                    turnUnit.setBattlerReturn(); //攻撃アニメから歩行へ戻す
+                }
                 if (!this.isMultiHitPopWaitingMode()) return;//待ち時間
                 turnUnit.executeAction();//アクションの実行
                 $gameTemp.countMultiHit();
@@ -8470,13 +8523,17 @@ Imported.TacticsBattleSys = true;
             case 9: //コマンド実行処理(対象アニメーション)
                 //対象に攻撃アニメーション
                 //Game_Eventにて「たたかう」だと対象の装備が反映されたアニメーションが表示される
-                turnUnit.setBattlerReturn();//攻撃アニメから歩行アニメへ戻す
                 turnUnit.target().showActionAnimation(turnUnit, turnUnit.useSkill());  // 行動アニメーションの表示
                 //多段ヒット時の設定
                 $gameTemp.setMultiHit(turnUnit.useSkill());
                 $gameSystem._phaseState = 10;//ダメージ表示フェーズへ移行
                 break;
             case 10: //コマンド実行処理(ダメージ表示)
+                if (turnUnit._attackTime) {
+                    return;
+                } else {
+                    turnUnit.setBattlerReturn(); //攻撃アニメから歩行へ戻す
+                }
                 if (!this.isMultiHitPopWaitingMode()) return;//待ち時間
                 turnUnit.executeAction();
                 $gameTemp.countMultiHit();
@@ -8577,13 +8634,17 @@ Imported.TacticsBattleSys = true;
             case 9: //コマンド実行処理(対象アニメーション)
                 //対象に攻撃アニメーション
                 //Game_Eventにて「たたかう」だと対象の装備が反映されたアニメーションが表示される
-                turnUnit.setBattlerReturn();//攻撃アニメから歩行アニメへ戻す
                 turnUnit.target().showActionAnimation(turnUnit, turnUnit.useSkill());  // 行動アニメーションの表示
                 //多段ヒット時の設定
                 $gameTemp.setMultiHit(turnUnit.useSkill());
                 $gameSystem._phaseState = 10;//ダメージ表示フェーズへ移行
                 break;
             case 10: //コマンド実行処理(ダメージ表示)
+                if (turnUnit._attackTime) {
+                    return;
+                } else {
+                    turnUnit.setBattlerReturn(); //攻撃アニメから歩行へ戻す
+                }
                 if (!this.isMultiHitPopWaitingMode()) return;//待ち時間
                 turnUnit.executeAction();
                 $gameTemp.countMultiHit();
@@ -8967,7 +9028,7 @@ Imported.TacticsBattleSys = true;
         if (!$gameSystem._moveTargetPointFlag) {
             unit.turnTowardCharacter(target);// 向き
         }
-        //unit.setBattlerAttack();
+        unit.setBattlerAttack();
         //unit.hasStepAnime();
         $gameSystem._phaseState = 10;//対象アニメーションフェーズへ移行
     };
