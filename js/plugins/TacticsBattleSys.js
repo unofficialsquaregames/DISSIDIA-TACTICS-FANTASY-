@@ -3413,17 +3413,17 @@ Imported.TacticsBattleSys = true;
     };
     // 攻撃時のアニメ設定
     Game_Event.prototype.setBattlerAttack = function () {
-        this.resetPattern();
         // var skillMotions = (this.useSkill().meta.motion || '1 false').split(' ');
         var battlerName = this.isActor().characterName() + "_Battler";
         var skillMotions = (this.useSkill().meta.motion || '0');
         this.setImage(battlerName, skillMotions);
-        this._attacktime = true;
-        this._attackmode = true;
+        this.setPattern(0);
+        this._attackTime = true;
+        this._attackMode = true;
     };
     // 攻撃モーション終了後のアニメ設定
     Game_Event.prototype.setBattlerReturn = function () {
-        this._attackmode = false;
+        this._attackMode = false;
         var battlerName = this.isActor().characterName().replace("_Battler", "");
         this.setImage(battlerName, 0);
     };
@@ -5066,8 +5066,8 @@ Imported.TacticsBattleSys = true;
         this._enemyId = null;
         this._unitId = null;
         this._actor = null; //アクターであった場合代入
-        this._attacktime = false; //攻撃中か
-        this._attackmode = false; //攻撃モードか
+        this._attackTime = false; //攻撃中か
+        this._attackMode = false; //攻撃モードか
     };
     // キャラクターがSRPGユニットかどうかを返す
     Game_CharacterBase.prototype.isUnit = function () {
@@ -5184,7 +5184,7 @@ Imported.TacticsBattleSys = true;
     Game_CharacterBase.prototype.updateAnimation = function () {
         this.updateAnimationCount();
         if (this._animationCount >= this.animationWait()) {
-            if (this._attacktime) {
+            if (this._attackTime) {
                 this.updateAttackPattern();
             } else {
                 this.updatePattern();
@@ -5194,8 +5194,8 @@ Imported.TacticsBattleSys = true;
     };
     var _Game_CharacterBase_updateAnimationCount = Game_CharacterBase.prototype.updateAnimationCount;
     Game_CharacterBase.prototype.updateAnimationCount = function () {
-        if (this._attacktime) {
-            this._animationCount++;
+        if (this._attackTime) {
+            this._animationCount += 1.5;
         } else if (this.isMoving() && this.hasWalkAnime()) {
             this._animationCount += 1.5;
         } else if (this.hasStepAnime() || !this.isOriginalPattern()) {
@@ -5205,17 +5205,12 @@ Imported.TacticsBattleSys = true;
 
     Game_CharacterBase.prototype.updateAttackPattern = function () {
         //$gameTempではなくユニット固有の方が良いのでは？
-        if (this._attackmode) {
-            //モーションによって2コマ3コマ変わることがあるのでアビリティのメモと紐づかせる必要あり
-            //var skillMotions = (this.useSkill().meta.motion || '1 false').split(' ');
-            var skillMotions = (this.useSkill().meta.motion || '0');
-
-            if (this._attacktime) {
-                //if (this._pattern == (this.maxPattern() - (4 - skillMotions[1]))) this._attackTime = false;
-                if (this._pattern == this.maxPattern()) {
+        if (this._attackMode) {
+            if (this._attackTime) {
+                this._pattern++;
+                if (this._pattern >= this.maxPattern()) {
                     this._attackTime = false;
-                } else {
-                    this._pattern = (this._pattern + 1) % this.maxPattern();
+                    this._pattern = 3;
                 }
             }
         } else if (!this.hasStepAnime() && this._stopCount > 0) {
@@ -5701,7 +5696,7 @@ Imported.TacticsBattleSys = true;
         _Sprite_Character_update.call(this);
         var actor = this._character.isActor();
         if (!actor) return;
-        if ($gameSystem._battleActive && !actor.isDead()) {
+        if ($gameSystem._battleActive && !actor.isDead() && !this._characterName.includes("_Battler")) {
             this.updateDamagePopup();
             if (useUnitHpGauge) this.updateHpGauge();
             if (useUnitStateIcon) this.updateStateIcon();
@@ -5751,8 +5746,10 @@ Imported.TacticsBattleSys = true;
         var sx = (this.characterBlockX() + this.characterPatternX()) * pw;
         var sy = (this.characterBlockY() + this.characterPatternY()) * ph;
         //バトラーとしてのファイルであった場合
-        if (is_attacker) sy -= 16;
-
+        if (is_attacker) {
+            sx = (this.characterBlockX() + this._character._pattern) * pw;
+            if (sx == 0) return;//効果ない
+        }
         this.updateHalfBodySprites();
         if (this._bushDepth > 0) {
             var d = this._bushDepth;
@@ -5764,6 +5761,80 @@ Imported.TacticsBattleSys = true;
         }
     };
 
+    // フレーム更新
+    // var _Sprite_Character_refresh = Sprite_Character.prototype._refresh;
+    Sprite_Character.prototype._refresh = function () {
+        // _Sprite_Character_update.call(this);
+        var frameX = Math.floor(this._frame.x);
+        var frameY = Math.floor(this._frame.y);
+        var frameW = Math.floor(this._frame.width);
+        var frameH = Math.floor(this._frame.height);
+        var bitmapW = this._bitmap ? this._bitmap.width : 0;
+        var bitmapH = this._bitmap ? this._bitmap.height : 0;
+        var realX = frameX.clamp(0, bitmapW);
+        var realY = frameY.clamp(0, bitmapH);
+        var realW = (frameW - realX + frameX).clamp(0, bitmapW - realX);
+        var realH = (frameH - realY + frameY).clamp(0, bitmapH - realY);
+
+        this._realFrame.x = realX;
+        this._realFrame.y = realY;
+        this._realFrame.width = realW;
+        this._realFrame.height = realH;
+        this.pivot.x = frameX - realX;
+        this.pivot.y = frameY - realY;
+
+        if (this._characterName.includes("_Battler")) {
+            this.pivot.y-=16;
+        }
+
+        if (realW > 0 && realH > 0) {
+            if (this._needsTint()) {
+                this._createTinter(realW, realH);
+                this._executeTint(realX, realY, realW, realH);
+                this._tintTexture.update();
+                this.texture.baseTexture = this._tintTexture;
+                this.texture.frame = new Rectangle(0, 0, realW, realH);
+            } else {
+                if (this._bitmap) {
+                    this.texture.baseTexture = this._bitmap.baseTexture;
+                }
+                this.texture.frame = this._realFrame;
+            }
+        } else if (this._bitmap) {
+            this.texture.frame = Rectangle.emptyRectangle;
+        } else {
+            this.texture.baseTexture.width = Math.max(this.texture.baseTexture.width, this._frame.x + this._frame.width);
+            this.texture.baseTexture.height = Math.max(this.texture.baseTexture.height, this._frame.y + this._frame.height);
+            this.texture.frame = this._frame;
+        }
+        this.texture._updateID++;
+    };
+
+    Sprite_Character.prototype.characterBlockX = function () {
+        if (this._isBigCharacter) {
+            return 0;
+        } else {
+            var index = this._character.characterIndex();
+            if (this._character.characterName().includes("_Battler")) {
+                return index % 3 * 4;
+            } else {
+                return index % 4 * 3;
+            }
+        }
+    };
+
+    Sprite_Character.prototype.characterBlockY = function () {
+        if (this._isBigCharacter) {
+            return 0;
+        } else {
+            var index = this._character.characterIndex();
+            if (this._character.characterName().includes("_Battler")) {
+                return Math.floor(index / 3) * 4;
+            } else {
+                return Math.floor(index / 4) * 4;
+            }
+        }
+    };
     // ダメージポップアップの更新
     Sprite_Character.prototype.updateDamagePopup = function () {
         var battler = this._character.isActor();
