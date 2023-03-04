@@ -3413,10 +3413,10 @@ Imported.TacticsBattleSys = true;
     };
     // 攻撃時のアニメ設定
     Game_Event.prototype.setBattlerAttack = function () {
-        // var skillMotions = (this.useSkill().meta.motion || '1 false').split(' ');
         var battlerName = this.isActor().characterName() + "_Battler";
-        var skillMotions = (this.useSkill().meta.motion || '0');
-        this.setImage(battlerName, skillMotions);
+        var skillMotions = (this.useSkill().meta.motion || '0 1').split(' ');
+        // var skillMotions = (this.useSkill().meta.motion || '0');
+        this.setImage(battlerName, parseInt(skillMotions[0]));
         this.setPattern(0);
         this._attackTime = true;
         this._attackMode = true;
@@ -5184,7 +5184,7 @@ Imported.TacticsBattleSys = true;
     Game_CharacterBase.prototype.updateAnimation = function () {
         this.updateAnimationCount();
         if (this._animationCount >= this.animationWait()) {
-            if (this._attackTime) {
+            if (this._attackMode) {
                 this.updateAttackPattern();
             } else {
                 this.updatePattern();
@@ -5205,14 +5205,19 @@ Imported.TacticsBattleSys = true;
 
     Game_CharacterBase.prototype.updateAttackPattern = function () {
         //$gameTempではなくユニット固有の方が良いのでは？
+        var skillMotions = (this.useSkill().meta.motion || '0 1').split(' ');
         if (this._attackMode) {
             if (this._attackTime) {
-                this._pattern++;
-                if (this._pattern >= this.maxPattern()) {
+                // if (this._pattern >= this.maxPattern()) {
+                if ((this._pattern + 1) < parseInt(skillMotions[1])) {
+                    this._pattern++;
+                }else{
                     this._attackTime = false;
-                    this._pattern = 3;
                 }
             }
+            //アニメーション出来ないはずなのになぜかアニメーション出来る調査用
+            console.log("パターン："+this._pattern);
+
         } else if (!this.hasStepAnime() && this._stopCount > 0) {
             this.resetPattern();
         } else {
@@ -5746,9 +5751,8 @@ Imported.TacticsBattleSys = true;
         var sx = (this.characterBlockX() + this.characterPatternX()) * pw;
         var sy = (this.characterBlockY() + this.characterPatternY()) * ph;
         //バトラーとしてのファイルであった場合
-        if (is_attacker) {
+        if (is_attacker && pw > 0) {
             sx = (this.characterBlockX() + this._character._pattern) * pw;
-            if (sx == 0) return;//効果ない
         }
         this.updateHalfBodySprites();
         if (this._bushDepth > 0) {
