@@ -1,6 +1,6 @@
 [
 null,
-{"id":1,"battlerName":"","characterIndex":0,"characterName":"MV_FF1_Wol","classId":1,"equips":[1,1],"faceIndex":0,"faceName":"","traits":[],"initialLevel":10,"maxLevel":50,"name":"光の戦士","nickname":"","note":"","profile":""},
+{"id":1,"battlerName":"MV_FF1_Wol_Battler","characterIndex":0,"characterName":"MV_FF1_Wol","classId":1,"equips":[1,1],"faceIndex":0,"faceName":"","traits":[],"initialLevel":10,"maxLevel":50,"name":"光の戦士","nickname":"","note":"","profile":""},
 {"id":2,"battlerName":"","characterIndex":0,"characterName":"MV_FF1_Garland","classId":2,"equips":[1,1],"faceIndex":0,"faceName":"","traits":[],"initialLevel":10,"maxLevel":50,"name":"ガーランド","nickname":"","note":"","profile":""},
 {"id":3,"battlerName":"","characterIndex":0,"characterName":"MV_FF2_Frioniel","classId":3,"equips":[1,1],"faceIndex":0,"faceName":"","traits":[],"initialLevel":10,"maxLevel":50,"name":"フリオニール","nickname":"","note":"","profile":""},
 {"id":4,"battlerName":"","characterIndex":0,"characterName":"MV_FF2_Emperor","classId":4,"equips":[1,1],"faceIndex":0,"faceName":"","traits":[],"initialLevel":10,"maxLevel":50,"name":"皇帝","nickname":"","note":"","profile":""},
