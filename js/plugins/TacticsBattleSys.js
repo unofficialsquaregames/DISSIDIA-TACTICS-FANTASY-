@@ -9103,7 +9103,7 @@ Imported.TacticsBattleSys = true;
         if (!$gameSystem._moveTargetPointFlag) {
             unit.turnTowardCharacter(target);// 向き
         }
-        unit.setBattlerAttack();
+        // unit.setBattlerAttack();
         //unit.hasStepAnime();
         $gameSystem._phaseState = 10;//対象アニメーションフェーズへ移行
     };
