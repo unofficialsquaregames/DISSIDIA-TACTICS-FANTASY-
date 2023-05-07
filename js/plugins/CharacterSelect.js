@@ -603,32 +603,32 @@
                     window.drawActorName(actor, a[0], a[1], a[2] || 180);
                 }
                 //ユニットのタイプを表示
-                var type = $dataClasses[actor._classId].meta.type;
-                window.changeTextColor(window.systemColor());
-                a = eval("[330, 0, 64]");
-                window.drawText("タイプ: ", a[0], a[1], a[2]);
-                switch (type) {
-                    case "強襲":
-                        window.changeTextColor('red');
-                        break;
-                    case "結束":
-                        window.changeTextColor('aquamarine');
-                        break;
-                    case "支援":
-                        window.changeTextColor('lime');
-                        break;
-                    case "守備":
-                        window.changeTextColor('orange');
-                        break;
-                    case "策略":
-                        window.changeTextColor('fuchsia');
-                        break;
-                }
-                a = eval("[394, 0, 32]");
-                window.drawText(type, a[0], a[1], a[2]);
-                window.resetTextColor();
-                a = eval("[330, 36, 180]");
-                if (a[2]) window.drawActorIcons(actor, a[0], a[1], a[2]);
+                // var type = $dataClasses[actor._classId].meta.type;
+                // window.changeTextColor(window.systemColor());
+                // a = eval("[330, 0, 64]");
+                // window.drawText("タイプ: ", a[0], a[1], a[2]);
+                // switch (type) {
+                //     case "強襲":
+                //         window.changeTextColor('red');
+                //         break;
+                //     case "結束":
+                //         window.changeTextColor('aquamarine');
+                //         break;
+                //     case "支援":
+                //         window.changeTextColor('lime');
+                //         break;
+                //     case "守備":
+                //         window.changeTextColor('orange');
+                //         break;
+                //     case "策略":
+                //         window.changeTextColor('fuchsia');
+                //         break;
+                // }
+                // a = eval("[394, 0, 32]");
+                // window.drawText(type, a[0], a[1], a[2]);
+                // window.resetTextColor();
+                // a = eval("[330, 36, 180]");
+                // if (a[2]) window.drawActorIcons(actor, a[0], a[1], a[2]);
 
                 //ユニットの詳細を表示
                 var description;

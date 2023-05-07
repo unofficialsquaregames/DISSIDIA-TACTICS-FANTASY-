@@ -191,8 +191,8 @@
  *
  * @param isDyingHp 
  * @desc 瀕死HPのライン(割合)
- * 初期値: 10
- * @default 10
+ * 初期値: 20
+ * @default 20
  *
  * @param CriticalColor
  * @desc クリティカル発生時の文字のフラッシュ色です。R(赤),G(緑),B(青),A(強さ)の順番でカンマ(,)区切りで指定。
