@@ -1259,11 +1259,15 @@ Imported.TacticsBattleSys = true;
                 this.executeDamage(target, value);
                 //バフ奪取(クリティカル発生時のみ)
                 if (turnUnit.useSkill().meta.steal) {
-                    if (turnUnit.useSkill().meta.steal == "buff" || turnUnit.useSkill().meta.steal == "burst") {
-                        var states = target._states; //ステータスIDの配列
+                    var buffAllFixed = false;
+                    var states = target._states; //ステータスIDの配列
+                    for (var id = 0; id < states.length; id++) {
+                        if ($dataStates[states[id]].meta.type == "buff" && $dataStates[states[id]].meta.buffAllFixedAbsolute) buffAllFixed = true;
+                    }
+                    if ((turnUnit.useSkill().meta.steal == "buff" || turnUnit.useSkill().meta.steal == "burst") && !buffAllFixed) {
                         for (var id = 0; id < states.length; id++) {
                             if ($dataStates[states[id]].meta.type == "buff") {
-                                if ($dataStates[states[id]].meta.buffFixed && (turnUnit.useSkill().meta.steal == "buff" || !result.critical)) continue; //フレーム付きの場合、クリティカルヒット時にダッシュ可能
+                                if (($dataStates[states[id]].meta.buffFixed && (turnUnit.useSkill().meta.steal == "buff" || !result.critical)) || $dataStates[states[id]].meta.buffAllFixedAbsolute) continue; //フレーム付きの場合、クリティカルヒット時にダッシュ可能
                                 this.subject().addState(this.subject().eventId(), states[id]);
                                 target.removeState(states[id]);
                                 break;
@@ -1285,21 +1289,24 @@ Imported.TacticsBattleSys = true;
                     this.applyItemEffect(target, effect); //指定対象にエフェクトを適用。
                 }, this);
             }
-            //バフ延長
             if (turnUnit.useSkill().meta.extend) {
+                //バフ延長
                 if (turnUnit.useSkill().meta.extend == "buffTurn") target.extendBuffStateTurns();
-            }
-            //バフ減少
-            if (turnUnit.useSkill().meta.decrease) {
-                if (turnUnit.useSkill().meta.decrease == "buffTurn") target.decreaseBuffStateTurns();
-            }
-            //デバフ延長
-            if (turnUnit.useSkill().meta.extend) {
+                //デバフ延長
                 if (turnUnit.useSkill().meta.extend == "debuffTurn") target.extendDebuffStateTurns();
             }
-            //デバフ減少
             if (turnUnit.useSkill().meta.decrease) {
-                if (turnUnit.useSkill().meta.decrease == "debuffTurn") target.decreaseDebuffStateTurns();
+                var buffAllFixed = false;
+                var debuffAllFixed = false;
+                var states = target._states; //ステータスIDの配列
+                for (var id = 0; id < states.length; id++) {
+                    if ($dataStates[states[id]].meta.type == "buff" && $dataStates[states[id]].meta.buffAllFixedAbsolute) buffAllFixed = true; //フレーム付きの場合、クリティカルヒット時にダッシュ可能
+                    if ($dataStates[states[id]].meta.type == "debuff" && $dataStates[states[id]].meta.debuffAllFixedAbsolute) debuffAllFixed = true; //フレーム付きの場合、クリティカルヒット時にダッシュ可能
+                }
+                //バフ減少
+                if (turnUnit.useSkill().meta.decrease == "buffTurn" && !buffAllFixed) target.decreaseBuffStateTurns();
+                //デバフ減少
+                if (turnUnit.useSkill().meta.decrease == "debuffTurn" && !debuffAllFixed) target.decreaseDebuffStateTurns();
             }
 
             //敵対ユニットが対象
@@ -1918,7 +1925,7 @@ Imported.TacticsBattleSys = true;
                         }
                     }
                     if ($dataStates[id].meta.shut == "debuff") {
-                        if ($dataStates[stateId].meta.type == "debuff") {
+                        if ($dataStates[stateId].meta.type == "debuff" && !$dataStates[stateId].meta.hitting) {
                             return;
                         }
                     }
@@ -1953,8 +1960,8 @@ Imported.TacticsBattleSys = true;
                         var buffAllFixed = false;
                         var debuffAllFixed = false;
                         for (var j = 0; j < this._states.length; j++) {
-                            if ($dataStates[parseInt(this._states[j])].meta.buffAllFixed) buffAllFixed = true;
-                            if ($dataStates[parseInt(this._states[j])].meta.debuffAllFixed) debuffAllFixed = true;
+                            if ($dataStates[parseInt(this._states[j])].meta.buffAllFixed || $dataStates[parseInt(this._states[j])].meta.buffAllFixedAbsolute) buffAllFixed = true;
+                            if ($dataStates[parseInt(this._states[j])].meta.debuffAllFixed || $dataStates[parseInt(this._states[j])].meta.debuffAllFixedAbsolute) debuffAllFixed = true;
                         }
                         if (($dataStates[removeId].meta.type == "buff") && buffAllFixed) continue;
                         if (($dataStates[removeId].meta.type == "debuff") && debuffAllFixed) continue;
@@ -2011,7 +2018,7 @@ Imported.TacticsBattleSys = true;
                         var buffAllFixed = false;
                         for (var allId = 1; allId < $dataStates.length; allId++) {
                             if (this.isStateAffected(allId)) {
-                                if ($dataStates[allId].meta.buffAllFixed && !burst) {
+                                if (($dataStates[allId].meta.buffAllFixed && !burst) || $dataStates[allId].meta.buffAllFixedAbsolute) {
                                     buffAllFixed = true;
                                 }
                             }
@@ -2039,7 +2046,7 @@ Imported.TacticsBattleSys = true;
                         var debuffAllFixed = false;
                         for (var allId = 1; allId < $dataStates.length; allId++) {
                             if (this.isStateAffected(allId)) {
-                                if ($dataStates[allId].meta.debuffAllFixed && !burst) {
+                                if (($dataStates[allId].meta.debuffAllFixed && !burst) || $dataStates[allId].meta.debuffAllFixedAbsolute) {
                                     debuffAllFixed = true;
                                 }
                             }
@@ -5211,12 +5218,12 @@ Imported.TacticsBattleSys = true;
                 // if (this._pattern >= this.maxPattern()) {
                 if ((this._pattern + 1) < parseInt(skillMotions[1])) {
                     this._pattern++;
-                }else{
+                } else {
                     this._attackTime = false;
                 }
             }
             //アニメーション出来ないはずなのになぜかアニメーション出来る調査用
-            console.log("パターン："+this._pattern);
+            console.log("パターン：" + this._pattern);
 
         } else if (!this.hasStepAnime() && this._stopCount > 0) {
             this.resetPattern();
@@ -5788,7 +5795,7 @@ Imported.TacticsBattleSys = true;
         this.pivot.y = frameY - realY;
 
         if (this._characterName.includes("_Battler")) {
-            this.pivot.y-=16;
+            this.pivot.y -= 16;
         }
 
         if (realW > 0 && realH > 0) {
@@ -6303,28 +6310,65 @@ Imported.TacticsBattleSys = true;
         this.bitmap.clear();
         //以下、解除不能のバフデバフのフレーム化
         if (this._battler.states()[this._number]) {
-            if (this._battler.states()[this._number].meta.buffFixed || this._battler.states()[this._number].meta.debuffFixed) {
+            var buffAllFixedAbsolute = false;
+            var buffAllFixed = false;
+            var debuffAllFixedAbsolute = false;
+            var debuffAllFixed = false;
+
+            for (var allId = 1; allId < $dataStates.length; allId++) {
+                if (this._battler.isStateAffected(allId)) {
+                    if (this._battler.states()[this._number].meta.type == "buff") {
+                        if ($dataStates[allId].meta.buffAllFixedAbsolute) buffAllFixedAbsolute = true;
+                        else if ($dataStates[allId].meta.buffAllFixed) buffAllFixed = true;
+                    }
+                    if (this._battler.states()[this._number].meta.type == "debuff") {
+                        if ($dataStates[allId].meta.debuffAllFixedAbsolute) debuffAllFixedAbsolute = true
+                        else if ($dataStates[allId].meta.debuffAllFixed) debuffAllFixed = true;
+                    }
+                }
+            }
+
+            if (buffAllFixedAbsolute || debuffAllFixedAbsolute) {
+                this.bitmap.fillRect(0, 0, 32, 4, '#dab300');
+                this.bitmap.fillRect(0, 0, 4, 32, '#dab300');
+                this.bitmap.fillRect(0, 28, 32, 4, '#dab300');
+                this.bitmap.fillRect(28, 0, 4, 32, '#dab300');
+            } else if (this._battler.states()[this._number].meta.buffFixed || this._battler.states()[this._number].meta.debuffFixed || buffAllFixed || debuffAllFixed) {
                 this.bitmap.fillRect(0, 0, 32, 4, '#ffffff');
                 this.bitmap.fillRect(0, 0, 4, 32, '#ffffff');
                 this.bitmap.fillRect(0, 28, 32, 4, '#ffffff');
                 this.bitmap.fillRect(28, 0, 4, 32, '#ffffff');
-            } else {
-                for (var allId = 1; allId < $dataStates.length; allId++) {
-                    if (this._battler.isStateAffected(allId)) {
-                        if (this._battler.states()[this._number].meta.type == "buff" && $dataStates[allId].meta.buffAllFixed) {
-                            this.bitmap.fillRect(0, 0, 32, 4, '#ffffff');
-                            this.bitmap.fillRect(0, 0, 4, 32, '#ffffff');
-                            this.bitmap.fillRect(0, 28, 32, 4, '#ffffff');
-                            this.bitmap.fillRect(28, 0, 4, 32, '#ffffff');
-                        }
-                        if (this._battler.states()[this._number].meta.type == "debuff" && $dataStates[allId].meta.debuffAllFixed) {
-                            this.bitmap.fillRect(0, 0, 32, 4, '#ffffff');
-                            this.bitmap.fillRect(0, 0, 4, 32, '#ffffff');
-                            this.bitmap.fillRect(0, 28, 32, 4, '#ffffff');
-                            this.bitmap.fillRect(28, 0, 4, 32, '#ffffff');
-                        }
-                    }
-                }
+                // } else {
+                //     for (var allId = 1; allId < $dataStates.length; allId++) {
+                //         if (this._battler.isStateAffected(allId)) {
+                //             if (this._battler.states()[this._number].meta.type == "buff") {
+                //                 if ($dataStates[allId].meta.buffAllFixedAbsolute) {
+                //                     this.bitmap.fillRect(0, 0, 32, 4, '#dab300');
+                //                     this.bitmap.fillRect(0, 0, 4, 32, '#dab300');
+                //                     this.bitmap.fillRect(0, 28, 32, 4, '#dab300');
+                //                     this.bitmap.fillRect(28, 0, 4, 32, '#dab300');
+                //                 } else if ($dataStates[allId].meta.buffAllFixed) {
+                //                     this.bitmap.fillRect(0, 0, 32, 4, '#ffffff');
+                //                     this.bitmap.fillRect(0, 0, 4, 32, '#ffffff');
+                //                     this.bitmap.fillRect(0, 28, 32, 4, '#ffffff');
+                //                     this.bitmap.fillRect(28, 0, 4, 32, '#ffffff');
+                //                 }
+                //             }
+                //             if (this._battler.states()[this._number].meta.type == "debuff") {
+                //                 if ($dataStates[allId].meta.debuffAllFixedAbsolute) {
+                //                     this.bitmap.fillRect(0, 0, 32, 4, '#dab300');
+                //                     this.bitmap.fillRect(0, 0, 4, 32, '#dab300');
+                //                     this.bitmap.fillRect(0, 28, 32, 4, '#dab300');
+                //                     this.bitmap.fillRect(28, 0, 4, 32, '#dab300');
+                //                 } else if ($dataStates[allId].meta.debuffAllFixed) {
+                //                     this.bitmap.fillRect(0, 0, 32, 4, '#ffffff');
+                //                     this.bitmap.fillRect(0, 0, 4, 32, '#ffffff');
+                //                     this.bitmap.fillRect(0, 28, 32, 4, '#ffffff');
+                //                     this.bitmap.fillRect(28, 0, 4, 32, '#ffffff');
+                //                 }
+                //             }
+                //         }
+                //     }
             }
         }
     };
@@ -7185,29 +7229,74 @@ Imported.TacticsBattleSys = true;
                 this.resetTextColor();
                 this.drawText(turn + "act", x + iconBoxWidth + this.spacing() * 3, y, this.spacing(), "left"); //ステートの期間の描画
                 //以下、解除不能のバフデバフのフレーム化
-                if (state.meta.buffFixed || state.meta.debuffFixed) {
+
+                var buffAllFixedAbsolute = false;
+                var buffAllFixed = false;
+                var debuffAllFixedAbsolute = false;
+                var debuffAllFixed = false;
+
+                for (var allId = 1; allId < $dataStates.length; allId++) {
+                    if (this._actor.isStateAffected(allId)) {
+                        if (state.meta.type == "buff") {
+                            if ($dataStates[allId].meta.buffAllFixedAbsolute) buffAllFixedAbsolute = true;
+                            else if ($dataStates[allId].meta.buffAllFixed) buffAllFixed = true;
+                        }
+                        if (state.meta.type == "debuff") {
+                            if ($dataStates[allId].meta.debuffAllFixedAbsolute) debuffAllFixedAbsolute = true
+                            else if ($dataStates[allId].meta.debuffAllFixed) debuffAllFixed = true;
+                        }
+                    }
+                }
+
+                if (buffAllFixedAbsolute || debuffAllFixedAbsolute) {
+                    this.contents.fillRect(x + 2, y, 32, 4, '#dab300');
+                    this.contents.fillRect(x + 2, y, 4, 32, '#dab300');
+                    this.contents.fillRect(x + 2, y + 28, 32, 4, '#dab300');
+                    this.contents.fillRect(x + 30, y, 4, 32, '#dab300');
+                } else if (state.meta.buffFixed || state.meta.debuffFixed || buffAllFixed || debuffAllFixed) {
                     this.contents.fillRect(x + 2, y, 32, 4, '#ffffff');
                     this.contents.fillRect(x + 2, y, 4, 32, '#ffffff');
                     this.contents.fillRect(x + 2, y + 28, 32, 4, '#ffffff');
                     this.contents.fillRect(x + 30, y, 4, 32, '#ffffff');
-                } else {
-                    for (var allId = 1; allId < $dataStates.length; allId++) {
-                        if (this._actor.isStateAffected(allId)) {
-                            if (state.meta.type == "buff" && $dataStates[allId].meta.buffAllFixed) {
-                                this.contents.fillRect(x + 2, y, 32, 4, '#ffffff');
-                                this.contents.fillRect(x + 2, y, 4, 32, '#ffffff');
-                                this.contents.fillRect(x + 2, y + 28, 32, 4, '#ffffff');
-                                this.contents.fillRect(x + 30, y, 4, 32, '#ffffff');
-                            }
-                            if (state.meta.type == "debuff" && $dataStates[allId].meta.debuffAllFixed) {
-                                this.contents.fillRect(x + 2, y, 32, 4, '#ffffff');
-                                this.contents.fillRect(x + 2, y, 4, 32, '#ffffff');
-                                this.contents.fillRect(x + 2, y + 28, 32, 4, '#ffffff');
-                                this.contents.fillRect(x + 30, y, 4, 32, '#ffffff');
-                            }
-                        }
-                    }
                 }
+                // if (state.meta.buffFixed || state.meta.debuffFixed) {
+                //     this.contents.fillRect(x + 2, y, 32, 4, '#ffffff');
+                //     this.contents.fillRect(x + 2, y, 4, 32, '#ffffff');
+                //     this.contents.fillRect(x + 2, y + 28, 32, 4, '#ffffff');
+                //     this.contents.fillRect(x + 30, y, 4, 32, '#ffffff');
+                // } else {
+                //     for (var allId = 1; allId < $dataStates.length; allId++) {
+                //         if (this._actor.isStateAffected(allId)) {
+                //             if (state.meta.type == "buff") {
+                //                 if ($dataStates[allId].meta.buffAllFixedAbsolute) {
+                //                     this.contents.fillRect(x + 2, y, 32, 4, '#dab300');
+                //                     this.contents.fillRect(x + 2, y, 4, 32, '#dab300');
+                //                     this.contents.fillRect(x + 2, y + 28, 32, 4, '#dab300');
+                //                     this.contents.fillRect(x + 30, y, 4, 32, '#dab300');
+                //                 } else if ($dataStates[allId].meta.buffAllFixed) {
+                //                     this.contents.fillRect(x + 2, y, 32, 4, '#ffffff');
+                //                     this.contents.fillRect(x + 2, y, 4, 32, '#ffffff');
+                //                     this.contents.fillRect(x + 2, y + 28, 32, 4, '#ffffff');
+                //                     this.contents.fillRect(x + 30, y, 4, 32, '#ffffff');
+                //                 }
+                //             }
+                //             if (state.meta.type == "debuff") {
+                //                 if ($dataStates[allId].meta.debuffAllFixedAbsolute) {
+                //                 } else if ($dataStates[allId].meta.debuffAllFixed) {
+                //                     this.contents.fillRect(x + 2, y, 32, 4, '#dab300');
+                //                     this.contents.fillRect(x + 2, y, 4, 32, '#dab300');
+                //                     this.contents.fillRect(x + 2, y + 28, 32, 4, '#dab300');
+                //                     this.contents.fillRect(x + 30, y, 4, 32, '#dab300');
+                //                 } else if ($dataStates[allId].meta.debuffAllFixed) {
+                //                     this.contents.fillRect(x + 2, y, 32, 4, '#ffffff');
+                //                     this.contents.fillRect(x + 2, y, 4, 32, '#ffffff');
+                //                     this.contents.fillRect(x + 2, y + 28, 32, 4, '#ffffff');
+                //                     this.contents.fillRect(x + 30, y, 4, 32, '#ffffff');
+                //                 }
+                //             }
+                //         }
+                //     }
+                // }
 
                 i++;
             }
