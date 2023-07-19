@@ -1205,8 +1205,14 @@ Imported.TacticsBattleSys = true;
                 if (turnUnit.useSkill().meta.throw) {
                     if (turnUnit.useSkill().meta.throw == "debuff") {
                         var states = this.subject()._states; //ステータスIDの配列
+                        var debuffAllFixed = false
                         for (var id = 0; id < states.length; id++) {
-                            if ($dataStates[states[id]].meta.type == "debuff") target.addState(this.subject().eventId(), states[id]);
+                            if ($dataStates[states[id]].meta.type == "debuff" && $dataStates[states[id]].meta.debuffAllFixedAbsolute) debuffAllFixed = true;
+                        }
+                        if (!debuffAllFixed) {
+                            for (var id = 0; id < states.length; id++) {
+                                if ($dataStates[states[id]].meta.type == "debuff") target.addState(this.subject().eventId(), states[id]);
+                            }
                         }
                         //this.subject().removeDebuffState(); //自身のデバフを消去
                     }
