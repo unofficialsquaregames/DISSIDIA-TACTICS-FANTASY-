@@ -1754,7 +1754,7 @@ Imported.TacticsBattleSys = true;
     //バフターン延長
     Game_BattlerBase.prototype.extendBuffStateTurns = function () {
         this._states.forEach(function (stateId) {
-            if (this._stateTurns[stateId] > 0 && $dataStates[stateId].meta.type == "buff") {
+            if (this._stateTurns[stateId] > 0 && $dataStates[stateId].meta.type == "buff" && !$dataStates[stateId].meta.notExtendTurn) {
                 this._stateTurns[stateId]++;
             }
         }, this);
@@ -1779,7 +1779,7 @@ Imported.TacticsBattleSys = true;
     //デバフターン延長
     Game_BattlerBase.prototype.extendDebuffStateTurns = function () {
         this._states.forEach(function (stateId) {
-            if (this._stateTurns[stateId] > 0 && $dataStates[stateId].meta.type == "debuff") {
+            if (this._stateTurns[stateId] > 0 && $dataStates[stateId].meta.type == "debuff" && !$dataStates[stateId].meta.notExtendTurn) {
                 this._stateTurns[stateId]++;
             }
         }, this);
