@@ -1155,6 +1155,22 @@ Imported.TacticsBattleSys = true;
                         target.removeBuffState(true);
                     }
                 }
+                //ジョーカーデス
+                if (turnUnit.useSkill().meta.joker) {
+                    const joker = Math.floor(Math.random() * 2);
+                    if (joker == 1) {
+                        target.removeBuffState(true);
+                        target.addNewState(this.subject().eventId(), this.subject().deathStateId());
+                        target.refresh();
+                        target._result.pushAddedState(this.subject().deathStateId()); //指定ステートの付加を追加。
+                    } else {
+                        this.subject().removeBuffState(true);
+                        this.subject().addNewState(this.subject().eventId(), this.subject().deathStateId());
+                        this.subject().refresh();
+                        this.subject()._result.pushAddedState(this.subject().deathStateId()); //指定ステートの付加を追加。
+                        turnUnit.checkDead();
+                    }
+                }
 
                 //スキルによる行動順遅延
                 var invalidDelay = false;
