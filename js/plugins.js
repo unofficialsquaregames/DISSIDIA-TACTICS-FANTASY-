@@ -13,7 +13,7 @@ var $plugins =
 {"name":"PressAnyButton","status":true,"description":"PressAnyButtonプラグイン","parameters":{"startText":"Press Any Button","soundEffect":"","font":"","adjustY":"0","decisionOnly":"false"}},
 {"name":"PictureCallCommon","status":true,"description":"ピクチャのボタン化プラグイン","parameters":{"透明色を考慮":"true","ピクチャ番号の変数番号":"5","ポインタX座標の変数番号":"0","ポインタY座標の変数番号":"0","タッチ操作抑制":"false","タッチ操作抑制スイッチ":"0","戦闘中常にコモン実行":"false","並列処理として実行":"false","無効スイッチ":"0"}},
 {"name":"aligncenter","status":true,"description":"メッセージボックスの文字を中央揃い、右揃いにするプラグインです。","parameters":{}},
-{"name":"DataCacheBlocker","status":true,"description":"キャッシュを阻止します。（dataフォルダのみ）","parameters":{}},
+{"name":"DataCacheBlocker","status":false,"description":"キャッシュを阻止します。（dataフォルダのみ）","parameters":{}},
 {"name":"DP_MapZoom","status":true,"description":"マップの拡大率を制御します。","parameters":{"Base Scale":"1","Encount Effect":"true","Camera Controll":"true","Weather Patch":"true","Picture Size Fixation":"true","Old Focus":"false","Easing Function":"t"}},
 {"name":"UsableCarriageReturn","status":true,"description":"改行コード使用可能プラグイン","parameters":{}},
 {"name":"CharacterSelect","status":true,"description":"DISSIDIA TACTICS FANTASY専用のキャラクターセレクト","parameters":{"system":"","addThisIntoMenuCommand":"true","maxBattleMembers":"0","maxAllParty":"4","layoutCW":"","alignmentOfCommand":"left","allyTerm":"味方の編成","enemyTerm":"敵の編成","saveTerm":"セーブ","loadTerm":"ロード","finishTerm":"準備完了","layoutPW":"","actorListColMax":"4","emptyFrameTerm":"- ランダム -","layoutWW":"","wwRowHeight":"48","wwRowTop":"0","removeOnReserveTerm":"外す","layoutSW":"","nameShow":"true","horzLineYPos":"[148]"}},
